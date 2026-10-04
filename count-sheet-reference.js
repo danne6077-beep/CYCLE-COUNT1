@@ -96,12 +96,21 @@ function paginateCombinedSupplierRows(groups,suppliers,maxSkuRows){
 function renderCountSheet(previewOnly=false){
   const storeName=escapeSheetText($('storeField').value||'Store #14014 - Retail');
   const editorName=escapeSheetText($('editorName')?.value||'Danne Lozana');
-  const selectedSupplier=$('supplierFilter')?.value||'all';
   const selectedCcd=$('countSheetCcdFilter')?.value||'all';
   const selectedDepartment=$('countSheetDepartmentFilter')?.value||'all';
-  const selectedCategory=$('countSheetCategoryFilter')?.value||'';
-  const mixedCategories=selectedCategory==='__mix__';
-  const filteredItems=selectedCategory?items.filter(item=>(selectedSupplier==='all'||(item.supplier||'Unassigned Supplier')===selectedSupplier)&&(selectedCcd==='all'||String(item.ccdNo||item.ccd||'').trim()===selectedCcd)&&(selectedDepartment==='all'||String(item.departmentCode||item.deptCode||'').trim()===selectedDepartment)&&(mixedCategories||(String(item.category||item.subdeptName||item.classification||'Uncategorized').trim()||'Uncategorized')===selectedCategory)):[];
+  const printMode=getPrintMode();
+  const selectedPrintOptions=getSelectedPrintOptions();
+  const selectedCategoryOptions=printMode==='category'?new Set(selectedPrintOptions):null;
+  const selectedSupplierOptions=printMode==='supplier'?new Set(selectedPrintOptions):null;
+  const filteredItems=items.filter(item=>{
+    const ccd=String(item.ccdNo||item.ccd||'').trim();
+    const department=String(item.departmentCode||item.deptCode||'').trim();
+    if(selectedCcd!=='all'&&ccd!==selectedCcd)return false;
+    if(selectedDepartment!=='all'&&department!==selectedDepartment)return false;
+    if(printMode==='category')return selectedCategoryOptions.has(CountSheetFilters.normalizeCategory(item));
+    return selectedSupplierOptions.has(CountSheetFilters.normalizeSupplier(item));
+  });
+  const mixedCategories=new Set(filteredItems.map(item=>CountSheetFilters.normalizeCategory(item))).size>1;
   const mergedRows=buildCountSheetRows(filteredItems);
   const sortOrder=$('countSheetSortOrder')?.value||'workbook';
   if(sortOrder!=='workbook')mergedRows.sort((left,right)=>{
@@ -156,12 +165,6 @@ function renderCountSheet(previewOnly=false){
           pages.push(buildPageObject(groupName,rows.slice(offset,offset+pageRows),offset));
         }
       });
-    } else if(Object.keys(groups).length){
-      Object.entries(groups).forEach(([groupName,rows])=>{
-        for(let offset=0;offset<rows.length;offset+=pageRows){
-          pages.push(buildPageObject(groupName,rows.slice(offset,offset+pageRows),offset));
-        }
-      });
     }
   }
 
@@ -206,7 +209,7 @@ function renderCountSheet(previewOnly=false){
       <header class="reference-sheet-header">
         <div class="reference-title">COUNT SHEET <span>PHYSICAL INVENTORY</span><strong>${escapeSheetText(groupName)}</strong></div>
         <div class="reference-meta"><b>STORE:</b> ${storeName} <b>BRANCH:</b> Prince Cauayan <b>CCD NO.:</b> ${escapeSheetText(selectedCcd==='all'?'ALL':selectedCcd)}</div>
-        <div class="reference-meta"><b>${groupMode==='category'?'CATEGORY':groupMode==='supplier-category'?'SUPPLIER + CATEGORY':'SUPPLIER'}:</b> ${escapeSheetText(groupName)} <b>DATE:</b> ${$('dateField').value||'2026-09-14'} <b>PREPARED BY:</b> ${editorName}</div>
+        <div class="reference-meta"><b>${groupMode==='supplier-category'?'SUPPLIER + CATEGORY':printMode==='category'?'CATEGORY':'SUPPLIER'}:</b> ${escapeSheetText(groupName)} <b>DATE:</b> ${$('dateField').value||'2026-09-14'} <b>PREPARED BY:</b> ${editorName}</div>
       </header>
       <table class="count-sheet-table reference-table">
         <thead><tr><th>#</th><th>SKU</th><th>BARCODE</th><th>DESCRIPTION</th><th>SELLING LOCATOR</th><th>COUNT</th><th>BUFFER LOCATOR</th><th>COUNT</th><th>WAREHOUSE LOCATOR</th><th>COUNT</th></tr></thead>
@@ -214,13 +217,13 @@ function renderCountSheet(previewOnly=false){
       </table>
       <footer class="reference-signoff"><span>COUNTER: __________________</span><span>VALIDATOR: __________________</span><span>SCANNER: __________________</span><span>DATE & TIME: ________________</span></footer>
     </article>`).join('');
-  if(previewOnly&&!pages.length)target.innerHTML=`<div class="live-empty">Select at least one ${groupMode==='category'?'category':groupMode==='supplier-category'?'supplier/category group':'supplier'} to preview a count sheet.</div>`;
+  if(previewOnly&&!pages.length)target.innerHTML=`<div class="live-empty">Select at least one ${printMode==='category'?'category':'supplier'} to preview a count sheet.</div>`;
   drawCountSheetBarcodes(target);
   if(previewOnly)return;
   const preview=$('countSheetLivePreview');
   if(preview){const firstPage=$('countSheetPages').firstElementChild;preview.innerHTML=firstPage?firstPage.outerHTML:'<div class="live-empty">Import inventory to preview your count sheet.</div>';drawCountSheetBarcodes(preview)}
-  const generatedLabel=groupMode==='all'?'combined group sheets':`${isCombinedGrouping?'combined ':''}${groupMode==='category'?'category sheets':groupMode==='supplier-category'?'supplier + category sheets':'supplier sheets'}`;
-  $('countSheetSummary').textContent=!selectedCategory?'Choose a category or Mix categories to prepare count sheets.':`${pages.length} landscape ${generatedLabel}${mixedCategories?' with mixed categories':''} prepared with selling, buffer, and warehouse locator count columns.`;
+  const generatedLabel=groupMode==='supplier-category'?'supplier + category sheets':`${isCombinedGrouping?'combined ':''}${printMode==='category'?'category sheets':'supplier sheets'}`;
+  $('countSheetSummary').textContent=!selectedPrintOptions.length?`Choose one or more ${printMode==='category'?'categories':'suppliers'} to prepare count sheets.`:`${pages.length} landscape ${generatedLabel}${mixedCategories?' with mixed categories':''} prepared with selling, buffer, and warehouse locator count columns.`;
 }
 
 function drawCountSheetBarcodes(root=document){

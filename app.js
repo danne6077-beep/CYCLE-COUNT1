@@ -121,7 +121,7 @@ function updateCountSheetCcdFilter(){
   const filter=$('countSheetCcdFilter');
   if(!filter)return;
   const current=filter.value||'all';
-  const values=[...new Set(items.map(item=>String(item.ccdNo||'').trim()).filter(Boolean))].sort((left,right)=>left.localeCompare(right,undefined,{numeric:true}));
+  const values=[...new Set(items.map(item=>String(item.ccdNo||item.ccd||'').trim()).filter(Boolean))].sort((left,right)=>left.localeCompare(right,undefined,{numeric:true}));
   filter.replaceChildren(new Option('All CCDs','all'),...values.map(value=>new Option(`CCD ${value}`,value)));
   filter.value=values.includes(current)?current:'all';
 }
@@ -137,10 +137,7 @@ function updateCountSheetCategoryFilter(){
   const hasMix=values.length>1;
   const nextValue=current==='__mix__'&&hasMix?current:hasMix&&current===''?('__mix__'):(values.includes(current)?current:'');
   filter.value=nextValue;
-  if(filter.value==='__mix__'&&$('supplierGroupingMode')?.value!=='category'){
-    $('supplierGroupingMode').value='category';
-    saveLayoutSettings();
-  }
+  if(typeof syncSupplierSelectionList==='function')syncSupplierSelectionList();
 }
 function updateCountSheetDepartmentFilter(){
   const filter=$('countSheetDepartmentFilter');
@@ -149,7 +146,7 @@ function updateCountSheetDepartmentFilter(){
   const ccd=$('countSheetCcdFilter').value;
   const departments=new Map();
   items.forEach(item=>{
-    if(ccd!=='all'&&item.ccdNo!==ccd)return;
+    if(ccd!=='all'&&String(item.ccdNo||item.ccd||'').trim()!==ccd)return;
     const code=String(item.departmentCode||item.deptCode||'').trim();
     if(code)departments.set(code,`${code}${item.department?` - ${item.department}`:''}`);
   });

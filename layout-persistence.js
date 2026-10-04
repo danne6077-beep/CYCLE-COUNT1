@@ -1,4 +1,4 @@
-const layoutControlIds=['paperSize','orientation','pageMargins','rowsPerPage','rowHeight','fontSize','barcodeWidth','countLineWidth','showSheetBarcode','showSheetLocator','showSupplierHeader','supplierGroupingMode','combineGroupOptionsFilter'];
+const layoutControlIds=['paperSize','orientation','pageMargins','rowsPerPage','rowHeight','fontSize','barcodeWidth','countLineWidth','showSheetBarcode','showSheetLocator','showSupplierHeader','supplierGroupingMode','combineGroupOptionsFilter','countSheetPrintMode'];
 const paperSizeControl=$('paperSize');
 
 function getSupplierOptions(){
@@ -40,40 +40,56 @@ function resetCombinedPrintStatus(){
 	if(typeof refreshLayoutPreview==='function')refreshLayoutPreview();
 }
 
-function getCombinedGroupOptions(){
-	const mode=$('supplierGroupingMode')?.value||'all';
+function getPrintMode(){
+	return $('countSheetPrintMode')?.value==='supplier'?'supplier':'category';
+}
+
+function getSelectionGridOptions(){
 	const ccd=$('countSheetCcdFilter')?.value||'all';
 	const department=$('countSheetDepartmentFilter')?.value||'all';
-	const supplier=$('supplierFilter')?.value||'all';
-	const category=$('countSheetCategoryFilter')?.value||'all';
-	const activeCategory=category==='__mix__'?'all':category;
+	return getPrintMode()==='category'
+		?CountSheetFilters.getDepartmentCategoryOptions(items,{ccd,department})
+		:CountSheetFilters.getDepartmentSupplierOptions(items,{ccd,department});
+}
+
+function getSelectedPrintOptions(){
+	const options=getSelectionGridOptions();
+	if(!options.length)return [];
+	const key=`danne-lozana-selected-${getPrintMode()}`;
+	let saved;
+	try{saved=JSON.parse(localStorage.getItem(key)||'null')}
+	catch(error){localStorage.removeItem(key)}
+	const selected=Array.isArray(saved)?saved.filter(value=>options.includes(value)):options.slice();
+	return options.filter(value=>selected.includes(value));
+}
+
+function getCombinedGroupOptions(){
+	const mode=$('supplierGroupingMode')?.value||'all';
 	const combineMode=$('combineGroupOptionsFilter')?.value||'separate';
 	if(combineMode==='combined'){
 		if(mode==='category')return ['ALL_CATEGORIES_COMBINED'];
 		if(mode==='supplier')return ['ALL_SUPPLIERS_COMBINED'];
 		if(mode==='supplier-category')return ['ALL_SUPPLIERS_AND_CATEGORIES_COMBINED'];
 	}
-	if(mode==='category'||mode==='supplier-category'){
-		const categories=CountSheetFilters.getDepartmentCategoryOptions(items,{ccd,department,supplier: supplier==='all'?'all':supplier});
-		if(mode==='supplier-category'){
-			const suppliers=CountSheetFilters.getDepartmentSupplierOptions(items,{ccd,department,category:activeCategory});
-			return suppliers.flatMap(supplierValue=>categories.map(categoryValue=>`${supplierValue} - ${categoryValue}`));
-		}
-		return categories;
+	const selected=getSelectedPrintOptions();
+	if(mode==='supplier-category'){
+		const ccd=$('countSheetCcdFilter')?.value||'all';
+		const department=$('countSheetDepartmentFilter')?.value||'all';
+		return selected.flatMap(supplier=>CountSheetFilters.getDepartmentCategoryOptions(items,{ccd,department,supplier})
+			.map(category=>`${supplier} - ${category}`));
 	}
-	return CountSheetFilters.getDepartmentSupplierOptions(items,{ccd,department,category:activeCategory});
+	return selected;
 }
 
 function getSelectedCombinedSuppliers(){
 	const options=getCombinedGroupOptions();
-	if(!options.length)return [];
-	const saved=JSON.parse(localStorage.getItem('danne-lozana-combined-suppliers')||'null');
-	const selected=Array.isArray(saved)?saved.filter(value=>options.includes(value)):options.slice();
-	return options.filter(value=>selected.includes(value));
+	return options;
 }
 
 function setCombinedSuppliers(selected){
-	localStorage.setItem('danne-lozana-combined-suppliers',JSON.stringify(selected));
+	const options=getSelectionGridOptions();
+	const key=`danne-lozana-selected-${getPrintMode()}`;
+	localStorage.setItem(key,JSON.stringify(options.filter(value=>selected.includes(value))));
 	syncSupplierSelectionList();
 	renderCountSheet();
 	refreshLayoutPreview();
@@ -82,21 +98,28 @@ function setCombinedSuppliers(selected){
 function syncSupplierSelectionList(){
 	const list=$('supplierSelectionList');
 	if(!list)return;
-	const mode=$('supplierGroupingMode')?.value||'all';
-	const options=getCombinedGroupOptions();
+	const mode=getPrintMode();
+	const options=getSelectionGridOptions();
 	const printedSuppliers=getPrintedCombinedSuppliers();
 	const availableOptions=options.filter(value=>!printedSuppliers.has(value));
-	const selectedOptions=getSelectedCombinedSuppliers().filter(value=>!printedSuppliers.has(value));
+	const selectedOptions=getSelectedPrintOptions().filter(value=>!printedSuppliers.has(value));
 	const selectedSet=new Set(selectedOptions);
-	list.hidden=mode==='all' || options.length < 2;
+	list.hidden=false;
 	list.innerHTML='';
-	if(!options.length)return;
+	if(!options.length){
+		const empty=document.createElement('p');
+		empty.className='supplier-selection-empty';
+		empty.textContent=`No ${mode==='category'?'categories':'suppliers'} match the selected CCD and department.`;
+		list.appendChild(empty);
+		['printSheetBtn','exportSheetBtn'].forEach(id=>{const button=$(id);if(button)button.disabled=true});
+		return;
+	}
 	const actions=document.createElement('div');
 	actions.className='supplier-selection-actions';
 	const selectAll=document.createElement('button');
 	selectAll.type='button';
 	selectAll.className='supplier-selection-action';
-	selectAll.textContent='Select All';
+	selectAll.textContent=`Select All ${mode==='category'?'Categories':'Suppliers'}`;
 	selectAll.disabled=selectedSet.size===availableOptions.length;
 	selectAll.addEventListener('click',()=>setCombinedSuppliers(availableOptions));
 	const clearAll=document.createElement('button');
@@ -119,9 +142,10 @@ function syncSupplierSelectionList(){
 		const button=document.createElement('button');
 		button.type='button';
 		button.className=`supplier-combine-option${isPrinted?' is-printed':selectedSet.has(value)?' is-selected':''}`;
-		button.dataset.supplier=value;
+		button.dataset.selection=value;
 		button.disabled=isPrinted;
 		button.setAttribute('aria-pressed',String(!isPrinted&&selectedSet.has(value)));
+		button.setAttribute('aria-label',`${selectedSet.has(value)?'Deselect':'Select'} ${mode==='category'?'category':'supplier'} ${value}`);
 		button.textContent=value;
 		if(isPrinted){
 			const tag=document.createElement('span');
@@ -131,7 +155,7 @@ function syncSupplierSelectionList(){
 		}
 		button.addEventListener('click',()=>{
 			if(isPrinted)return;
-			const current=getSelectedCombinedSuppliers().filter(item=>!printedSuppliers.has(item));
+			const current=getSelectedPrintOptions().filter(item=>!printedSuppliers.has(item));
 			const next=current.includes(value)?current.filter(item=>item!==value):[...current,value];
 			setCombinedSuppliers(next);
 		});
@@ -139,8 +163,37 @@ function syncSupplierSelectionList(){
 	});
 	const printable=selectedOptions.length;
 	['printSheetBtn','exportSheetBtn'].forEach(id=>{
-		const button=$(id); if(button)button.disabled=mode==='all' ? false : printable===0;
+		const button=$(id); if(button)button.disabled=printable===0;
 	});
+}
+
+function updateGroupModeControl(){
+	const control=$('countSheetGroupMode');
+	if(!control)return;
+	const printMode=getPrintMode();
+	const groupMode=$('supplierGroupingMode')?.value||'all';
+	const isCombined=$('combineGroupOptionsFilter')?.value==='combined';
+	const options=printMode==='category'
+		?[
+			['category-separate','One category per sheet'],
+			['category-combined','Combine into single continuous sheet']
+		]
+		:[
+			['supplier-separate','One supplier per sheet'],
+			['supplier-combined','Combine into single continuous sheet'],
+			['supplier-category','Group by Supplier + Category']
+		];
+	const current=groupMode==='supplier-category'?'supplier-category':`${printMode}-${isCombined?'combined':'separate'}`;
+	control.replaceChildren(...options.map(([value,label])=>new Option(label,value)));
+	control.value=options.some(([value])=>value===current)?current:options[0][0];
+	setGroupModeFromControl();
+}
+
+function setGroupModeFromControl(){
+	const value=$('countSheetGroupMode')?.value||'category-separate';
+	const groupMode=value==='supplier-category'?'supplier':value.startsWith('category-')?'category':'supplier';
+	$('supplierGroupingMode').value=value==='supplier-category'?'supplier-category':groupMode;
+	$('combineGroupOptionsFilter').value=value.endsWith('-combined')?'combined':'separate';
 }
 
 paperSizeControl.querySelector('option[value="letter"]').textContent='Short bond · Letter (8.5 x 11 in)';
@@ -150,6 +203,7 @@ function saveLayoutSettings(){const values={};layoutControlIds.forEach(id=>{cons
 function restoreLayoutSettings(){try{const values=JSON.parse(localStorage.getItem('danne-lozana-count-layout')||'{}');layoutControlIds.forEach(id=>{const control=document.getElementById(id);if(values[id]===undefined)return;if(control.type==='checkbox')control.checked=values[id];else{if(id==='rowsPerPage'&&!Array.from(control.options).some(option=>option.value===String(values[id]))){control.add(new Option(`${values[id]} rows`,String(values[id])))}control.value=values[id]}})}catch(error){localStorage.removeItem('danne-lozana-count-layout')}
 if(typeof applyLayout==='function')applyLayout(false);if(typeof refreshLayoutPreview==='function')refreshLayoutPreview()}
 restoreLayoutSettings();
+updateGroupModeControl();
 layoutControlIds.forEach(id=>{const control=document.getElementById(id);control.addEventListener('change',()=>{saveLayoutSettings();if(typeof recordLocalHistory==='function')recordLocalHistory('Layout changed',`${id}: ${control.type==='checkbox'?control.checked:control.value}`)});control.addEventListener('input',saveLayoutSettings)});
 $('configureSheetBtn').onclick=()=>{showStep(3);refreshLayoutPreview()};
 
@@ -173,18 +227,27 @@ function updateSupplierFilter(){
 }
 updateSupplierFilter();
 $('supplierFilter').addEventListener('change',()=>{updateCountSheetCategoryFilter();renderCountSheet();refreshLayoutPreview()});
-$('supplierGroupingMode')?.addEventListener('change',()=>{localStorage.removeItem('danne-lozana-combined-suppliers');if($('supplierGroupingMode').value==='category'&&$('countSheetCategoryFilter').value!== '__mix__'){ $('countSheetCategoryFilter').value='__mix__'; updateCountSheetCategoryFilter(); } syncSupplierSelectionList(); renderCountSheet(); refreshLayoutPreview(); saveLayoutSettings(); });
-$('combineGroupOptionsFilter')?.addEventListener('change',()=>{
-	localStorage.removeItem('danne-lozana-combined-suppliers');
+$('countSheetPrintMode')?.addEventListener('change',()=>{
+	updateGroupModeControl();
 	syncSupplierSelectionList();
 	renderCountSheet();
 	refreshLayoutPreview();
 	saveLayoutSettings();
 });
+$('countSheetGroupMode')?.addEventListener('change',()=>{
+	setGroupModeFromControl();
+	syncSupplierSelectionList();
+	renderCountSheet();
+	refreshLayoutPreview();
+	saveLayoutSettings();
+});
+$('supplierGroupingMode')?.addEventListener('change',()=>{updateGroupModeControl();syncSupplierSelectionList();renderCountSheet();refreshLayoutPreview();saveLayoutSettings()});
+$('combineGroupOptionsFilter')?.addEventListener('change',()=>{updateGroupModeControl();syncSupplierSelectionList();renderCountSheet();refreshLayoutPreview();saveLayoutSettings()});
+$('countSheetCcdFilter')?.addEventListener('change',()=>syncSupplierSelectionList());
+$('countSheetDepartmentFilter')?.addEventListener('change',()=>syncSupplierSelectionList());
 $('countSheetCategoryFilter').addEventListener('change',()=>{
-	const selectedCategory=$('countSheetCategoryFilter')?.value||'';
-	if(selectedCategory==='__mix__'&&$('supplierGroupingMode')?.value!=='category'){$('supplierGroupingMode').value='category';}
 	updateSupplierFilter();
+	syncSupplierSelectionList();
 	renderCountSheet();
 	refreshLayoutPreview();
 });
