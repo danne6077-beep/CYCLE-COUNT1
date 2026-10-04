@@ -112,42 +112,57 @@ function renderCountSheet(previewOnly=false){
     return department||ccd||left.sku.localeCompare(right.sku,undefined,{numeric:true});
   });
   const pageRows=Number($('rowsPerPage').value);
-  const groupingMode=$('supplierGroupingMode')?.value||'split';
-  const selectedCombinedSuppliers=getSelectedCombinedSuppliers();
+  const groupingMode=$('supplierGroupingMode')?.value||'all';
+  const groupMode=groupingMode==='category'||groupingMode==='supplier-category'||groupingMode==='supplier'||groupingMode==='all'?groupingMode:'all';
+  const selectedCombinedGroups=getSelectedCombinedSuppliers();
+  const combinedGroupKeys={
+    category:'ALL_CATEGORIES_COMBINED',
+    supplier:'ALL_SUPPLIERS_COMBINED',
+    'supplier-category':'ALL_SUPPLIERS_AND_CATEGORIES_COMBINED'
+  };
+  const combinedGroupKey=combinedGroupKeys[groupMode];
+  const isCombinedGrouping=$('combineGroupOptionsFilter')?.value==='combined'&&selectedCombinedGroups.includes(combinedGroupKey);
   const groups=mergedRows.reduce((result,item)=>{
-    const key=item.supplier||'Unassigned Supplier';
+    let key='All';
+    if(groupMode==='supplier')key=item.supplier||'Unassigned Supplier';
+    else if(groupMode==='category')key=item.category||'Uncategorized';
+    else if(groupMode==='supplier-category')key=`${item.supplier||'Unassigned Supplier'} - ${item.category||'Uncategorized'}`;
     (result[key]??=[]).push(item);
     return result;
   },{});
 
-  const buildPageObject=(supplier,rows,offset)=>({supplier,rows,offset});
+  const buildPageObject=(groupName,rows,offset)=>({groupName,rows,offset});
   const pages=[];
 
-  if(groupingMode==='combined'){
-    const printedSuppliers=getPrintedCombinedSuppliers();
-    const enabledSuppliers=selectedCombinedSuppliers.filter(supplier=>
-      Object.prototype.hasOwnProperty.call(groups,supplier)&&!printedSuppliers.has(supplier)
-    );
-    if(enabledSuppliers.length>1){
-      const combinedPages=paginateCombinedSupplierRows(groups,enabledSuppliers,pageRows);
-      pages.push(...(previewOnly?combinedPages.slice(0,1):combinedPages));
-    }else if(enabledSuppliers.length===1){
-      const supplier=enabledSuppliers[0];
-      const rows=groups[supplier];
-      if(previewOnly)pages.push(buildPageObject(supplier,rows.slice(0,pageRows),0));
-      else for(let offset=0;offset<rows.length;offset+=pageRows){
-        pages.push(buildPageObject(supplier,rows.slice(offset,offset+pageRows),offset));
+  if(groupMode==='all'){
+    const allRows=mergedRows;
+    for(let offset=0;offset<allRows.length;offset+=pageRows){
+      pages.push(buildPageObject('All categories',allRows.slice(offset,offset+pageRows),offset));
+    }
+  } else if(isCombinedGrouping){
+    if(!getPrintedCombinedSuppliers().has(combinedGroupKey)){
+      const groupName=groupMode==='category'?'All categories':groupMode==='supplier'?'All suppliers':'All suppliers + categories';
+      for(let offset=0;offset<mergedRows.length;offset+=pageRows){
+        pages.push(buildPageObject(groupName,mergedRows.slice(offset,offset+pageRows),offset));
       }
     }
-  } else if(previewOnly){
-    const [supplier,rows]=Object.entries(groups)[0]||[];
-    if(supplier)pages.push(buildPageObject(supplier,rows.slice(0,pageRows),0));
   } else {
-    Object.entries(groups).forEach(([supplier,rows])=>{
-      for(let offset=0;offset<rows.length;offset+=pageRows){
-        pages.push(buildPageObject(supplier,rows.slice(offset,offset+pageRows),offset));
-      }
-    });
+    const printedGroups=getPrintedCombinedSuppliers();
+    const enabledGroups=selectedCombinedGroups.filter(groupName=>Object.prototype.hasOwnProperty.call(groups,groupName)&&!printedGroups.has(groupName));
+    if(enabledGroups.length>0){
+      enabledGroups.forEach(groupName=>{
+        const rows=groups[groupName]||[];
+        for(let offset=0;offset<rows.length;offset+=pageRows){
+          pages.push(buildPageObject(groupName,rows.slice(offset,offset+pageRows),offset));
+        }
+      });
+    } else if(Object.keys(groups).length){
+      Object.entries(groups).forEach(([groupName,rows])=>{
+        for(let offset=0;offset<rows.length;offset+=pageRows){
+          pages.push(buildPageObject(groupName,rows.slice(offset,offset+pageRows),offset));
+        }
+      });
+    }
   }
 
   const showBarcode=$('showSheetBarcode').checked;
@@ -155,15 +170,15 @@ function renderCountSheet(previewOnly=false){
   const formatLocatorCell=(values)=>values.length?values.map(value=>`<span class="locator-pill">${value}</span>`).join('<br>'):'<span class="locator-empty">—</span>';
   const renderRows=(rows,offset,isCombinedPage)=>{
     const rowEntries=[];
-    let currentSupplier='';
+    let currentGroup='';
     let currentDepartment='';
     let currentCcd='';
     let currentCategory='';
     rows.forEach((item,index)=>{
-      const itemSupplier=item.supplier||'Unassigned Supplier';
-      if(isCombinedPage && currentSupplier!==itemSupplier){
-        rowEntries.push(`<tr class="supplier-group-row"><td colspan="10"><span class="supplier-group-label">${itemSupplier}</span></td></tr>`);
-        currentSupplier=itemSupplier;
+      const itemGroup=groupMode==='category'?item.category||'Uncategorized':groupMode==='supplier-category'?`${item.supplier||'Unassigned Supplier'} - ${item.category||'Uncategorized'}`:item.supplier||'Unassigned Supplier';
+      if(isCombinedPage && currentGroup!==itemGroup){
+        rowEntries.push(`<tr class="supplier-group-row"><td colspan="10"><span class="supplier-group-label">${escapeSheetText(itemGroup)}</span></td></tr>`);
+        currentGroup=itemGroup;
       }
       const departmentKey=`${item.departmentCode} ${item.department}`.trim();
       const ccdKey=item.ccdNo||'Unassigned';
@@ -186,26 +201,26 @@ function renderCountSheet(previewOnly=false){
     return rowEntries.join('');
   };
 
-  target.innerHTML=pages.map(({supplier,rows,offset},pageIndex)=>`
+  target.innerHTML=pages.map(({groupName,rows,offset})=>`
     <article class="count-sheet-page reference-sheet">
       <header class="reference-sheet-header">
-        <div class="reference-title">COUNT SHEET <span>PHYSICAL INVENTORY</span><strong>${groupingMode==='combined' && supplier==='Combined Suppliers' ? 'MULTI-SUPPLIER' : supplier}</strong></div>
+        <div class="reference-title">COUNT SHEET <span>PHYSICAL INVENTORY</span><strong>${escapeSheetText(groupName)}</strong></div>
         <div class="reference-meta"><b>STORE:</b> ${storeName} <b>BRANCH:</b> Prince Cauayan <b>CCD NO.:</b> ${escapeSheetText(selectedCcd==='all'?'ALL':selectedCcd)}</div>
-        <div class="reference-meta"><b>SUPPLIER:</b> ${groupingMode==='combined' && supplier==='Combined Suppliers' ? 'MIXED SUPPLIERS' : supplier} <b>DATE:</b> ${$('dateField').value||'2026-09-14'} <b>PREPARED BY:</b> ${editorName}</div>
+        <div class="reference-meta"><b>${groupMode==='category'?'CATEGORY':groupMode==='supplier-category'?'SUPPLIER + CATEGORY':'SUPPLIER'}:</b> ${escapeSheetText(groupName)} <b>DATE:</b> ${$('dateField').value||'2026-09-14'} <b>PREPARED BY:</b> ${editorName}</div>
       </header>
       <table class="count-sheet-table reference-table">
         <thead><tr><th>#</th><th>SKU</th><th>BARCODE</th><th>DESCRIPTION</th><th>SELLING LOCATOR</th><th>COUNT</th><th>BUFFER LOCATOR</th><th>COUNT</th><th>WAREHOUSE LOCATOR</th><th>COUNT</th></tr></thead>
-        <tbody>${renderRows(rows,offset,supplier==='Combined Suppliers')}</tbody>
+        <tbody>${renderRows(rows,offset,!isCombinedGrouping)}</tbody>
       </table>
       <footer class="reference-signoff"><span>COUNTER: __________________</span><span>VALIDATOR: __________________</span><span>SCANNER: __________________</span><span>DATE & TIME: ________________</span></footer>
     </article>`).join('');
-  if(previewOnly&&!pages.length)target.innerHTML=groupingMode==='combined'?'<div class="live-empty">Select an unprinted supplier to preview a count sheet.</div>':'<div class="live-empty">Import inventory to preview your count sheet.</div>';
+  if(previewOnly&&!pages.length)target.innerHTML=`<div class="live-empty">Select at least one ${groupMode==='category'?'category':groupMode==='supplier-category'?'supplier/category group':'supplier'} to preview a count sheet.</div>`;
   drawCountSheetBarcodes(target);
   if(previewOnly)return;
   const preview=$('countSheetLivePreview');
   if(preview){const firstPage=$('countSheetPages').firstElementChild;preview.innerHTML=firstPage?firstPage.outerHTML:'<div class="live-empty">Import inventory to preview your count sheet.</div>';drawCountSheetBarcodes(preview)}
-  const generatedLabel=groupingMode==='combined'?'combined supplier sheets':'supplier sheets';
-  $('countSheetSummary').textContent=!selectedCategory?'Choose a category or Mix categories to prepare count sheets.':groupingMode==='combined'&&!pages.length?'Select at least one unprinted supplier to prepare a count sheet.':`${pages.length} landscape ${generatedLabel}${mixedCategories?' with mixed categories':''} prepared with selling, buffer, and warehouse locator count columns.`;
+  const generatedLabel=groupMode==='all'?'combined group sheets':`${isCombinedGrouping?'combined ':''}${groupMode==='category'?'category sheets':groupMode==='supplier-category'?'supplier + category sheets':'supplier sheets'}`;
+  $('countSheetSummary').textContent=!selectedCategory?'Choose a category or Mix categories to prepare count sheets.':`${pages.length} landscape ${generatedLabel}${mixedCategories?' with mixed categories':''} prepared with selling, buffer, and warehouse locator count columns.`;
 }
 
 function drawCountSheetBarcodes(root=document){

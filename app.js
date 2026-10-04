@@ -132,9 +132,15 @@ function updateCountSheetCategoryFilter(){
   const ccd=$('countSheetCcdFilter').value;
   const department=$('countSheetDepartmentFilter').value;
   const supplier=$('supplierFilter').value;
-  const values=[...new Set(items.filter(item=>(ccd==='all'||item.ccdNo===ccd)&&(department==='all'||item.departmentCode===department)&&(supplier==='all'||item.supplier===supplier)).map(item=>String(item.category||item.subdeptName||item.classification||'Uncategorized').trim()||'Uncategorized'))].sort((left,right)=>left.localeCompare(right,undefined,{sensitivity:'base'}));
+  const values=CountSheetFilters.getDepartmentCategoryOptions(items,{ccd,department,supplier});
   filter.replaceChildren(new Option('Choose category',''),...(values.length>1?[new Option('Mix categories','__mix__')]:[]),...values.map(value=>new Option(value,value)));
-  filter.value=current==='__mix__'&&values.length>1?current:values.includes(current)?current:'';
+  const hasMix=values.length>1;
+  const nextValue=current==='__mix__'&&hasMix?current:hasMix&&current===''?('__mix__'):(values.includes(current)?current:'');
+  filter.value=nextValue;
+  if(filter.value==='__mix__'&&$('supplierGroupingMode')?.value!=='category'){
+    $('supplierGroupingMode').value='category';
+    saveLayoutSettings();
+  }
 }
 function updateCountSheetDepartmentFilter(){
   const filter=$('countSheetDepartmentFilter');

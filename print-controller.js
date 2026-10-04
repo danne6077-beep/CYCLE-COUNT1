@@ -1,14 +1,33 @@
 let pendingCombinedPrint=[];
 let pendingCombinedPrintSignature='';
 
+function showPrintToast(message='Count sheet sent to printer successfully.'){
+  const toast=$('#printToast');
+  if(!toast)return;
+  const text=toast.querySelector('p');
+  if(text)text.textContent=message;
+  toast.hidden=false;
+  toast.classList.add('show');
+  clearTimeout(showPrintToast.dismissTimer);
+  showPrintToast.dismissTimer=setTimeout(()=>{
+    toast.classList.remove('show');
+    setTimeout(()=>toast.hidden=true,260);
+  },3500);
+}
+
+function dismissPrintToast(){
+  const toast=$('#printToast');
+  if(!toast)return;
+  toast.classList.remove('show');
+  setTimeout(()=>toast.hidden=true,260);
+}
+
 function getSelectedSuppliersForPrint(){
-  if($('supplierGroupingMode')?.value!=='combined')return [];
+  if($('supplierGroupingMode')?.value==='all')return [];
   const selected=getSelectedCombinedSuppliers();
   const printed=getPrintedCombinedSuppliers();
-  const supplierFilter=$('supplierFilter')?.value||'all';
-  const inventorySuppliers=new Set(items.map(item=>item.supplier||'Unassigned Supplier'));
-  return selected.filter(supplier=>inventorySuppliers.has(supplier)&&!printed.has(supplier)&&
-    (supplierFilter==='all'||supplier===supplierFilter));
+  const options=getCombinedGroupOptions();
+  return selected.filter(value=>options.includes(value)&&!printed.has(value));
 }
 
 function prepareCountSheetPrint(){
@@ -27,8 +46,7 @@ function finishCountSheetPrint(){
   if(!document.body.classList.contains('print-count-sheet'))return;
   document.body.classList.remove('print-count-sheet');
   if(!pendingCombinedPrint.length)return;
-  $('printConfirmationSuppliers').textContent=pendingCombinedPrint.join(', ');
-  $('printConfirmationModal').hidden=false;
+  showPrintToast(`Printed ${pendingCombinedPrint.length} group${pendingCombinedPrint.length>1?'s':''} successfully.`);
 }
 function printPreparedCountSheet(action){
   prepareCountSheetPrint();
@@ -42,14 +60,4 @@ $('printSheetBtn').onclick=()=>printPreparedCountSheet('Print requested');
 $('exportSheetBtn').onclick=()=>printPreparedCountSheet('PDF export requested');
 window.addEventListener('beforeprint',prepareCountSheetPrint);
 window.addEventListener('afterprint',finishCountSheetPrint);
-$('confirmSuppliersPrinted').onclick=()=>{
-  markCombinedSuppliersPrinted(pendingCombinedPrint,pendingCombinedPrintSignature);
-  pendingCombinedPrint=[];
-  pendingCombinedPrintSignature='';
-  $('printConfirmationModal').hidden=true;
-};
-$('cancelSupplierPrintConfirmation').onclick=()=>{
-  pendingCombinedPrint=[];
-  pendingCombinedPrintSignature='';
-  $('printConfirmationModal').hidden=true;
-};
+$('#printToast .print-toast__close')?.addEventListener('click',dismissPrintToast);
