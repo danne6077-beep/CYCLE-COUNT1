@@ -4,6 +4,8 @@ const productImageCache=new Map();
 const homeNavigation=$('homeNav');
 const homePanel=$('homePanel');
 const countSheetNavigation=$('countSheetNav');
+const cigarsNavigation=$('cigarsNav');
+const cigarsPanel=$('cigarsPanel');
 const productLookupNavigation=$('productLookupNav');
 const productLookupPanel=$('productLookupPanel');
 const masterlistNavigation=$('masterlistNav');
@@ -366,6 +368,10 @@ async function showCountSheetWorkspace(){
 
 homeNavigation.addEventListener('click',showHomePanel);
 countSheetNavigation.addEventListener('click',showCountSheetWorkspace);
+cigarsNavigation.addEventListener('click',()=>{
+  if(activeLookupPanel===cigarsPanel)closeLookupPanel();
+  else openLookupPanel(cigarsPanel,cigarsNavigation);
+});
 document.querySelectorAll('[data-home-open]').forEach(button=>button.addEventListener('click',()=>$(button.dataset.homeOpen).click()));
 window.addEventListener('online',renderHomeDashboard);
 window.addEventListener('offline',renderHomeDashboard);

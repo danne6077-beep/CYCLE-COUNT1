@@ -1,0 +1,46 @@
+.cigars-workspace{--cigar-ink:#18251f;--cigar-muted:#66756c;--cigar-line:#dce6df;color:var(--cigar-ink)}
+.cigars-workspace[hidden]{display:none!important}
+.cigars-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:20px}
+.cigars-heading h1{margin:0 0 5px;font-family:'Space Grotesk',sans-serif;font-size:30px;letter-spacing:-.7px}
+.cigars-heading p:last-child{margin:0;color:var(--cigar-muted)}
+.cigars-local-note{padding:7px 10px;border:1px solid var(--cigar-line);border-radius:999px;color:var(--cigar-muted);font-size:11px}
+.cigars-subnav{display:flex;gap:8px;overflow-x:auto;margin:0 0 16px;padding:0 0 3px}
+.cigars-subnav-item{flex:none;padding:9px 12px;border:1px solid var(--cigar-line);border-radius:7px;background:#fff;color:#58665e;font-size:12px;font-weight:700}
+.cigars-subnav-item.is-active{border-color:#18815d;background:#eff8f2;color:#086345}
+.cigars-subnav-item:disabled{cursor:not-allowed;opacity:.58}
+.cigars-rule-notice{margin-bottom:18px;padding:13px 15px;border:1px solid #ead4a1;border-left:4px solid #c18414;border-radius:7px;background:#fff9e9;color:#665020;font-size:12px;line-height:1.55}
+.cigars-rule-notice strong{display:block;margin-bottom:2px;color:#543f15}
+.cigars-checker-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(280px,.95fr);gap:16px}
+.cigars-card{min-width:0;padding:20px;border:1px solid var(--cigar-line);border-radius:10px;background:#fff;box-shadow:0 4px 16px #17291f08}
+.cigars-card h2{margin:0 0 17px;font-family:'Space Grotesk',sans-serif;font-size:18px}
+.cigars-card label{display:block;margin:0 0 14px;color:#405148;font-size:12px;font-weight:700}
+.cigars-card label span{color:#859087;font-weight:500}
+.cigars-card input,.cigars-card select{display:block;width:100%;min-height:40px;margin-top:5px;padding:9px 10px;border:1px solid #d5dfd8;border-radius:6px;background:#fff;color:#26352d}
+.cigars-card input:focus,.cigars-card select:focus{outline:2px solid #a8dbc3;outline-offset:1px}
+.cigars-date-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cigars-field-hint{margin:-8px 0 14px;color:var(--cigar-muted);font-size:11px}
+.cigars-card .primary-button,.cigars-card .secondary-button{min-height:38px;margin:4px 8px 0 0}
+.cigars-result-card{display:flex;flex-direction:column;justify-content:center;min-height:340px}
+.cigars-result-card .section-kicker{margin-bottom:13px}
+.cigars-empty-result{color:var(--cigar-muted);font-size:14px;line-height:1.6}
+.cigars-result{padding:19px;border:1px solid var(--cigar-line);border-radius:9px;background:#f7faf8}
+.cigars-result>strong{display:block;font-family:'Space Grotesk',sans-serif;font-size:23px;line-height:1.2}
+.cigars-result dl{display:grid;grid-template-columns:1fr auto;gap:9px 16px;margin:18px 0 0;font-size:12px}
+.cigars-result dt{color:var(--cigar-muted)}
+.cigars-result dd{margin:0;text-align:right;font-weight:700}
+.cigars-result-accept{border-color:#8ecdb0;background:#eefaf2;color:#145c36}
+.cigars-result-reject-expired,.cigars-result-reject-shelf-life{border-color:#e5a4a4;background:#fff1f1;color:#8b2020}
+.cigars-status{min-height:18px;margin:12px 0 0;color:var(--cigar-muted);font-size:11px}
+.cigars-history-card{margin-top:16px}
+.cigars-section-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:13px}
+.cigars-section-heading h2{margin:0;font-size:17px}
+.cigars-section-heading p{margin:4px 0 0;color:var(--cigar-muted);font-size:11px}
+.cigars-section-heading>span{color:var(--cigar-muted);font-size:11px}
+.cigars-history-wrap{overflow:auto}
+.cigars-history-wrap table{width:100%;border-collapse:collapse;font-size:11px}
+.cigars-history-wrap th,.cigars-history-wrap td{padding:9px 8px;border-top:1px solid #e8eee9;text-align:left;white-space:nowrap}
+.cigars-history-wrap th{color:#65736a;font-size:10px;text-transform:uppercase}
+.cigars-history-accept td:last-child{color:#14713f;font-weight:800}
+.cigars-history-reject-expired td:last-child,.cigars-history-reject-shelf-life td:last-child{color:#a12727;font-weight:800}
+@media(max-width:760px){.cigars-heading{align-items:flex-start;flex-direction:column}.cigars-checker-grid{grid-template-columns:1fr}.cigars-result-card{min-height:220px}}
+@media(max-width:460px){.cigars-card{padding:15px}.cigars-date-grid{grid-template-columns:1fr;gap:0}.cigars-heading h1{font-size:26px}}
