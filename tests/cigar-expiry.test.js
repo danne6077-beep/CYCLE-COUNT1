@@ -1,27 +1,32 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { checkExpiry } = require('../cigar-expiry-utils.js');
+const { decodeBatchCode } = require('../cigar-expiry-utils.js');
 
-const today = new Date(2026, 9, 4, 12);
-
-test('accepts delivery that meets its supplied minimum remaining shelf life', () => {
+test('decodes PMFTC batch codes using the workbook year and Julian-day positions', () => {
   assert.deepEqual(
-    checkExpiry({ expiryDate: '2027-04-02', minimumDays: '180', now: today }),
-    { decision: 'accept', daysRemaining: 180, minimumDays: 180, expiryDate: '2027-04-02' }
+    decodeBatchCode('MB23619110'),
+    { manufacturer: 'PMFTC', manufacturingDate: '2026-07-10', expiryDate: '2027-07-10' }
   );
+  assert.equal(decodeBatchCode('MB24624016').manufacturingDate, '2026-08-28');
 });
 
-test('rejects unexpired stock below the required minimum shelf life', () => {
-  assert.equal(checkExpiry({ expiryDate: '2026-10-20', minimumDays: 30, now: today }).decision, 'reject-shelf-life');
+test('decodes JTI batch codes using the workbook month, year, and day positions', () => {
+  assert.deepEqual(
+    decodeBatchCode('6EF27C52'),
+    { manufacturer: 'JTI', manufacturingDate: '2026-05-27', expiryDate: '2027-05-27' }
+  );
+  assert.equal(decodeBatchCode('6FF29A32').manufacturingDate, '2026-06-29');
 });
 
-test('rejects stock expiring today or earlier', () => {
-  assert.equal(checkExpiry({ expiryDate: '2026-10-04', minimumDays: 0, now: today }).decision, 'reject-expired');
-  assert.equal(checkExpiry({ expiryDate: '2026-10-03', minimumDays: 0, now: today }).decision, 'reject-expired');
+test('rejects invalid code dates and unsupported code formats', () => {
+  assert.throws(() => decodeBatchCode('MB23636710'), /invalid production day/);
+  assert.throws(() => decodeBatchCode('6EF32C52'), /invalid production date/);
+  assert.throws(() => decodeBatchCode('not-a-batch-code'), /format not recognized/);
 });
 
-test('rejects invalid expiry dates and receiving thresholds', () => {
-  assert.throws(() => checkExpiry({ expiryDate: '2026-02-30', minimumDays: 0, now: today }), /valid expiry date/);
-  assert.throws(() => checkExpiry({ expiryDate: '2027-01-01', minimumDays: '', now: today }), /threshold/);
-  assert.throws(() => checkExpiry({ expiryDate: '2027-01-01', minimumDays: -1, now: today }), /threshold/);
+test('treats leap-day expiry as the final day of February in the following year', () => {
+  assert.deepEqual(
+    decodeBatchCode('MB24406000'),
+    { manufacturer: 'PMFTC', manufacturingDate: '2024-02-29', expiryDate: '2025-02-28' }
+  );
 });

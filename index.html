@@ -206,7 +206,7 @@
     <nav class="primary-nav" aria-label="Primary navigation">
       <button class="nav-button" id="homeNav" type="button" title="Open Home dashboard" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg><span>Home</span></button>
       <button class="nav-button" id="countSheetNav" type="button" title="Open Count Sheet"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h3m2 0h3m-8 4h3m2 0h3m-8 3h3m2 0h3"/></svg><span>Count Sheet</span></button>
-      <button class="nav-button" id="cigarsNav" type="button" title="Open Cigars inventory tools"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13h17a1 1 0 0 1 1 1v3H3a2 2 0 0 1-2-2v-1a1 1 0 0 1 1-1Zm4 0v4m8-4v4M4 10c2-1 2-3 1-5m5 5c2-1 2-3 1-5"/></svg><span>Cigars</span></button>
+      <button class="nav-button" id="cigarsNav" type="button" title="Open cigarette expiration generator"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13h17a1 1 0 0 1 1 1v3H3a2 2 0 0 1-2-2v-1a1 1 0 0 1 1-1Zm4 0v4m8-4v4M4 10c2-1 2-3 1-5m5 5c2-1 2-3 1-5"/></svg><span>Cigarette Expiry</span></button>
       <button class="nav-button" id="shelfTagNav" type="button" title="Open Shelftag / PP Tag Printing"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 13 11 22l-9-9V2h11z"/><circle cx="7" cy="7" r="1"/></svg><span>Shelf Tag</span></button>
       <button class="nav-button" id="productLookupNav" type="button" title="Search the master product catalog"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg><span>Product Lookup</span></button>
       <button class="nav-button" id="masterlistNav" type="button" title="Browse uploaded master data"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4zM4 9h16M9 9v11m6-11v11"/></svg><span>Masterlist</span></button>
@@ -236,7 +236,7 @@
       <div class="home-section-heading"><div><p class="home-eyebrow">QUICK ACCESS</p><h2>Choose a workflow</h2></div><span>01 / 07</span></div>
       <div class="home-feature-grid">
         <article class="home-feature home-feature-count"><div class="home-feature-top"><span class="home-feature-icon" aria-hidden="true">▦</span><span class="home-feature-index">01</span></div><h3>Count Sheet</h3><p>Import inventory, review SKU records, organize suppliers, and prepare physical count sheets.</p><button type="button" data-home-open="countSheetNav">Open count sheet <span aria-hidden="true">→</span></button></article>
-        <article class="home-feature home-feature-cigars"><div class="home-feature-top"><span class="home-feature-icon" aria-hidden="true">◉</span><span class="home-feature-index">02</span></div><h3>Cigars & Cigarettes</h3><p>Check verified expiry dates and receive-by shelf-life thresholds.</p><button type="button" data-home-open="cigarsNav">Open Cigars <span aria-hidden="true">→</span></button></article>
+        <article class="home-feature home-feature-cigars"><div class="home-feature-top"><span class="home-feature-icon" aria-hidden="true">◉</span><span class="home-feature-index">02</span></div><h3>CIGARETTE'S EXPIRATION GENERATOR</h3><p>Enter a cigarette batch code to generate its expiry date.</p><button type="button" data-home-open="cigarsNav">Open generator <span aria-hidden="true">→</span></button></article>
         <article class="home-feature home-feature-shelf"><div class="home-feature-top"><span class="home-feature-icon" aria-hidden="true">▤</span><span class="home-feature-index">03</span></div><h3>Shelf Tag Printing</h3><p>Build millimeter-accurate white shelf tags and yellow promo tags with barcode footers.</p><button type="button" data-home-open="shelfTagNav">Open shelf tags <span aria-hidden="true">→</span></button></article>
         <article class="home-feature home-feature-lookup"><div class="home-feature-top"><span class="home-feature-icon" aria-hidden="true">⌕</span><span class="home-feature-index">04</span></div><h3>Product Lookup</h3><p>Search the master catalog by SKU, barcode, or product description.</p><button type="button" data-home-open="productLookupNav">Search products <span aria-hidden="true">→</span></button></article>
         <article class="home-feature home-feature-masterlist"><div class="home-feature-top"><span class="home-feature-icon" aria-hidden="true">▥</span><span class="home-feature-index">05</span></div><h3>Masterlist View</h3><p>Upload monitoring workbooks and browse CCD, department, SKU, and vendor records.</p><button type="button" data-home-open="masterlistNav">Browse masterlist <span aria-hidden="true">→</span></button></article>
@@ -247,41 +247,20 @@
     </section>
     <section id="cigarsPanel" class="cigars-workspace" hidden aria-labelledby="cigarsHeading">
       <header class="cigars-heading">
-        <div><p class="section-kicker">CIGARS & CIGARETTES</p><h1 id="cigarsHeading">Expiry Checker</h1><p>Validate delivery shelf life using a verified expiry date.</p></div>
-        <span class="cigars-local-note">Saved in this browser</span>
+        <div><p class="section-kicker">BATCH CODE LOOKUP</p><h1 id="cigarsHeading">CIGARETTE'S EXPIRATION GENERATOR</h1><p>Enter the printed batch code to generate its expiry date.</p></div>
       </header>
-      <nav class="cigars-subnav" aria-label="Cigars tools">
-        <button type="button" class="cigars-subnav-item is-active" aria-current="page">Expiry Checker</button>
-        <button type="button" class="cigars-subnav-item" disabled title="Not implemented yet">Summary & Alerts · Coming soon</button>
-        <button type="button" class="cigars-subnav-item" disabled title="Not implemented yet">Warehouse Logs · Coming soon</button>
-        <button type="button" class="cigars-subnav-item" disabled title="Not implemented yet">Selling Counter · Coming soon</button>
-      </nav>
-      <div class="cigars-rule-notice" role="note"><strong>Batch code decoding is not enabled.</strong> JTI / PMFTC decoding rules have not been validated. Enter the expiry date printed on the pack or delivery document; this checker will not infer it from a batch code.</div>
       <div class="cigars-checker-grid">
         <form id="cigarExpiryForm" class="cigars-card" novalidate>
-          <h2>Check a delivery</h2>
-          <label>Manufacturer<select id="cigarManufacturer" required><option value="">Select manufacturer</option><option value="JTI">JTI</option><option value="PMFTC">PMFTC</option><option value="Other">Other</option></select></label>
-          <label>Batch code<input id="cigarBatchCode" autocomplete="off" placeholder="Scan or enter printed batch code"></label>
-          <label>SKU / barcode<input id="cigarSkuBarcode" autocomplete="off" placeholder="Optional SKU or barcode"></label>
-          <div class="cigars-date-grid">
-            <label>Manufacturing date <span>Optional</span><input id="cigarManufacturingDate" type="date"></label>
-            <label>Verified expiry date<input id="cigarExpiryDate" type="date" required></label>
-          </div>
-          <label>Minimum remaining shelf life on receipt (days)<input id="cigarMinimumDays" type="number" min="0" step="1" inputmode="numeric" required placeholder="Enter supplier/store requirement"></label>
-          <p class="cigars-field-hint">The threshold is required for each check; no default receiving policy is assumed.</p>
-          <button class="primary-button" type="submit">Check expiry</button>
-          <button class="secondary-button" id="clearCigarExpiryForm" type="button">Clear fields</button>
+          <label for="cigarBatchCode">Cigarette batch code</label>
+          <input id="cigarBatchCode" name="batchCode" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="e.g. MB23619110 or 6EF27C52" required>
+          <button class="primary-button" type="submit">Generate expiry date</button>
         </form>
-        <section class="cigars-card cigars-result-card" aria-live="polite" aria-atomic="true">
-          <p class="section-kicker">RECEIVING DECISION</p>
-          <div id="cigarExpiryResult" class="cigars-empty-result">Enter a verified expiry date and required shelf-life threshold to check a delivery.</div>
+        <section class="cigars-card cigars-result-card" aria-live="polite" aria-atomic="true" aria-label="Generated expiry date">
+          <p class="section-kicker">EXPIRY DATE</p>
+          <div id="cigarExpiryResult" class="cigars-empty-result">Enter a JTI or PMFTC batch code to generate its expiry date.</div>
           <p id="cigarExpiryStatus" class="cigars-status" role="status"></p>
         </section>
       </div>
-      <section class="cigars-card cigars-history-card">
-        <div class="cigars-section-heading"><div><h2>Recent checks</h2><p>History is stored locally in this browser.</p></div><span id="cigarExpiryHistoryCount">0 checks</span></div>
-        <div class="cigars-history-wrap"><table><thead><tr><th>Checked</th><th>Manufacturer</th><th>Batch</th><th>SKU / Barcode</th><th>Expiry</th><th>Days left</th><th>Required</th><th>Decision</th></tr></thead><tbody id="cigarExpiryHistory"><tr><td colspan="8">No checks saved yet.</td></tr></tbody></table></div>
-      </section>
     </section>
     <section id="introRow" class="intro-row">
       <div>
