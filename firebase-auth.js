@@ -241,7 +241,7 @@
     '#settingsBtn','#resetBtn','#chooseFile','#fileInput','#sampleBtn','#reuploadBtn','#addItemBtn','.edit-item','.delete-item',
     '#configurePanel input','#configurePanel select','#masterlistDropzone','#masterlistFile','#shelfAddRow','#shelfFileInput',
     '.shelf-upload','#shelfSelectAll','#shelfSelectNone','#shelfBulkPromo','#shelfApplyBulkPromo','.shelf-edit-input','.shelf-qty-input',
-    '[data-shelf-select]','#masterfileUpload','#hotlistResults input','#saveShiftData','#downloadBackupBtn','#restoreBackupInput',
+    '[data-shelf-select]','#masterfileUpload','#branchLocatorUpload','#clearBranchLocatorOverrides','#hotlistResults input','#saveShiftData','#downloadBackupBtn','#restoreBackupInput',
     '#resetSettingsBtn','#clearInventoryBtn','#clearLocalHistory'
   ];
   function markAdminControls(){

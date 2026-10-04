@@ -1,5 +1,115 @@
 const layoutControlIds=['paperSize','orientation','pageMargins','rowsPerPage','rowHeight','fontSize','barcodeWidth','countLineWidth','showSheetBarcode','showSheetLocator','showSupplierHeader','supplierGroupingMode','combineGroupOptionsFilter','countSheetPrintMode'];
 const paperSizeControl=$('paperSize');
+let activeCountSheetMode='selection';
+let countSheetPreviewRequested=false;
+let countSheetPreviewTimer;
+let standardFilterLoadRequest=0;
+
+function isStandardCountSheetMode(){
+	return activeCountSheetMode==='standard';
+}
+
+function setCountSheetMode(mode){
+	activeCountSheetMode=mode;
+	countSheetPreviewRequested=false;
+	standardFilterLoadRequest++;
+	clearTimeout(countSheetPreviewTimer);
+	$('countSheetModeSelection').hidden=mode!=='selection';
+	$('countSheetModeBar').hidden=mode==='selection';
+	$('standardCountSheetMode').hidden=mode!=='standard';
+	$('manualCountSheetMode').hidden=mode!=='manual';
+	$('countSheetModeStatus').textContent=mode==='standard'?'Standard Count Sheet':mode==='manual'?'Manual Excel / CSV':'';
+	$('countSheetPages').replaceChildren();
+	if(mode!=='standard'){
+		$('supplierSelectionList').replaceChildren();
+		$('supplierSelectionList').hidden=true;
+	}
+	$('countSheetLivePreview')?.replaceChildren(Object.assign(document.createElement('div'),{className:'live-empty',textContent:mode==='standard'?'Choose groups and generate a preview to see count sheets.':'Choose Standard Count Sheet mode to preview.'}));
+}
+
+function clearCountSheetPreview(){
+	countSheetPreviewRequested=false;
+	clearTimeout(countSheetPreviewTimer);
+	$('countSheetPages').replaceChildren();
+	$('countSheetLivePreview')?.replaceChildren(Object.assign(document.createElement('div'),{className:'live-empty',textContent:'Choose groups and generate a preview to see count sheets.'}));
+	$('countSheetSummary').textContent=`Choose one or more ${getPrintMode()==='category'?'categories':'suppliers'} to prepare count sheets.`;
+}
+
+function queueCountSheetPreview(message='Updating count sheet preview…'){
+	if(!isStandardCountSheetMode())return;
+	if(!getSelectedPrintOptions().length){
+		clearCountSheetPreview();
+		toast(`Select at least one ${getPrintMode()==='category'?'category':'supplier'} to preview.`);
+		return;
+	}
+	countSheetPreviewRequested=true;
+	toast(message);
+	clearTimeout(countSheetPreviewTimer);
+	countSheetPreviewTimer=setTimeout(()=>{
+		if(isStandardCountSheetMode())renderCountSheet();
+	},40);
+}
+
+async function selectCountSheetMode(mode){
+	if(mode==='selection'){
+		setCountSheetMode('selection');
+		return;
+	}
+	if(mode==='manual'){
+		setCountSheetMode('manual');
+		toast('Manual Excel / CSV mode ready');
+		return;
+	}
+	if(mode!=='standard')throw new Error(`Unknown count sheet mode: ${mode}`);
+	setCountSheetMode('standard');
+	const loadRequest=standardFilterLoadRequest;
+	$('standardCountSheetMode').setAttribute('aria-busy','true');
+	$('countSheetModeStatus').textContent='Loading standard filters…';
+	toast('Loading standard count-sheet filters…');
+	setTimeout(async()=>{
+		try{
+			await prepareCountSheetMasterlist({renderInventory:false});
+			if(!isStandardCountSheetMode()||loadRequest!==standardFilterLoadRequest)return;
+			updateCountSheetCcdFilter();
+			updateCountSheetDepartmentFilter();
+			updateCountSheetCategoryFilter();
+			updateSupplierFilter();
+			syncSupplierSelectionList();
+			$('countSheetSummary').textContent=items.length
+				?`${items.length.toLocaleString()} inventory rows available. Select groups or filters, then generate a preview.`
+				:'No inventory data is available yet. Import inventory or load a Masterlist before generating sheets.';
+			$('importCountSheetInventory').hidden=items.length>0;
+			$('countSheetModeStatus').textContent=items.length?'Standard Count Sheet ready':'No inventory data loaded';
+			if(!items.length)toast('No inventory data is available for the standard count sheet.');
+		}catch(error){
+			if(!isStandardCountSheetMode()||loadRequest!==standardFilterLoadRequest)return;
+			$('countSheetModeStatus').textContent='Could not load standard filters';
+			$('countSheetSummary').textContent='Standard filters could not be loaded. Return to mode selection and try again.';
+			console.error('Could not load standard count-sheet filters:',error);
+			toast(`Could not load standard filters: ${error.message}`);
+		}finally{
+			if(loadRequest===standardFilterLoadRequest)$('standardCountSheetMode').removeAttribute('aria-busy');
+		}
+	},40);
+}
+
+$('chooseStandardCountSheetMode').addEventListener('click',()=>selectCountSheetMode('standard'));
+$('chooseManualCountSheetMode').addEventListener('click',()=>selectCountSheetMode('manual'));
+$('changeCountSheetMode').addEventListener('click',()=>selectCountSheetMode('selection'));
+$('importCountSheetInventory').addEventListener('click',()=>{
+	$('countSheetPanel').hidden=true;
+	$('introRow')?.removeAttribute('hidden');
+	$('stepper')?.removeAttribute('hidden');
+	showStep(1);
+});
+$('generateCountSheetPreview').addEventListener('click',()=>{
+	if(!getSelectedPrintOptions().length){
+		clearCountSheetPreview();
+		toast(`Select at least one ${getPrintMode()==='category'?'category':'supplier'} before generating a preview.`);
+		return;
+	}
+	queueCountSheetPreview('Generating count-sheet preview…');
+});
 
 function getSupplierOptions(){
 	return [...new Set((items||[]).map(item=>item.supplier||'Unassigned Supplier'))].sort();
@@ -59,7 +169,7 @@ function getSelectedPrintOptions(){
 	let saved;
 	try{saved=JSON.parse(localStorage.getItem(key)||'null')}
 	catch(error){localStorage.removeItem(key)}
-	const selected=Array.isArray(saved)?saved.filter(value=>options.includes(value)):options.slice();
+	const selected=Array.isArray(saved)?saved.filter(value=>options.includes(value)):[];
 	return options.filter(value=>selected.includes(value));
 }
 
@@ -91,13 +201,19 @@ function setCombinedSuppliers(selected){
 	const key=`danne-lozana-selected-${getPrintMode()}`;
 	localStorage.setItem(key,JSON.stringify(options.filter(value=>selected.includes(value))));
 	syncSupplierSelectionList();
-	renderCountSheet();
-	refreshLayoutPreview();
+	if(selected.length)queueCountSheetPreview('Updating selected count-sheet groups…');
+	else{
+		clearCountSheetPreview();
+	}
 }
 
 function syncSupplierSelectionList(){
 	const list=$('supplierSelectionList');
 	if(!list)return;
+	if(!isStandardCountSheetMode()){
+		list.hidden=true;
+		return;
+	}
 	const mode=getPrintMode();
 	const options=getSelectionGridOptions();
 	const printedSuppliers=getPrintedCombinedSuppliers();
@@ -214,6 +330,7 @@ $('developersModal').onclick=event=>{if(event.target===$('developersModal'))$('d
 function updateSupplierFilter(){
 	const filter=$('supplierFilter');
 	if(!filter)return;
+	if(!isStandardCountSheetMode())return;
 	const current=filter.value;
 	const ccd=$('countSheetCcdFilter')?.value||'all';
 	const department=$('countSheetDepartmentFilter')?.value||'all';
@@ -226,30 +343,32 @@ function updateSupplierFilter(){
 	updatePaperUseEstimate();
 }
 updateSupplierFilter();
-$('supplierFilter').addEventListener('change',()=>{updateCountSheetCategoryFilter();renderCountSheet();refreshLayoutPreview()});
+$('supplierFilter').addEventListener('change',()=>{
+	if(!isStandardCountSheetMode())return;
+	updateCountSheetCategoryFilter();
+	if(countSheetPreviewRequested)queueCountSheetPreview();
+});
 $('countSheetPrintMode')?.addEventListener('change',()=>{
+	if(!isStandardCountSheetMode())return;
 	updateGroupModeControl();
 	syncSupplierSelectionList();
-	renderCountSheet();
-	refreshLayoutPreview();
+	if(countSheetPreviewRequested)queueCountSheetPreview();
 	saveLayoutSettings();
 });
 $('countSheetGroupMode')?.addEventListener('change',()=>{
+	if(!isStandardCountSheetMode())return;
 	setGroupModeFromControl();
 	syncSupplierSelectionList();
-	renderCountSheet();
-	refreshLayoutPreview();
+	if(countSheetPreviewRequested)queueCountSheetPreview();
 	saveLayoutSettings();
 });
-$('supplierGroupingMode')?.addEventListener('change',()=>{updateGroupModeControl();syncSupplierSelectionList();renderCountSheet();refreshLayoutPreview();saveLayoutSettings()});
-$('combineGroupOptionsFilter')?.addEventListener('change',()=>{updateGroupModeControl();syncSupplierSelectionList();renderCountSheet();refreshLayoutPreview();saveLayoutSettings()});
-$('countSheetCcdFilter')?.addEventListener('change',()=>syncSupplierSelectionList());
-$('countSheetDepartmentFilter')?.addEventListener('change',()=>syncSupplierSelectionList());
+$('supplierGroupingMode')?.addEventListener('change',()=>{if(!isStandardCountSheetMode())return;updateGroupModeControl();syncSupplierSelectionList();if(countSheetPreviewRequested)queueCountSheetPreview();saveLayoutSettings()});
+$('combineGroupOptionsFilter')?.addEventListener('change',()=>{if(!isStandardCountSheetMode())return;updateGroupModeControl();syncSupplierSelectionList();if(countSheetPreviewRequested)queueCountSheetPreview();saveLayoutSettings()});
 $('countSheetCategoryFilter').addEventListener('change',()=>{
+	if(!isStandardCountSheetMode())return;
 	updateSupplierFilter();
 	syncSupplierSelectionList();
-	renderCountSheet();
-	refreshLayoutPreview();
+	if(countSheetPreviewRequested)queueCountSheetPreview();
 });
 
 const rowsSelect=$('rowsPerPage');

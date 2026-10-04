@@ -44,7 +44,46 @@
     return rows;
   }
 
-  const api={parseCsv,rowsFromMatrix};
+  const headerAliases={
+    supplier:['supplier','supplier name','vendor','vendor name','principal'],
+    locator:['locator','locator code','locator no','locator number','location','bin location','selling locator'],
+    sku:['sku','sku no','sku number','item code','item no','item number','product code'],
+    barcode:['upc','upc code','upc number','upc barcode','upc barcode number','barcode','barcode number','ean','gtin'],
+    description:['description','item description','product description','product name','item name','name'],
+    ccdNo:['ccd','ccd no','ccd number','ccdno'],
+    departmentCode:['department code','dept code','department number','dept no'],
+    department:['department','department name','dept name'],
+    category:['category','subdepartment','subdept name','classification']
+  };
+
+  function normalizeHeader(value){
+    return String(value??'').replace(/^\uFEFF/,'').trim().toLowerCase().replace(/&/g,' and ').replace(/[^a-z0-9]+/g,' ').trim().replace(/\s+/g,' ');
+  }
+
+  function mapImportedRows(rows){
+    if(!Array.isArray(rows)||!rows.length)throw new Error('The selected file does not contain any data rows.');
+    const sourceHeaders=Object.keys(rows[0]);
+    const normalizedHeaders=new Map(sourceHeaders.map(header=>[normalizeHeader(header),header]));
+    const columns=Object.fromEntries(Object.entries(headerAliases).map(([field,aliases])=>[
+      field,
+      aliases.map(alias=>normalizedHeaders.get(alias)).find(Boolean)
+    ]));
+    const read=(row,field)=>columns[field]?String(row[columns[field]]??'').trim():'';
+    return rows.map(row=>({
+      ...row,
+      supplier:read(row,'supplier')||'Unassigned Supplier',
+      locator:read(row,'locator'),
+      sku:read(row,'sku'),
+      barcode:read(row,'barcode'),
+      description:read(row,'description'),
+      ccdNo:read(row,'ccdNo'),
+      departmentCode:read(row,'departmentCode'),
+      department:read(row,'department'),
+      category:read(row,'category')||'Imported Items'
+    }));
+  }
+
+  const api={parseCsv,rowsFromMatrix,mapImportedRows};
   if(typeof module!=='undefined'&&module.exports)module.exports=api;
   global.CountSheetImport=api;
 }(typeof window!=='undefined'?window:globalThis));

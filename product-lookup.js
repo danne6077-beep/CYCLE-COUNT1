@@ -22,6 +22,7 @@ let productLookupRequest=0;
 const HOTLIST_CATEGORIES=['MILK','CIGARETTES','LIQUORS'];
 const HOTLIST_STORAGE_KEY='cycle-count-hotlist-shift-v1';
 const MASTER_DETAILS_STORAGE_KEY='cycle-count-master-details-v1';
+const BRANCH_LOCATOR_OVERRIDES_KEY='branch_locator_overrides';
 let hotlistProducts=[];
 let activeHotlistCategory='MILK';
 let hotlistShiftState=readLocalObject(HOTLIST_STORAGE_KEY);
@@ -178,7 +179,52 @@ function createProductImage(url,label,barcodes=[]){
 }
 
 function lookupMasterDetails(sku){
-  return masterProductDetails[normalizeMasterSku(sku)]||{};
+  const normalizedSku=normalizeMasterSku(sku);
+  const details=masterProductDetails[normalizedSku]||{};
+  const branchLocator=getBranchLocatorMap()[normalizedSku];
+  return branchLocator?{...details,locator:branchLocator}:details;
+}
+
+function getBranchLocatorMap(){
+  try{
+    const saved=JSON.parse(localStorage.getItem(BRANCH_LOCATOR_OVERRIDES_KEY)||'{}');
+    if(!saved||typeof saved!=='object'||Array.isArray(saved))throw new Error('Saved branch locator overrides are invalid.');
+    return Object.fromEntries(Object.entries(saved)
+      .filter(([sku,locator])=>normalizeMasterSku(sku)&&typeof locator==='string'&&locator.trim())
+      .map(([sku,locator])=>[normalizeMasterSku(sku),locator.trim()]));
+  }catch(error){
+    console.error('Could not read branch locator overrides:',error);
+    return {};
+  }
+}
+
+window.getBranchLocatorMap=getBranchLocatorMap;
+
+function updateBranchLocatorOverrideStatus(message){
+  const branchMap=getBranchLocatorMap();
+  const count=Object.keys(branchMap).length;
+  $('branchLocatorOverrideStatus').textContent=message||`${count.toLocaleString()} active branch locator override${count===1?'':'s'} stored in this browser.`;
+  $('clearBranchLocatorOverrides').disabled=count===0;
+}
+
+function parseBranchLocatorOverrides(workbook){
+  const firstSheetName=workbook.SheetNames[0];
+  if(!firstSheetName)throw new Error('The branch locator workbook has no worksheets.');
+  const worksheet=workbook.Sheets[firstSheetName];
+  const rows=XLSX.utils.sheet_to_json(worksheet,{defval:'',raw:false});
+  if(!rows.length)throw new Error('The first worksheet has no branch locator data rows.');
+  const headers=Object.keys(rows[0]);
+  const skuColumn=headers.find(header=>normalizeMasterHeader(header)==='sku');
+  const locatorColumn=headers.find(header=>normalizeMasterHeader(header)==='locator');
+  if(!skuColumn||!locatorColumn)throw new Error('The first worksheet must contain SKU and LOCATOR columns.');
+  const overrides={};
+  rows.forEach(row=>{
+    const sku=normalizeMasterSku(row[skuColumn]);
+    const locator=String(row[locatorColumn]??'').trim();
+    if(sku&&locator)overrides[sku]=locator;
+  });
+  if(!Object.keys(overrides).length)throw new Error('No rows with both SKU and LOCATOR values were found.');
+  return overrides;
 }
 
 function renderProductLookupResults(products,query,total=products.length,searchMode='sku'){
@@ -304,7 +350,6 @@ function showHomePanel(){
   renderHomeDashboard();
 }
 async function showCountSheetWorkspace(){
-  await prepareCountSheetMasterlist();
   if(activeLookupNavigation)activeLookupNavigation.removeAttribute('aria-current');
   productLookupViews.forEach(view=>{view.hidden=true});
   activeLookupPanel=null;
@@ -312,17 +357,11 @@ async function showCountSheetWorkspace(){
   previousProductLookupView=null;
   homeNavigation.removeAttribute('aria-current');
   countSheetNavigation.setAttribute('aria-current','page');
-  if(items.length&&typeof renderCountSheet==='function'){
-    renderItems();
-    if(typeof updateSupplierFilter==='function')updateSupplierFilter();
-    renderCountSheet();
-    if(typeof refreshLayoutPreview==='function')refreshLayoutPreview();
-    $('countSheetPanel').hidden=false;
-  }else{
-    $('introRow')?.removeAttribute('hidden');
-    $('stepper')?.removeAttribute('hidden');
-    showStep(1);
-  }
+  $('introRow')?.setAttribute('hidden','');
+  $('stepper')?.setAttribute('hidden','');
+  Object.values(panels).forEach(panel=>{panel.hidden=true});
+  $('countSheetPanel').hidden=false;
+  setCountSheetMode('selection');
 }
 
 homeNavigation.addEventListener('click',showHomePanel);
@@ -636,11 +675,48 @@ $('masterfileUpload').addEventListener('change',async event=>{
   $('masterfileStatus').textContent=`Reading ${file.name}…`;
   try{await importPriceLocatorMaster(file);}
   catch(error){$('masterfileStatus').textContent=error.message;console.error('Masterfile import failed:',error);}
+  finally{event.target.value='';}
+});
+$('branchLocatorUpload').addEventListener('change',async event=>{
+  const file=event.target.files?.[0];
+  if(!file)return;
+  const status=$('branchLocatorOverrideStatus');
+  status.textContent=`Reading ${file.name}…`;
+  try{
+    if(typeof XLSX==='undefined')throw new Error('Spreadsheet reader is unavailable. Check your internet connection.');
+    const workbook=XLSX.read(await file.arrayBuffer(),{type:'array',raw:false});
+    const overrides=parseBranchLocatorOverrides(workbook);
+    localStorage.setItem(BRANCH_LOCATOR_OVERRIDES_KEY,JSON.stringify(overrides));
+    updateBranchLocatorOverrideStatus(`Loaded ${Object.keys(overrides).length.toLocaleString()} branch locator overrides from ${file.name}.`);
+    renderHotlist();
+    if($('productLookupInput').value.trim())searchMasterCatalog({preventDefault(){}});
+    toast(`Loaded ${Object.keys(overrides).length.toLocaleString()} branch locator overrides`);
+  }catch(error){
+    status.textContent=`Could not load branch locator overrides: ${error.message}`;
+    console.error('Branch locator override import failed:',error);
+    toast(`Could not load branch locator file: ${error.message}`);
+  }finally{
+    event.target.value='';
+  }
+});
+$('clearBranchLocatorOverrides').addEventListener('click',()=>{
+  try{
+    localStorage.removeItem(BRANCH_LOCATOR_OVERRIDES_KEY);
+    updateBranchLocatorOverrideStatus('Branch locator overrides cleared from this browser.');
+    renderHotlist();
+    if($('productLookupInput').value.trim())searchMasterCatalog({preventDefault(){}});
+    toast('Branch locator overrides cleared');
+  }catch(error){
+    $('branchLocatorOverrideStatus').textContent=`Could not clear branch locator overrides: ${error.message}`;
+    console.error('Could not clear branch locator overrides:',error);
+    toast(`Could not clear branch locator overrides: ${error.message}`);
+  }
 });
 document.querySelectorAll('[data-hotlist-category]').forEach(tab=>tab.setAttribute('aria-selected',String(tab.dataset.hotlistCategory===activeHotlistCategory)));
 if(Object.keys(masterProductDetails).length)$('masterfileStatus').textContent=`Using saved price and locator data for ${Object.keys(masterProductDetails).length.toLocaleString()} SKUs.`;
 loadHotlist();
 loadPublishedMasterDetails();
+updateBranchLocatorOverrideStatus();
 
 document.addEventListener('keydown',event=>{
   if(event.key==='Escape'&&activeLookupPanel)closeLookupPanel();

@@ -93,16 +93,17 @@ function paginateCombinedSupplierRows(groups,suppliers,maxSkuRows){
   return pages;
 }
 
-function renderCountSheet(previewOnly=false){
+function renderCountSheet(previewOnly=false,renderOptions={}){
+  const sourceItems=renderOptions.items||items;
   const storeName=escapeSheetText($('storeField').value||'Store #14014 - Retail');
   const editorName=escapeSheetText($('editorName')?.value||'Danne Lozana');
-  const selectedCcd=$('countSheetCcdFilter')?.value||'all';
-  const selectedDepartment=$('countSheetDepartmentFilter')?.value||'all';
-  const printMode=getPrintMode();
-  const selectedPrintOptions=getSelectedPrintOptions();
+  const selectedCcd=renderOptions.ccd??$('countSheetCcdFilter')?.value??'all';
+  const selectedDepartment=renderOptions.department??$('countSheetDepartmentFilter')?.value??'all';
+  const printMode=renderOptions.printMode||getPrintMode();
+  const selectedPrintOptions=renderOptions.selectedPrintOptions||getSelectedPrintOptions();
   const selectedCategoryOptions=printMode==='category'?new Set(selectedPrintOptions):null;
   const selectedSupplierOptions=printMode==='supplier'?new Set(selectedPrintOptions):null;
-  const filteredItems=items.filter(item=>{
+  const filteredItems=sourceItems.filter(item=>{
     const ccd=String(item.ccdNo||item.ccd||'').trim();
     const department=String(item.departmentCode||item.deptCode||'').trim();
     if(selectedCcd!=='all'&&ccd!==selectedCcd)return false;
@@ -112,7 +113,7 @@ function renderCountSheet(previewOnly=false){
   });
   const mixedCategories=new Set(filteredItems.map(item=>CountSheetFilters.normalizeCategory(item))).size>1;
   const mergedRows=buildCountSheetRows(filteredItems);
-  const sortOrder=$('countSheetSortOrder')?.value||'workbook';
+  const sortOrder=renderOptions.sortOrder||$('countSheetSortOrder')?.value||'workbook';
   if(sortOrder!=='workbook')mergedRows.sort((left,right)=>{
     const department=left.department.localeCompare(right.department,undefined,{numeric:true,sensitivity:'base'})||left.departmentCode.localeCompare(right.departmentCode,undefined,{numeric:true});
     const ccd=left.ccdNo.localeCompare(right.ccdNo,undefined,{numeric:true,sensitivity:'base'});
@@ -121,16 +122,22 @@ function renderCountSheet(previewOnly=false){
     return department||ccd||left.sku.localeCompare(right.sku,undefined,{numeric:true});
   });
   const pageRows=Number($('rowsPerPage').value);
-  const groupingMode=$('supplierGroupingMode')?.value||'all';
+  const groupingMode=renderOptions.groupMode||$('supplierGroupingMode')?.value||'all';
   const groupMode=groupingMode==='category'||groupingMode==='supplier-category'||groupingMode==='supplier'||groupingMode==='all'?groupingMode:'all';
-  const selectedCombinedGroups=getSelectedCombinedSuppliers();
+  const combinedMode=(renderOptions.combineMode||$('combineGroupOptionsFilter')?.value)==='combined';
+  const defaultSelectedCombinedGroups=renderOptions.imported
+    ?groupMode==='supplier-category'
+      ?[...new Set(filteredItems.map(item=>`${CountSheetFilters.normalizeSupplier(item)} - ${CountSheetFilters.normalizeCategory(item)}`))]
+      :selectedPrintOptions
+    :getSelectedCombinedSuppliers();
+  const selectedCombinedGroups=renderOptions.selectedCombinedGroups||defaultSelectedCombinedGroups;
   const combinedGroupKeys={
     category:'ALL_CATEGORIES_COMBINED',
     supplier:'ALL_SUPPLIERS_COMBINED',
     'supplier-category':'ALL_SUPPLIERS_AND_CATEGORIES_COMBINED'
   };
   const combinedGroupKey=combinedGroupKeys[groupMode];
-  const isCombinedGrouping=$('combineGroupOptionsFilter')?.value==='combined'&&selectedCombinedGroups.includes(combinedGroupKey);
+  const isCombinedGrouping=combinedMode&&selectedCombinedGroups.includes(combinedGroupKey);
   const groups=mergedRows.reduce((result,item)=>{
     let key='All';
     if(groupMode==='supplier')key=item.supplier||'Unassigned Supplier';
@@ -149,14 +156,14 @@ function renderCountSheet(previewOnly=false){
       pages.push(buildPageObject('All categories',allRows.slice(offset,offset+pageRows),offset));
     }
   } else if(isCombinedGrouping){
-    if(!getPrintedCombinedSuppliers().has(combinedGroupKey)){
+    if(renderOptions.imported||!getPrintedCombinedSuppliers().has(combinedGroupKey)){
       const groupName=groupMode==='category'?'All categories':groupMode==='supplier'?'All suppliers':'All suppliers + categories';
       for(let offset=0;offset<mergedRows.length;offset+=pageRows){
         pages.push(buildPageObject(groupName,mergedRows.slice(offset,offset+pageRows),offset));
       }
     }
   } else {
-    const printedGroups=getPrintedCombinedSuppliers();
+    const printedGroups=renderOptions.imported?new Set():getPrintedCombinedSuppliers();
     const enabledGroups=selectedCombinedGroups.filter(groupName=>Object.prototype.hasOwnProperty.call(groups,groupName)&&!printedGroups.has(groupName));
     if(enabledGroups.length>0){
       enabledGroups.forEach(groupName=>{
@@ -169,8 +176,8 @@ function renderCountSheet(previewOnly=false){
   }
 
   const showBarcode=$('showSheetBarcode').checked;
-  const target=previewOnly?$('countSheetLivePreview'):$('countSheetPages');
-  const formatLocatorCell=(values)=>values.length?values.map(value=>`<span class="locator-pill">${value}</span>`).join('<br>'):'<span class="locator-empty">—</span>';
+  const target=previewOnly?$('countSheetLivePreview'):renderOptions.target||$('countSheetPages');
+  const formatLocatorCell=(values)=>values.length?values.map(value=>`<span class="locator-pill">${escapeSheetText(value)}</span>`).join('<br>'):'<span class="locator-empty">—</span>';
   const renderRows=(rows,offset,isCombinedPage)=>{
     const rowEntries=[];
     let currentGroup='';
@@ -198,8 +205,8 @@ function renderCountSheet(previewOnly=false){
         currentCategory=categoryKey;
       }
       const barcode=String(item.barcode||'').trim();
-      const barcodeCell=showBarcode?(barcode?`<svg class="scan-barcode" data-barcode="${barcode}"></svg>`:'<span class="barcode-missing">NO BARCODE</span>'):'';
-      rowEntries.push(`<tr><td>${offset+index+1}</td><td>${item.sku||'—'}</td><td>${barcodeCell}</td><td>${item.description||'—'}</td><td>${formatLocatorCell(item.selling)}</td><td><span class="count-line"></span></td><td>${formatLocatorCell(item.buffer)}</td><td><span class="count-line"></span></td><td>${formatLocatorCell(item.warehouse)}</td><td><span class="count-line"></span></td></tr>`);
+      const barcodeCell=showBarcode?(barcode?`<svg class="scan-barcode" data-barcode="${escapeSheetText(barcode)}"></svg>`:'<span class="barcode-missing">NO BARCODE</span>'):'';
+      rowEntries.push(`<tr><td>${offset+index+1}</td><td>${escapeSheetText(item.sku||'—')}</td><td>${barcodeCell}</td><td>${escapeSheetText(item.description||'—')}</td><td>${formatLocatorCell(item.selling)}</td><td><span class="count-line"></span></td><td>${formatLocatorCell(item.buffer)}</td><td><span class="count-line"></span></td><td>${formatLocatorCell(item.warehouse)}</td><td><span class="count-line"></span></td></tr>`);
     });
     return rowEntries.join('');
   };
@@ -220,6 +227,7 @@ function renderCountSheet(previewOnly=false){
   if(previewOnly&&!pages.length)target.innerHTML=`<div class="live-empty">Select at least one ${printMode==='category'?'category':'supplier'} to preview a count sheet.</div>`;
   drawCountSheetBarcodes(target);
   if(previewOnly)return;
+  if(renderOptions.imported)return;
   const preview=$('countSheetLivePreview');
   if(preview){const firstPage=$('countSheetPages').firstElementChild;preview.innerHTML=firstPage?firstPage.outerHTML:'<div class="live-empty">Import inventory to preview your count sheet.</div>';drawCountSheetBarcodes(preview)}
   const generatedLabel=groupMode==='supplier-category'?'supplier + category sheets':`${isCombinedGrouping?'combined ':''}${printMode==='category'?'category sheets':'supplier sheets'}`;

@@ -292,30 +292,77 @@
     <section id="configurePanel" class="panel" hidden><div class="panel-heading"><div><p class="section-kicker">STEP 03</p><h2>Configure layout</h2><p>Set the count sheet dimensions and choose what appears when printing.</p></div><span class="status-pill"><span class="status-dot"></span> Live preview</span></div><div class="layout-controls"><div class="layout-control-grid"><label>Paper size<select id="paperSize"><option value="letter">Letter · Bond paper</option><option value="a4">A4</option><option value="legal">Legal</option></select></label><label>Orientation<select id="orientation"><option value="portrait">Portrait</option><option value="landscape">Landscape</option></select></label><label>Page margins<select id="pageMargins"><option value="compact">Compact · 0.28 in</option><option value="standard">Standard · 0.5 in</option><option value="wide">Wide · 0.75 in</option></select></label><label>Rows per page<select id="rowsPerPage"><option value="8">8 rows</option><option value="10">10 rows</option><option value="12">12 rows</option></select></label><label>Row height <output id="rowHeightValue">50 px</output><input id="rowHeight" type="range" min="38" max="82" value="50"></label><label>Table font size <output id="fontSizeValue">11 px</output><input id="fontSize" type="range" min="9" max="16" value="11"></label><label>Barcode width <output id="barcodeWidthValue">110 px</output><input id="barcodeWidth" type="range" min="70" max="170" value="110"></label><label>Count line width <output id="countLineValue">88%</output><input id="countLineWidth" type="range" min="55" max="100" value="88"></label></div><div class="layout-toggles"><div class="toggle-row"><span><b>Show barcode</b><small>Print the barcode in each row</small></span><input id="showSheetBarcode" type="checkbox" checked></div><div class="toggle-row"><span><b>Show locator column</b><small>Keep the locator beside each item</small></span><input id="showSheetLocator" type="checkbox" checked></div><div class="toggle-row"><span><b>Show supplier header</b><small>Start each supplier group with its name</small></span><input id="showSupplierHeader" type="checkbox" checked></div></div></div><div class="layout-preview-note"><span class="note-icon">i</span><span>These settings apply to the supplier-grouped count sheet and are preserved while you move between steps.</span></div><div class="layout-live-preview"><div class="live-preview-heading"><b>COUNT SHEET PREVIEW</b><span>Updates as you change settings</span></div><div id="countSheetLivePreview"><div class="live-empty">Import inventory to preview your count sheet.</div></div></div><div class="bottom-actions"><button class="secondary-button" id="backData">← Back to validation</button><div class="heading-actions"><button class="secondary-button" id="goCountSheet">▦ Generate Count Sheet</button><button class="primary-button" id="goGenerate">Generate Count Tags →</button></div></div></section>
 
     <section id="countSheetPanel" class="count-sheet-workspace" hidden>
-      <div class="print-toolbar">
-        <div><p class="section-kicker">COUNT SHEET · CATEGORY OR SUPPLIER</p><h2>Count Sheet</h2><p id="countSheetSummary">Choose a print mode and select the groups to include.</p></div>
-        <div class="generated-actions">
-          <label class="supplier-filter">Filter by CCD<select id="countSheetCcdFilter"><option value="all">All CCDs</option></select></label>
-          <label class="supplier-filter">Filter by Department<select id="countSheetDepartmentFilter"><option value="all">All departments</option></select></label>
-          <label class="supplier-filter">Print mode<select id="countSheetPrintMode"><option value="category">Print by Category</option><option value="supplier">Print by Supplier</option></select></label>
-          <label class="supplier-filter">Group sheets<select id="countSheetGroupMode"></select></label>
-          <label class="supplier-filter">Sort rows<select id="countSheetSortOrder"><option value="department-ccd">Department, then CCD</option><option value="department">Department</option><option value="ccd">CCD number</option><option value="workbook">Workbook order</option></select></label>
-          <label class="supplier-filter" hidden aria-hidden="true">Print supplier<select id="supplierFilter"><option value="all">All suppliers</option></select></label>
-          <label class="supplier-filter" hidden aria-hidden="true">Print category<select id="countSheetCategoryFilter"><option value="all">All categories</option></select></label>
-          <select id="supplierGroupingMode" hidden aria-hidden="true"><option value="all">Combine all</option><option value="supplier">One supplier per sheet</option><option value="category">One category per sheet</option><option value="supplier-category">Group by Supplier + Category</option></select>
-          <select id="combineGroupOptionsFilter" hidden aria-hidden="true"><option value="separate">Separate · one sheet per group</option><option value="combined">Combined · one continuous sheet set</option></select>
-          <div id="supplierSelectionList" class="supplier-selection-list" role="group" aria-label="Select categories or suppliers"></div>
-          <button class="secondary-button" id="backCountData">← Back</button><button class="secondary-button" id="printSheetBtn">⎙ Print sheet</button><button class="primary-button" id="exportSheetBtn">↓ Export PDF</button>
+      <section id="countSheetModeSelection" class="count-sheet-mode-selection" aria-labelledby="countSheetModeHeading">
+        <p class="section-kicker">COUNT SHEET WORKSPACE</p>
+        <h2 id="countSheetModeHeading">Choose Mode</h2>
+        <p>Select how you want to prepare your count sheet. Standard filters load only after you choose them.</p>
+        <div class="count-sheet-mode-options">
+          <button class="count-sheet-mode-option" id="chooseStandardCountSheetMode" type="button">
+            <span class="count-sheet-mode-icon" aria-hidden="true">▦</span>
+            <span><strong>Standard Count Sheet (Filter by CCD / Supplier / Category)</strong><small>Use saved inventory and choose the groups you need.</small></span>
+            <span class="count-sheet-mode-arrow" aria-hidden="true">→</span>
+          </button>
+          <button class="count-sheet-mode-option" id="chooseManualCountSheetMode" type="button">
+            <span class="count-sheet-mode-icon" aria-hidden="true">↑</span>
+            <span><strong>Upload Manual Excel / CSV File</strong><small>Print rows directly from a spreadsheet without loading standard filters.</small></span>
+            <span class="count-sheet-mode-arrow" aria-hidden="true">→</span>
+          </button>
         </div>
+      </section>
+      <div id="countSheetModeBar" class="count-sheet-mode-bar" hidden>
+        <span id="countSheetModeStatus" role="status" aria-live="polite"></span>
+        <button class="secondary-button" id="changeCountSheetMode" type="button">← Change Mode</button>
       </div>
-      <div class="manual-import-controls" aria-label="Manual spreadsheet printing">
-        <input id="manualCountSheetFileInput" type="file" accept=".xlsx,.xls,.csv,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden>
-        <button class="secondary-button" id="uploadManualCountSheetBtn" type="button">Upload Excel / CSV</button>
-        <button class="primary-button" id="printImportedCountSheetBtn" type="button" disabled>Print Imported Sheet</button>
-        <span id="manualCountSheetFileName" aria-live="polite">No file selected</span>
+      <div id="standardCountSheetMode" hidden>
+        <div class="print-toolbar">
+          <div><p class="section-kicker">COUNT SHEET · CATEGORY OR SUPPLIER</p><h2>Standard Count Sheet</h2><p id="countSheetSummary">Choose CCDs, departments, or groups, then generate a preview.</p><button class="secondary-button" id="importCountSheetInventory" type="button" hidden>Import inventory</button></div>
+          <div class="generated-actions">
+            <label class="supplier-filter">Filter by CCD<select id="countSheetCcdFilter"><option value="all">All CCDs</option></select></label>
+            <label class="supplier-filter">Filter by Department<select id="countSheetDepartmentFilter"><option value="all">All departments</option></select></label>
+            <label class="supplier-filter">Print mode<select id="countSheetPrintMode"><option value="category">Print by Category</option><option value="supplier">Print by Supplier</option></select></label>
+            <label class="supplier-filter">Group sheets<select id="countSheetGroupMode"></select></label>
+            <label class="supplier-filter">Sort rows<select id="countSheetSortOrder"><option value="department-ccd">Department, then CCD</option><option value="department">Department</option><option value="ccd">CCD number</option><option value="workbook">Workbook order</option></select></label>
+            <label class="supplier-filter" hidden aria-hidden="true">Print supplier<select id="supplierFilter"><option value="all">All suppliers</option></select></label>
+            <label class="supplier-filter" hidden aria-hidden="true">Print category<select id="countSheetCategoryFilter"><option value="all">All categories</option></select></label>
+            <select id="supplierGroupingMode" hidden aria-hidden="true"><option value="all">Combine all</option><option value="supplier">One supplier per sheet</option><option value="category">One category per sheet</option><option value="supplier-category">Group by Supplier + Category</option></select>
+            <select id="combineGroupOptionsFilter" hidden aria-hidden="true"><option value="separate">Separate · one sheet per group</option><option value="combined">Combined · one continuous sheet set</option></select>
+            <div id="supplierSelectionList" class="supplier-selection-list" role="group" aria-label="Select categories or suppliers"></div>
+            <div class="count-sheet-actions">
+              <button class="primary-button" id="generateCountSheetPreview" type="button">Generate Preview</button>
+              <button class="secondary-button" id="backCountData" type="button">← Back to validation</button>
+              <button class="secondary-button" id="printSheetBtn" type="button" disabled>⎙ Print sheet</button>
+              <button class="secondary-button" id="exportSheetBtn" type="button" disabled>↓ Export PDF</button>
+            </div>
+          </div>
+        </div>
+        <div id="countSheetPages"></div>
       </div>
-      <div id="manualCountSheetPages" class="manual-count-sheet-pages" hidden></div>
-      <div id="countSheetPages"></div>
+      <div id="manualCountSheetMode" hidden>
+        <div class="manual-count-sheet-tools" aria-label="Manual count-sheet filters and generation">
+          <div class="manual-count-sheet-filters">
+            <label>Filter by CCD<select id="manualCountSheetCcd"><option value="all">All CCDs</option></select></label>
+            <label>Filter by Department<select id="manualCountSheetDepartment"><option value="all">All departments</option></select></label>
+            <label>Filter by Supplier<select id="manualCountSheetSupplier"><option value="all">All suppliers</option></select></label>
+            <label>Filter by Category<select id="manualCountSheetCategory"><option value="all">All categories</option></select></label>
+            <label>Print groups by<select id="manualCountSheetGroupMode"><option value="supplier">Supplier</option><option value="category">Category</option><option value="supplier-category">Supplier + Category</option></select></label>
+            <label>Sort count-sheet rows<select id="manualCountSheetSortOrder"><option value="department-ccd">Department, then CCD</option><option value="department">Department</option><option value="ccd">CCD number</option><option value="workbook">Workbook order</option></select></label>
+            <label>Sheet grouping<select id="manualCountSheetCombineMode"><option value="separate">Separate sheets per group</option><option value="combined">Combine selected groups</option></select></label>
+          </div>
+          <div id="manualCountSheetGroupList" class="supplier-selection-list" role="group" aria-label="Select imported count-sheet groups"></div>
+          <div class="count-sheet-actions">
+            <button class="primary-button" id="generateImportedCountSheetPreviewBtn" type="button" disabled>Generate Preview</button>
+          </div>
+        </div>
+        <div class="manual-import-controls" aria-label="Manual spreadsheet printing">
+          <input id="manualCountSheetFileInput" type="file" accept=".xlsx,.csv,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden>
+          <button class="secondary-button" id="uploadManualCountSheetBtn" type="button">Upload Excel / CSV</button>
+          <button class="primary-button" id="printImportedCountSheetBtn" type="button" disabled>Print Imported Sheet</button>
+          <button class="secondary-button" id="exportImportedCountSheetBtn" type="button" disabled>Export PDF</button>
+          <span id="manualCountSheetFileName" aria-live="polite">No file selected</span>
+        </div>
+        <div id="manualCountSheetTablePreview" class="manual-count-sheet-table-preview" hidden></div>
+        <div id="manualCountSheetPages" class="manual-count-sheet-pages" hidden></div>
+      </div>
     </section>
     <section id="productLookupPanel" class="panel product-lookup-panel" hidden aria-labelledby="productLookupHeading">
       <div class="panel-heading">
@@ -338,7 +385,13 @@
     <section id="hotlistPanel" class="panel hotlist-workspace" hidden aria-labelledby="hotlistHeading">
       <div class="panel-heading hotlist-heading">
         <div><p class="section-kicker">SHIFT INVENTORY</p><h2 id="hotlistHeading">HOTLIST SKU'S</h2><p>Counts are saved in this browser; price and locator are matched by SKU from your workbook.</p></div>
-        <div class="heading-actions"><label class="masterfile-upload"><span>Price & locator masterfile</span><input id="masterfileUpload" type="file" accept=".xlsx,.xls,.csv"></label><button class="secondary-button" id="backFromHotlist" type="button">← Back to cycle count</button></div>
+        <div class="heading-actions">
+          <label class="masterfile-upload"><span>Price & locator masterfile</span><input id="masterfileUpload" type="file" accept=".xlsx, .xls, .csv"></label>
+          <label class="masterfile-upload"><span>Branch locator override</span><input id="branchLocatorUpload" type="file" accept=".xlsx, .xls, .csv"></label>
+          <button class="secondary-button" id="clearBranchLocatorOverrides" type="button" disabled>Clear overrides</button>
+          <span id="branchLocatorOverrideStatus" class="branch-locator-override-status" role="status" aria-live="polite">No branch locator overrides loaded.</span>
+          <button class="secondary-button" id="backFromHotlist" type="button">← Back to cycle count</button>
+        </div>
       </div>
       <div id="masterfileStatus" class="masterfile-status" role="status" aria-live="polite">Loading published price and locator details…</div>
       <nav class="hotlist-tabs" role="tablist" aria-label="Hotlist category">
