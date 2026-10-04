@@ -41,3 +41,7 @@ See [FIREBASE_SETUP.md](FIREBASE_SETUP.md) for enabling Email/Password Authentic
 ## Masterlist View
 
 Open Masterlist from the top navigation and upload a Pcount monitoring workbook. The importer reads `CC Masterlist` plus `CC Sched`, `CC Variance Details`, and `IRA% IRA Summary` when present. Parsed master rows and available secondary sheets are stored in this browser's IndexedDB and restored on reload. The dashboard filters CCD and department, searches SKU/description/vendor fields, sorts by column, and renders 50 or 100 rows per page. Uploaded workbook contents are not uploaded to the website.
+
+## Cigarette Monitoring
+
+Open **Cigarette Monitor** and import the local monitoring workbook. The page reads its `SELLING` sheet in the browser, imports the product list and available daily entries, and lets you save or edit daily `BEG`, `W`, `SALES`, `JDA_S`, `ENDING`, `TRANS#`, `CS1`, `CS2`, `BAG`, and `FMCG` values. For a new date, the beginning count is prefilled from the latest earlier saved ending count when available. Download the log as CSV for a portable backup. The workbook is not uploaded; products and monitoring entries are saved only in that browser profile.

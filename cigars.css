@@ -16,5 +16,35 @@
 .cigars-result>strong{display:block;font-family:'Space Grotesk',sans-serif;font-size:23px;line-height:1.2}
 .cigars-result>p{margin:10px 0 0;color:var(--cigar-muted);font-size:12px}
 .cigars-status{min-height:18px;margin:12px 0 0;color:var(--cigar-muted);font-size:11px}
+.cigars-monitor-card{margin:0 0 18px;padding:20px;border:1px solid var(--cigar-line);border-radius:10px;background:#fff;box-shadow:0 4px 16px #17291f08}
+.cigars-monitor-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.cigars-monitor-heading h2{margin:0;color:var(--cigar-ink);font-family:'Space Grotesk',sans-serif;font-size:20px}
+.cigars-monitor-heading p:last-child{margin:6px 0 0;color:var(--cigar-muted);font-size:12px}
+.cigars-import-bar{display:flex;align-items:center;gap:11px;margin:16px 0 0;padding:12px;background:#f7faf8}
+.cigars-import-bar .secondary-button{flex:none;cursor:pointer}
+.cigars-import-bar>span{color:var(--cigar-muted);font-size:11px;line-height:1.5}
+.cigars-storage-note{margin:9px 0 16px;color:#758178;font-size:10px}
+.cigars-day-meta{display:grid;grid-template-columns:repeat(6,minmax(110px,1fr));gap:10px}
+.cigars-monitor-card label{display:block;color:#405148;font-size:11px;font-weight:700}
+.cigars-monitor-card input:not([type=checkbox]){display:block;width:100%;min-height:37px;margin-top:5px;padding:8px 9px;border:1px solid #d5dfd8;border-radius:5px;background:#fff;color:#26352d;font:inherit;font-weight:400}
+.cigars-monitor-card input:focus{outline:2px solid #a8dbc3;outline-offset:1px}
+.cigars-list-tools{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin:17px 0 8px}
+.cigars-list-tools label{width:min(100%,320px)}
+.cigars-list-tools>span{padding-bottom:9px;color:var(--cigar-muted);font-size:11px}
+.cigars-table-wrap{max-height:480px;overflow:auto;border:1px solid var(--cigar-line);border-radius:6px}
+.cigars-daily-table{width:100%;border-collapse:collapse;font-size:11px}
+.cigars-daily-table th{position:sticky;top:0;z-index:1;padding:9px 7px;background:#eaf4ee;color:#334b3d;text-align:left}
+.cigars-daily-table td{padding:6px 7px;border-top:1px solid #edf1ee;color:#34443a;white-space:nowrap}
+.cigars-daily-table td:nth-child(2){min-width:210px;white-space:normal}
+.cigars-daily-table td:nth-child(3){color:var(--cigar-muted)}
+.cigars-daily-table td input{width:78px!important;min-height:32px!important;margin:0!important;padding:5px 6px!important;text-align:right}
+.cigars-daily-table tr:nth-child(even){background:#fbfcfb}
+.cigars-save-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:13px}
+.cigars-save-row>span{color:var(--cigar-muted);font-size:11px}
+.cigars-save-row .is-error{color:#a1392f}
+.cigars-checker-grid{margin-top:20px}
+.cigars-checker-grid .cigars-card>.section-kicker{margin:0 0 14px;color:var(--cigar-muted);font-size:10px;font-weight:800;letter-spacing:1px}
 @media(max-width:760px){.cigars-checker-grid{grid-template-columns:1fr}.cigars-heading h1{font-size:26px}}
+@media(max-width:760px){.cigars-day-meta{grid-template-columns:repeat(3,minmax(0,1fr))}.cigars-monitor-heading{align-items:flex-start;flex-direction:column}}
+@media(max-width:520px){.cigars-monitor-card{padding:14px}.cigars-day-meta{grid-template-columns:repeat(2,minmax(0,1fr))}.cigars-import-bar{align-items:flex-start;flex-direction:column}.cigars-table-wrap{max-height:60vh}.cigars-save-row{align-items:flex-start;flex-direction:column}.cigars-save-row .primary-button{width:100%}}
 @media(max-width:460px){.cigars-card{padding:15px}}

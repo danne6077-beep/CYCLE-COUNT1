@@ -206,7 +206,7 @@
     <nav class="primary-nav" aria-label="Primary navigation">
       <button class="nav-button" id="homeNav" type="button" title="Open Home dashboard" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg><span>Home</span></button>
       <button class="nav-button" id="countSheetNav" type="button" title="Open Count Sheet"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h3m2 0h3m-8 4h3m2 0h3m-8 3h3m2 0h3"/></svg><span>Count Sheet</span></button>
-      <button class="nav-button" id="cigarsNav" type="button" title="Open cigarette expiration generator"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13h17a1 1 0 0 1 1 1v3H3a2 2 0 0 1-2-2v-1a1 1 0 0 1 1-1Zm4 0v4m8-4v4M4 10c2-1 2-3 1-5m5 5c2-1 2-3 1-5"/></svg><span>Cigarette Expiry</span></button>
+      <button class="nav-button" id="cigarsNav" type="button" title="Open cigarette monitoring"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13h17a1 1 0 0 1 1 1v3H3a2 2 0 0 1-2-2v-1a1 1 0 0 1 1-1Zm4 0v4m8-4v4M4 10c2-1 2-3 1-5m5 5c2-1 2-3 1-5"/></svg><span>Cigarette Monitor</span></button>
       <button class="nav-button" id="shelfTagNav" type="button" title="Open Shelftag / PP Tag Printing"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 13 11 22l-9-9V2h11z"/><circle cx="7" cy="7" r="1"/></svg><span>Shelf Tag</span></button>
       <button class="nav-button" id="productLookupNav" type="button" title="Search the master product catalog"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg><span>Product Lookup</span></button>
       <button class="nav-button" id="masterlistNav" type="button" title="Browse uploaded master data"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4zM4 9h16M9 9v11m6-11v11"/></svg><span>Masterlist</span></button>
@@ -236,7 +236,7 @@
       <div class="home-section-heading"><div><p class="home-eyebrow">QUICK ACCESS</p><h2>Choose a workflow</h2></div><span>01 / 07</span></div>
       <div class="home-feature-grid">
         <article class="home-feature home-feature-count"><div class="home-feature-top"><span class="home-feature-icon" aria-hidden="true">▦</span><span class="home-feature-index">01</span></div><h3>Count Sheet</h3><p>Import inventory, review SKU records, organize suppliers, and prepare physical count sheets.</p><button type="button" data-home-open="countSheetNav">Open count sheet <span aria-hidden="true">→</span></button></article>
-        <article class="home-feature home-feature-cigars"><div class="home-feature-top"><span class="home-feature-icon" aria-hidden="true">◉</span><span class="home-feature-index">02</span></div><h3>CIGARETTE'S EXPIRATION GENERATOR</h3><p>Enter a cigarette batch code to generate its expiry date.</p><button type="button" data-home-open="cigarsNav">Open generator <span aria-hidden="true">→</span></button></article>
+        <article class="home-feature home-feature-cigars"><div class="home-feature-top"><span class="home-feature-icon" aria-hidden="true">◉</span><span class="home-feature-index">02</span></div><h3>Cigarette monitoring</h3><p>Import the SELLING sheet, record daily cigarette counts, and look up batch expiry dates.</p><button type="button" data-home-open="cigarsNav">Open monitoring <span aria-hidden="true">→</span></button></article>
         <article class="home-feature home-feature-shelf"><div class="home-feature-top"><span class="home-feature-icon" aria-hidden="true">▤</span><span class="home-feature-index">03</span></div><h3>Shelf Tag Printing</h3><p>Build millimeter-accurate white shelf tags and yellow promo tags with barcode footers.</p><button type="button" data-home-open="shelfTagNav">Open shelf tags <span aria-hidden="true">→</span></button></article>
         <article class="home-feature home-feature-lookup"><div class="home-feature-top"><span class="home-feature-icon" aria-hidden="true">⌕</span><span class="home-feature-index">04</span></div><h3>Product Lookup</h3><p>Search the master catalog by SKU, barcode, or product description.</p><button type="button" data-home-open="productLookupNav">Search products <span aria-hidden="true">→</span></button></article>
         <article class="home-feature home-feature-masterlist"><div class="home-feature-top"><span class="home-feature-icon" aria-hidden="true">▥</span><span class="home-feature-index">05</span></div><h3>Masterlist View</h3><p>Upload monitoring workbooks and browse CCD, department, SKU, and vendor records.</p><button type="button" data-home-open="masterlistNav">Browse masterlist <span aria-hidden="true">→</span></button></article>
@@ -247,10 +247,29 @@
     </section>
     <section id="cigarsPanel" class="cigars-workspace" hidden aria-labelledby="cigarsHeading">
       <header class="cigars-heading">
-        <div><p class="section-kicker">BATCH CODE LOOKUP</p><h1 id="cigarsHeading">CIGARETTE'S EXPIRATION GENERATOR</h1><p>Enter the printed batch code to generate its expiry date.</p></div>
+        <div><p class="section-kicker">DAILY STOCK &amp; EXPIRY</p><h1 id="cigarsHeading">Cigarette Monitoring</h1><p>Import your existing SELLING sheet, then record and review cigarette stock each day.</p></div>
       </header>
+      <section class="cigars-monitor-card" aria-labelledby="cigarMonitorHeading">
+        <div class="cigars-monitor-heading"><div><p class="section-kicker">DAILY SELLING SHEET</p><h2 id="cigarMonitorHeading">Daily stock log</h2><p>Choose a date to enter the same figures as the workbook: BEG, W, SALES, JDA_S, and ENDING.</p></div><button id="cigarExportCsv" class="secondary-button" type="button">Download log CSV</button></div>
+        <div class="cigars-import-bar"><label class="secondary-button" for="cigarSellingFile">Import SELLING workbook</label><input id="cigarSellingFile" type="file" accept=".xlsx,.xls,.xlsm" hidden><span id="cigarImportStatus" role="status" aria-live="polite">No selling sheet imported. Choose your workbook to load its products and existing daily entries.</span></div>
+        <p class="cigars-storage-note">The workbook is read on this device only. Monitoring data is saved in this browser and is not uploaded to the website.</p>
+        <form id="cigarDailyForm">
+          <div class="cigars-day-meta">
+            <label for="cigarLogDate">Date<input id="cigarLogDate" type="date" required></label>
+            <label for="cigarTransaction">TRANS#<input id="cigarTransaction" type="text" autocomplete="off"></label>
+            <label for="cigarCs1">CS1<input id="cigarCs1" type="text" autocomplete="off"></label>
+            <label for="cigarCs2">CS2<input id="cigarCs2" type="text" autocomplete="off"></label>
+            <label for="cigarBag">BAG<input id="cigarBag" type="text" autocomplete="off"></label>
+            <label for="cigarFmcg">FMCG<input id="cigarFmcg" type="text" autocomplete="off"></label>
+          </div>
+          <div class="cigars-list-tools"><label for="cigarItemSearch">Find product<input id="cigarItemSearch" type="search" placeholder="Search SKU or description"></label><span id="cigarProductCount"></span></div>
+          <div class="cigars-table-wrap"><table class="cigars-daily-table"><thead><tr><th>SKU</th><th>Description</th><th>UPC</th><th>BEG</th><th>W</th><th>SALES</th><th>JDA_S</th><th>ENDING</th></tr></thead><tbody id="cigarDailyRows"><tr><td colspan="8">Import a SELLING sheet to load cigarette products.</td></tr></tbody></table></div>
+          <div class="cigars-save-row"><span id="cigarDailyStatus" role="status" aria-live="polite"></span><button id="cigarSaveDay" class="primary-button" type="submit">Save daily entry</button></div>
+        </form>
+      </section>
       <div class="cigars-checker-grid">
         <form id="cigarExpiryForm" class="cigars-card" novalidate>
+          <p class="section-kicker">BATCH CODE LOOKUP</p>
           <label for="cigarBatchCode">Cigarette batch code</label>
           <input id="cigarBatchCode" name="batchCode" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="e.g. MB23619110 or 6EF27C52" required>
           <button class="primary-button" type="submit">Generate expiry date</button>
@@ -700,6 +719,8 @@
   <script src="print-controller.js"></script>
   <script src="product-lookup.js"></script>
   <script src="cigar-expiry-utils.js"></script>
+  <script src="cigar-monitor-utils.js"></script>
+  <script src="cigar-monitor.js"></script>
   <script src="cigar-expiry.js"></script>
   <script src="masterlist.js"></script>
   <script src="shelftag.js"></script>
