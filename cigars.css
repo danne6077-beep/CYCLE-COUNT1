@@ -3,6 +3,10 @@
 .cigars-heading{margin-bottom:20px}
 .cigars-heading h1{margin:0 0 5px;font-family:'Space Grotesk',sans-serif;font-size:30px;letter-spacing:-.7px}
 .cigars-heading p:last-child{margin:0;color:var(--cigar-muted)}
+.cigars-tabs{display:flex;gap:6px;margin:0 0 16px;padding:5px;border:1px solid var(--cigar-line);border-radius:8px;background:#f3f7f4}
+.cigars-tab{min-height:40px;padding:9px 17px;border:0;border-radius:6px;background:transparent;color:#536158;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.cigars-tab[aria-selected=true]{background:#fff;color:#08785b;box-shadow:0 1px 4px #17291f18}
+.cigars-tab-panel[hidden],.cigars-summary[hidden]{display:none!important}
 .cigars-checker-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,1fr);gap:16px}
 .cigars-card{min-width:0;padding:20px;border:1px solid var(--cigar-line);border-radius:10px;background:#fff;box-shadow:0 4px 16px #17291f08}
 .cigars-card label{display:block;margin:0 0 8px;color:#405148;font-size:12px;font-weight:700}
@@ -42,9 +46,19 @@
 .cigars-save-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:13px}
 .cigars-save-row>span{color:var(--cigar-muted);font-size:11px}
 .cigars-save-row .is-error{color:#a1392f}
+.cigars-summary{margin-top:18px;padding-top:18px;border-top:1px solid var(--cigar-line)}
+.cigars-summary-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:15px}
+.cigars-summary-heading h2{margin:0;color:var(--cigar-ink);font-family:'Space Grotesk',sans-serif;font-size:20px}
+.cigars-summary-heading>div:first-child>p:last-child{margin:6px 0 0;color:var(--cigar-muted);font-size:11px}
+.cigars-summary-actions{display:flex;gap:8px}
+.cigars-summary-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:15px}
+.cigars-summary-stats>div{display:flex;min-height:74px;flex-direction:column;justify-content:center;gap:7px;padding:12px;border:1px solid var(--cigar-line);border-radius:6px;background:#f7faf8}
+.cigars-summary-stats span{color:var(--cigar-muted);font-size:10px}
+.cigars-summary-stats strong{color:#1f604b;font-family:'Space Grotesk',sans-serif;font-size:20px}
+.cigars-summary .cigars-storage-note{margin:10px 0 0;line-height:1.5}
 .cigars-checker-grid{margin-top:20px}
 .cigars-checker-grid .cigars-card>.section-kicker{margin:0 0 14px;color:var(--cigar-muted);font-size:10px;font-weight:800;letter-spacing:1px}
 @media(max-width:760px){.cigars-checker-grid{grid-template-columns:1fr}.cigars-heading h1{font-size:26px}}
 @media(max-width:760px){.cigars-day-meta{grid-template-columns:repeat(3,minmax(0,1fr))}.cigars-monitor-heading{align-items:flex-start;flex-direction:column}}
-@media(max-width:520px){.cigars-monitor-card{padding:14px}.cigars-day-meta{grid-template-columns:repeat(2,minmax(0,1fr))}.cigars-import-bar{align-items:flex-start;flex-direction:column}.cigars-table-wrap{max-height:60vh}.cigars-save-row{align-items:flex-start;flex-direction:column}.cigars-save-row .primary-button{width:100%}}
+@media(max-width:520px){.cigars-monitor-card{padding:14px}.cigars-day-meta{grid-template-columns:repeat(2,minmax(0,1fr))}.cigars-import-bar{align-items:flex-start;flex-direction:column}.cigars-table-wrap{max-height:60vh}.cigars-save-row{align-items:flex-start;flex-direction:column}.cigars-save-row .primary-button{width:100%}.cigars-summary-heading{align-items:flex-start;flex-direction:column}.cigars-summary-actions{width:100%}.cigars-summary-actions button{flex:1}.cigars-summary-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:460px){.cigars-card{padding:15px}}

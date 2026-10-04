@@ -249,6 +249,11 @@
       <header class="cigars-heading">
         <div><p class="section-kicker">DAILY STOCK &amp; EXPIRY</p><h1 id="cigarsHeading">Cigarette Monitoring</h1><p>Import your existing SELLING sheet, then record and review cigarette stock each day.</p></div>
       </header>
+      <div class="cigars-tabs" role="tablist" aria-label="Cigarette tools">
+        <button class="cigars-tab" id="cigarMonitorTab" type="button" role="tab" aria-selected="true" aria-controls="cigarMonitorWorkspace">Daily Monitoring</button>
+        <button class="cigars-tab" id="cigarExpiryTab" type="button" role="tab" aria-selected="false" aria-controls="cigarExpiryWorkspace">Expiry Lookup</button>
+      </div>
+      <section id="cigarMonitorWorkspace" class="cigars-tab-panel" role="tabpanel" aria-labelledby="cigarMonitorTab">
       <section class="cigars-monitor-card" aria-labelledby="cigarMonitorHeading">
         <div class="cigars-monitor-heading"><div><p class="section-kicker">DAILY SELLING SHEET</p><h2 id="cigarMonitorHeading">Daily stock log</h2><p>Choose a date to enter the same figures as the workbook: BEG, W, SALES, JDA_S, and ENDING.</p></div><button id="cigarExportCsv" class="secondary-button" type="button">Download log CSV</button></div>
         <div class="cigars-import-bar"><label class="secondary-button" for="cigarSellingFile">Import SELLING workbook</label><input id="cigarSellingFile" type="file" accept=".xlsx,.xls,.xlsm" hidden><span id="cigarImportStatus" role="status" aria-live="polite">No selling sheet imported. Choose your workbook to load its products and existing daily entries.</span></div>
@@ -266,7 +271,15 @@
           <div class="cigars-table-wrap"><table class="cigars-daily-table"><thead><tr><th>SKU</th><th>Description</th><th>UPC</th><th>BEG</th><th>W</th><th>SALES</th><th>JDA_S</th><th>ENDING</th></tr></thead><tbody id="cigarDailyRows"><tr><td colspan="8">Import a SELLING sheet to load cigarette products.</td></tr></tbody></table></div>
           <div class="cigars-save-row"><span id="cigarDailyStatus" role="status" aria-live="polite"></span><button id="cigarSaveDay" class="primary-button" type="submit">Save daily entry</button></div>
         </form>
+        <section id="cigarDailySummary" class="cigars-summary" hidden aria-labelledby="cigarSummaryHeading">
+          <div class="cigars-summary-heading"><div><p class="section-kicker">SAVED DAILY SUMMARY</p><h2 id="cigarSummaryHeading"></h2><p id="cigarSummaryMetadata"></p></div><div class="cigars-summary-actions"><button id="cigarEditDay" class="secondary-button" type="button">Edit this day</button><button id="cigarNewDay" class="primary-button" type="button">Enter new day</button></div></div>
+          <div id="cigarSummaryStats" class="cigars-summary-stats"></div>
+          <div class="cigars-table-wrap"><table class="cigars-daily-table"><thead><tr><th>SKU</th><th>Description</th><th>BEG</th><th>W</th><th>SALES</th><th>JDA_S</th><th>ENDING</th></tr></thead><tbody id="cigarSummaryRows"></tbody></table></div>
+          <p id="cigarSummaryNote" class="cigars-storage-note"></p>
+        </section>
       </section>
+      </section>
+      <section id="cigarExpiryWorkspace" class="cigars-tab-panel" role="tabpanel" aria-labelledby="cigarExpiryTab" hidden>
       <div class="cigars-checker-grid">
         <form id="cigarExpiryForm" class="cigars-card" novalidate>
           <p class="section-kicker">BATCH CODE LOOKUP</p>
@@ -280,6 +293,7 @@
           <p id="cigarExpiryStatus" class="cigars-status" role="status"></p>
         </section>
       </div>
+      </section>
     </section>
     <section id="introRow" class="intro-row">
       <div>

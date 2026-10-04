@@ -8,6 +8,11 @@
   const status=$('cigarDailyStatus');
   const importStatus=$('cigarImportStatus');
   const fieldIds={transaction:'cigarTransaction',cs1:'cigarCs1',cs2:'cigarCs2',bag:'cigarBag',fmcg:'cigarFmcg'};
+  const monitorTab=$('cigarMonitorTab');
+  const expiryTab=$('cigarExpiryTab');
+  const monitorWorkspace=$('cigarMonitorWorkspace');
+  const expiryWorkspace=$('cigarExpiryWorkspace');
+  const summaryView=$('cigarDailySummary');
   const fieldColumns=[
     {key:'beginning',label:'BEG'},
     {key:'withdrawal',label:'W'},
@@ -28,6 +33,17 @@
   function setStatus(message,isError=false){
     status.textContent=message;
     status.classList.toggle('is-error',isError);
+  }
+
+  function showEntryForm(){
+    form.hidden=false;
+    summaryView.hidden=true;
+  }
+
+  function nextDate(dateValue){
+    const date=new Date(`${dateValue}T00:00:00`);
+    date.setDate(date.getDate()+1);
+    return`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
   }
 
   function getSavedRecord(date){
@@ -68,8 +84,58 @@
     readRecordFields(record);
     loadedDate=date;
     dirty=false;
+    showEntryForm();
     renderProducts();
+    $('cigarSaveDay').textContent=record?'Update daily entry':'Save daily entry';
     setStatus(record?'Loaded saved entry for this date.':state.products.length?'New day ready. Beginning counts carry forward from the latest earlier saved day.':'Import a SELLING workbook to start.');
+  }
+
+  function summaryValue(value){
+    return value===null||value===undefined?'—':String(value);
+  }
+
+  function renderSummary(record){
+    $('cigarSummaryHeading').textContent=new Intl.DateTimeFormat(undefined,{dateStyle:'full'}).format(new Date(`${record.date}T00:00:00`));
+    const metadata=[['TRANS#',record.transaction],['CS1',record.cs1],['CS2',record.cs2],['BAG',record.bag],['FMCG',record.fmcg]]
+      .filter(([,value])=>value)
+      .map(([label,value])=>`${label}: ${value}`);
+    $('cigarSummaryMetadata').textContent=metadata.length?metadata.join(' · '):'No transaction details were entered.';
+    const countEntered=record.items.filter(item=>fieldColumns.some(({key})=>item[key]!==null&&item[key]!==undefined)).length;
+    const totals=Object.fromEntries(fieldColumns.map(({key,label})=>{
+      const numbers=record.items.map(item=>item[key]).filter(value=>typeof value==='number'&&Number.isFinite(value));
+      return[label,numbers.length?numbers.reduce((sum,value)=>sum+value,0):'—'];
+    }));
+    const stats=[
+      ['Products entered',`${countEntered} / ${record.items.length}`],
+      ['Total sales',totals.SALES],
+      ['JDA sales',totals.JDA_S],
+      ['Ending stock',totals.ENDING]
+    ];
+    const statsContainer=$('cigarSummaryStats');
+    statsContainer.replaceChildren();
+    stats.forEach(([label,value])=>{
+      const card=document.createElement('div');
+      const caption=document.createElement('span');
+      caption.textContent=label;
+      const number=document.createElement('strong');
+      number.textContent=String(value);
+      card.append(caption,number);
+      statsContainer.append(card);
+    });
+    const productBySku=new Map(state.products.map(product=>[product.sku,product]));
+    const summaryRows=$('cigarSummaryRows');
+    summaryRows.replaceChildren();
+    record.items.forEach(item=>{
+      const row=summaryRows.insertRow();
+      const product=productBySku.get(item.sku)||{};
+      [item.sku,product.description,...fieldColumns.map(({key})=>summaryValue(item[key]))].forEach(value=>{
+        const cell=row.insertCell();
+        cell.textContent=value||'—';
+      });
+    });
+    $('cigarSummaryNote').textContent=`Saved locally in this browser for ${record.items.length} products. Use “Enter new day” to start the next date with beginning counts carried forward from these ending counts.`;
+    form.hidden=true;
+    summaryView.hidden=false;
   }
 
   function renderProducts(){
@@ -161,14 +227,18 @@
       fmcg:$('cigarFmcg').value.trim(),
       items
     };
-    state.records=state.records.filter(existing=>existing.date!==date);
-    state.records.push(record);
-    state.records.sort((left,right)=>left.date.localeCompare(right.date));
+    const nextState={
+      products:state.products,
+      records:[...state.records.filter(existing=>existing.date!==date),record]
+        .sort((left,right)=>left.date.localeCompare(right.date))
+    };
     try{
-      persistState();
+      persistState(nextState);
+      state=nextState;
       loadedDate=date;
       dirty=false;
       setStatus(`Saved ${date} for ${items.length} products in this browser.`);
+      renderSummary(record);
     }catch(error){
       setStatus(error.message,true);
     }
@@ -277,4 +347,23 @@
   });
   fileInput.addEventListener('change',importSellingSheet);
   $('cigarExportCsv').addEventListener('click',exportCsv);
+  $('cigarEditDay').addEventListener('click',showEntryForm);
+  $('cigarNewDay').addEventListener('click',()=>{
+    const date=nextDate(loadedDate);
+    $('cigarLogDate').value=date;
+    loadDate(date);
+    $('cigarLogDate').focus();
+  });
+  monitorTab.addEventListener('click',()=>{
+    monitorTab.setAttribute('aria-selected','true');
+    expiryTab.setAttribute('aria-selected','false');
+    monitorWorkspace.hidden=false;
+    expiryWorkspace.hidden=true;
+  });
+  expiryTab.addEventListener('click',()=>{
+    monitorTab.setAttribute('aria-selected','false');
+    expiryTab.setAttribute('aria-selected','true');
+    monitorWorkspace.hidden=true;
+    expiryWorkspace.hidden=false;
+  });
 })();
