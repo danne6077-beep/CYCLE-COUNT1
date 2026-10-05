@@ -1,12 +1,13 @@
 let pendingCombinedPrint=[];
 let pendingCombinedPrintSignature='';
+let pendingCombinedPrintScope='';
 let importedCountSheetRows=[];
 let importedCountSheetFileName='';
 let importedCountSheetPrintActive=false;
 let selectedImportedCountSheetGroups=new Set();
 let importedCountSheetPreviewReady=false;
 
-function showPrintToast(message='Count sheet sent to printer successfully.'){
+function showPrintToast(message='Print dialog closed.'){
   const toast=$('#printToast');
   if(!toast)return;
   const text=toast.querySelector('p');
@@ -27,12 +28,9 @@ function dismissPrintToast(){
   showPrintToast.hideTimer=setTimeout(()=>toast.hidden=true,260);
 }
 
-function getSelectedSuppliersForPrint(){
-  if($('supplierGroupingMode')?.value==='all')return [];
-  const selected=getSelectedCombinedSuppliers();
+function getSelectedGroupsForPrint(){
   const printed=getPrintedCombinedSuppliers();
-  const options=getCombinedGroupOptions();
-  return selected.filter(value=>options.includes(value)&&!printed.has(value));
+  return getSelectedPrintOptions().filter(value=>!printed.has(value));
 }
 
 function prepareCountSheetPrint(){
@@ -59,13 +57,26 @@ function finishCountSheetPrint(){
     showPrintToast(`Print dialog opened for ${importedCountSheetFileName} · ${importedCountSheetRows.length} rows.`);
     return;
   }
-  if(!pendingCombinedPrint.length)return;
-  showPrintToast();
+  const printedGroups=pendingCombinedPrint;
+  const signature=pendingCombinedPrintSignature;
+  const scopeKey=pendingCombinedPrintScope;
+  pendingCombinedPrint=[];
+  pendingCombinedPrintSignature='';
+  pendingCombinedPrintScope='';
+  if(!printedGroups.length)return;
+  if(markCombinedSuppliersPrinted(printedGroups,signature,scopeKey)){
+    showPrintToast(`${printedGroups.length} selected ${printedGroups.length===1?'group':'groups'} marked as printed. Choose another or use Reset Printed.`);
+  }else if(signature!==getInventoryPrintSignature()){
+    showPrintToast('Inventory changed while printing. Print status was not updated; generate the sheets again.');
+  }else{
+    showPrintToast('Could not save print status. Check browser storage and try again.');
+  }
 }
 function printPreparedCountSheet(action){
   prepareCountSheetPrint();
-  pendingCombinedPrint=getSelectedSuppliersForPrint();
+  pendingCombinedPrint=getSelectedGroupsForPrint();
   pendingCombinedPrintSignature=getInventoryPrintSignature();
+  pendingCombinedPrintScope=getPrintStatusScopeKey();
   const supplier=$('supplierFilter')?.value||'all';
   if(typeof persistLocalCycleData==='function')persistLocalCycleData(action,supplier==='all'?'All suppliers':supplier);
   requestAnimationFrame(()=>window.print());

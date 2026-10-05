@@ -117,26 +117,48 @@ function getSupplierOptions(){
 
 function getInventoryPrintSignature(){
 	const source=JSON.stringify((items||[]).map(item=>[
-		item.supplier||'Unassigned Supplier',item.sku||'',item.barcode||'',item.description||'',item.locator||''
+		item.supplier||'Unassigned Supplier',item.category||item.subdeptName||item.classification||'Uncategorized',
+		item.ccdNo||item.ccd||'',item.departmentCode||item.deptCode||'',
+		item.sku||'',item.barcode||'',item.description||'',item.locator||''
 	]).sort((left,right)=>JSON.stringify(left).localeCompare(JSON.stringify(right))));
 	let hash=2166136261;
 	for(let index=0;index<source.length;index++)hash=Math.imul(hash^source.charCodeAt(index),16777619);
 	return `${(hash>>>0).toString(36)}-${source.length}`;
 }
 
-function getPrintedCombinedSuppliers(){
+function getPrintStatusScopeKey(){
+	return JSON.stringify({
+		mode:getPrintMode(),
+		ccd:$('countSheetCcdFilter')?.value||'all',
+		department:$('countSheetDepartmentFilter')?.value||'all'
+	});
+}
+
+function getPrintedCombinedSuppliers(scopeKey=getPrintStatusScopeKey()){
 	try{
 		const saved=JSON.parse(localStorage.getItem('danne-lozana-printed-suppliers')||'null');
-		if(saved?.signature===getInventoryPrintSignature()&&Array.isArray(saved.suppliers))return new Set(saved.suppliers);
+		if(saved?.signature===getInventoryPrintSignature()&&Array.isArray(saved.scopes?.[scopeKey]))return new Set(saved.scopes[scopeKey]);
 	}catch(error){localStorage.removeItem('danne-lozana-printed-suppliers')}
 	return new Set();
 }
 
-function markCombinedSuppliersPrinted(suppliers,signature=getInventoryPrintSignature()){
+function markCombinedSuppliersPrinted(suppliers,signature=getInventoryPrintSignature(),scopeKey=getPrintStatusScopeKey()){
 	if(signature!==getInventoryPrintSignature())return false;
-	const printed=getPrintedCombinedSuppliers();
+	let saved;
+	try{saved=JSON.parse(localStorage.getItem('danne-lozana-printed-suppliers')||'null')}
+	catch(error){localStorage.removeItem('danne-lozana-printed-suppliers')}
+	const scopes=saved?.signature===signature&&saved.scopes&&typeof saved.scopes==='object'?saved.scopes:{};
+	const printed=getPrintedCombinedSuppliers(scopeKey);
 	suppliers.forEach(supplier=>printed.add(supplier));
-	localStorage.setItem('danne-lozana-printed-suppliers',JSON.stringify({signature,suppliers:[...printed]}));
+	try{
+		localStorage.setItem('danne-lozana-printed-suppliers',JSON.stringify({
+			signature,
+			scopes:{...scopes,[scopeKey]:[...printed]}
+		}));
+	}catch(error){
+		console.error('Could not save count-sheet print status:',error);
+		return false;
+	}
 	syncSupplierSelectionList();
 	renderCountSheet();
 	refreshLayoutPreview();
@@ -384,12 +406,12 @@ function updatePaperUseEstimate(){
 	estimate.textContent=`Estimated sheets: ${sheets} · ${perPage} rows per sheet · ${paper} ${orientation}`;
 }
 if(rowsSelect){
-	if(!localStorage.getItem('danne-lozana-count-layout')){if(!Array.from(rowsSelect.options).some(option=>option.value==='7'))rowsSelect.add(new Option('7 rows','7'));rowsSelect.value='7'}
+	if(!localStorage.getItem('danne-lozana-count-layout'))rowsSelect.value='9';
 	const rowsInput=document.createElement('input');
 	rowsInput.type='number';rowsInput.id='rowsPerPageFree';rowsInput.min='1';rowsInput.max='30';rowsInput.value=rowsSelect.value;rowsInput.title='Type any number of rows';rowsInput.style.marginTop='6px';
 	rowsSelect.parentElement.appendChild(rowsInput);
 	const presetWrap=document.createElement('div');presetWrap.className='rows-presets';
-	[5,7,10,15,20,25,30].forEach(value=>{const button=document.createElement('button');button.type='button';button.textContent=value;button.dataset.rows=value;button.onclick=()=>{rowsInput.value=value;rowsSelect.value=String(value);if(!Array.from(rowsSelect.options).some(option=>option.value===String(value)))rowsSelect.add(new Option(`${value} rows`,String(value)));rowsSelect.dispatchEvent(new Event('change'));refreshLayoutPreview();saveLayoutSettings()};presetWrap.appendChild(button)});
+	[5,7,9,10,15,20,25,30].forEach(value=>{const button=document.createElement('button');button.type='button';button.textContent=value;button.dataset.rows=value;button.onclick=()=>{rowsInput.value=value;rowsSelect.value=String(value);if(!Array.from(rowsSelect.options).some(option=>option.value===String(value)))rowsSelect.add(new Option(`${value} rows`,String(value)));rowsSelect.dispatchEvent(new Event('change'));refreshLayoutPreview();saveLayoutSettings()};presetWrap.appendChild(button)});
 	rowsSelect.parentElement.appendChild(presetWrap);
 	const estimate=document.createElement('small');estimate.id='paperUseEstimate';estimate.style.display='block';estimate.style.marginTop='7px';estimate.style.color='#66726b';rowsSelect.parentElement.appendChild(estimate);
 	rowsSelect.addEventListener('change',updatePaperUseEstimate);

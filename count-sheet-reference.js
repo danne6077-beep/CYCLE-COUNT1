@@ -100,6 +100,7 @@ function renderCountSheet(previewOnly=false,renderOptions={}){
   const selectedCcd=renderOptions.ccd??$('countSheetCcdFilter')?.value??'all';
   const selectedDepartment=renderOptions.department??$('countSheetDepartmentFilter')?.value??'all';
   const printMode=renderOptions.printMode||getPrintMode();
+  const printedGroups=renderOptions.imported?new Set():getPrintedCombinedSuppliers();
   const selectedPrintOptions=renderOptions.selectedPrintOptions||getSelectedPrintOptions();
   const selectedCategoryOptions=printMode==='category'?new Set(selectedPrintOptions):null;
   const selectedSupplierOptions=printMode==='supplier'?new Set(selectedPrintOptions):null;
@@ -108,8 +109,9 @@ function renderCountSheet(previewOnly=false,renderOptions={}){
     const department=String(item.departmentCode||item.deptCode||'').trim();
     if(selectedCcd!=='all'&&ccd!==selectedCcd)return false;
     if(selectedDepartment!=='all'&&department!==selectedDepartment)return false;
-    if(printMode==='category')return selectedCategoryOptions.has(CountSheetFilters.normalizeCategory(item));
-    return selectedSupplierOptions.has(CountSheetFilters.normalizeSupplier(item));
+    const group=printMode==='category'?CountSheetFilters.normalizeCategory(item):CountSheetFilters.normalizeSupplier(item);
+    if(!selectedCategoryOptions?.has(group)&&!selectedSupplierOptions?.has(group))return false;
+    return !printedGroups.has(group);
   });
   const mixedCategories=new Set(filteredItems.map(item=>CountSheetFilters.normalizeCategory(item))).size>1;
   const mergedRows=buildCountSheetRows(filteredItems);
@@ -163,7 +165,6 @@ function renderCountSheet(previewOnly=false,renderOptions={}){
       }
     }
   } else {
-    const printedGroups=renderOptions.imported?new Set():getPrintedCombinedSuppliers();
     const enabledGroups=selectedCombinedGroups.filter(groupName=>Object.prototype.hasOwnProperty.call(groups,groupName)&&!printedGroups.has(groupName));
     if(enabledGroups.length>0){
       enabledGroups.forEach(groupName=>{
@@ -231,7 +232,7 @@ function renderCountSheet(previewOnly=false,renderOptions={}){
   const preview=$('countSheetLivePreview');
   if(preview){const firstPage=$('countSheetPages').firstElementChild;preview.innerHTML=firstPage?firstPage.outerHTML:'<div class="live-empty">Import inventory to preview your count sheet.</div>';drawCountSheetBarcodes(preview)}
   const generatedLabel=groupMode==='supplier-category'?'supplier + category sheets':`${isCombinedGrouping?'combined ':''}${printMode==='category'?'category sheets':'supplier sheets'}`;
-  $('countSheetSummary').textContent=!selectedPrintOptions.length?`Choose one or more ${printMode==='category'?'categories':'suppliers'} to prepare count sheets.`:`${pages.length} landscape ${generatedLabel}${mixedCategories?' with mixed categories':''} prepared with selling, buffer, and warehouse locator count columns.`;
+  $('countSheetSummary').textContent=!selectedPrintOptions.length?`Choose one or more ${printMode==='category'?'categories':'suppliers'} to prepare count sheets.`:!pages.length?`The selected ${printMode==='category'?'categories':'suppliers'} are already marked printed. Choose another group or use Reset Printed.`:`${pages.length} landscape ${generatedLabel}${mixedCategories?' with mixed categories':''} prepared with selling, buffer, and warehouse locator count columns.`;
 }
 
 function drawCountSheetBarcodes(root=document){
