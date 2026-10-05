@@ -19,6 +19,7 @@
   <link rel="stylesheet" href="announcements.css">
   <link rel="stylesheet" href="masterlist.css">
   <link rel="stylesheet" href="auth.css">
+  <link rel="stylesheet" href="about-us.css">
   <style>
     .rows-control{display:flex;align-items:center;gap:7px}.rows-control input{margin-top:5px}.rows-presets{display:flex;gap:4px;margin-top:6px}.rows-presets button{background:#fff;border:1px solid #d4ddd7;border-radius:5px;color:#536158;padding:3px 7px;font-size:10px}.rows-presets button:hover{border-color:var(--accent);color:var(--accent)}.supplier-filter{color:#647069;font-size:11px;text-align:left}.supplier-filter select{min-width:165px;margin-top:3px;padding:7px 9px;font-size:11px}
     @media screen {
@@ -215,7 +216,7 @@
       <button class="nav-button" id="announcementsNav" type="button" title="Read announcements and updates"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11a8 8 0 0 1 16 0v5l2 2H2l2-2zM9 21h6"/></svg><span>Updates</span></button>
       <div hidden><button id="hotlistNav" type="button">Hotlist</button></div>
       <button class="nav-button" id="settingsBtn" type="button" title="Open settings"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19 13.5a7 7 0 0 0 0-3l2-1.5-2-3.5-2.4 1a7 7 0 0 0-2.6-1.5L13.5 2h-3L10 5a7 7 0 0 0-2.6 1.5L5 5.5l-2 3.5 2 1.5a7 7 0 0 0 0 3L3 15l2 3.5 2.4-1A7 7 0 0 0 10 19l.5 3h3l.5-3a7 7 0 0 0 2.6-1.5l2.4 1 2-3.5z" transform="translate(-1 -1)"/></svg><span>Settings</span></button>
-      <button class="nav-button" id="creditsBtn" type="button" title="About Us and help"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9a2.5 2.5 0 1 1 4.4 1.6c-1.2 1.1-2 1.4-2 3m0 3h.01"/></svg><span>About</span></button>
+      <button class="nav-button" id="creditsBtn" type="button" title="About Us"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9a2.5 2.5 0 1 1 4.4 1.6c-1.2 1.1-2 1.4-2 3m0 3h.01"/></svg><span>About Us</span></button>
       <button class="nav-button reset" id="resetBtn" type="button" title="Start over" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8m0-5v5h5"/></svg><span>Start over</span></button>
       <button class="nav-button profile-button" id="authProfileBtn" type="button" title="Sign in"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span id="authProfileLabel">Sign in</span></button>
       <button class="nav-button auth-header-logout" id="authHeaderLogoutBtn" type="button" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17l5-5-5-5m5 5H3m9-9h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6"/></svg><span>Log Out</span></button>
@@ -244,6 +245,144 @@
         <article class="home-feature home-feature-hotlist"><div class="home-feature-top"><span class="home-feature-icon" aria-hidden="true">▥</span><span class="home-feature-index">07</span></div><h3>Hotlist</h3><p>Review focused shift counts for milk, cigarettes, and liquor inventory.</p><button type="button" data-home-open="hotlistNav">Open hotlist <span aria-hidden="true">→</span></button></article>
       </div>
       <footer class="home-footer"><span>FUJI CYCLE COUNT SYSTEM</span><span>Inventory data stays in this browser.</span></footer>
+    </section>
+    <section id="aboutPanel" class="about-page" hidden aria-labelledby="aboutHeading">
+      <nav class="about-nav" id="aboutNav" aria-label="About page navigation">
+        <a class="about-brand" href="#aboutHeading" aria-label="Fuji Cycle Count home">
+          <span class="about-brand-mark" aria-hidden="true">F</span>
+          <span>FUJI <small>OPERATIONS TOOLS</small></span>
+        </a>
+        <button class="about-menu-toggle" id="aboutMenuToggle" type="button" aria-expanded="false" aria-controls="aboutNavLinks" aria-label="Open page navigation">
+          <span></span><span></span><span></span>
+        </button>
+        <div class="about-nav-links" id="aboutNavLinks">
+          <a href="#about-what-we-do">What We Do</a>
+          <a href="#about-approach">Our Approach</a>
+          <a href="#about-values">About Us</a>
+          <a href="#about-insights">Insights</a>
+        </div>
+        <div class="about-nav-actions">
+          <button class="about-search" id="aboutSearch" type="button" aria-label="Search products">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg>
+          </button>
+          <a class="about-contact-button" href="#about-contact">Contact <span aria-hidden="true">↗</span></a>
+        </div>
+      </nav>
+
+      <header class="about-hero" id="about-what-we-do">
+        <div class="about-hero-copy">
+          <p class="about-eyebrow"><span></span> PEOPLE · PROCESS · BETTER COUNTS</p>
+          <h1 id="aboutHeading">Make the work clearer.<br><em>Make every count matter.</em></h1>
+          <p>We build practical tools for the people who keep inventory moving. From cycle counts to shelf tags, our focus is making everyday operations easier to understand and easier to trust.</p>
+          <a class="about-hero-link" href="#about-team">Meet the people behind the workflow <span aria-hidden="true">↓</span></a>
+        </div>
+        <div class="about-hero-art" aria-hidden="true">
+          <div class="about-art-orbit about-art-orbit-one"></div>
+          <div class="about-art-orbit about-art-orbit-two"></div>
+          <div class="about-art-card about-art-card-back"><span>ITEMS VERIFIED</span><strong>01—04</strong><i></i><i></i><i></i></div>
+          <div class="about-art-card about-art-card-front"><span>COUNT COMPLETE</span><strong>✓</strong><small>Clear work. Confident teams.</small></div>
+          <span class="about-art-spark about-art-spark-one">✳</span>
+          <span class="about-art-spark about-art-spark-two">✦</span>
+        </div>
+        <div class="about-hero-foot"><span>BUILT FOR REAL-WORLD OPERATIONS</span><span>LOCAL-FIRST · TEAM-READY</span></div>
+      </header>
+
+      <section class="about-team-section" id="about-team" aria-labelledby="aboutTeamHeading">
+        <div class="about-section-heading">
+          <p class="about-eyebrow">THE PEOPLE BEHIND THE WORKFLOW</p>
+          <h2 id="aboutTeamHeading">Grounded in the work.<br><span>Designed around people.</span></h2>
+          <p>Good tools come from understanding the daily work: what slows a count down, where details get missed, and what helps a team move forward together.</p>
+        </div>
+        <div class="about-team-grid">
+          <article class="about-team-card about-team-card-lead">
+            <span class="about-card-index">01 / SYSTEM DESIGN</span>
+            <div class="about-card-monogram" aria-hidden="true">DL</div>
+            <p class="about-principle">Bring operational thinking and process clarity into tools people can use with confidence.</p>
+            <div class="about-person"><strong>Danne Lozana</strong><span>Lead System Developer</span></div>
+          </article>
+          <article class="about-team-card about-team-card-ops">
+            <span class="about-card-index">02 / DAILY OPERATIONS</span>
+            <div class="about-card-monogram" aria-hidden="true">JA</div>
+            <p class="about-principle">Keep cycle-count tasks clear, practical, and connected to the real store workflow.</p>
+            <div class="about-person"><strong>Jimboy Abante</strong><span>Operations Support</span></div>
+          </article>
+          <article class="about-team-card about-team-card-process">
+            <span class="about-card-index">03 / INVENTORY PROCESS</span>
+            <div class="about-card-monogram" aria-hidden="true">RS</div>
+            <p class="about-principle">Build reliable workflows so item details and physical counts stay consistent.</p>
+            <div class="about-person"><strong>Riz Nesty Sapungan</strong><span>Inventory Process</span></div>
+          </article>
+        </div>
+        <p class="about-team-note">Principles shown here summarize each role’s contribution to the system.</p>
+      </section>
+
+      <section class="about-values-section" id="about-values" aria-labelledby="aboutValuesHeading">
+        <div class="about-values-heading">
+          <span class="about-value-badge"><i></i> OUR CORE VALUES</span>
+          <h2 id="aboutValuesHeading">We are all <span>One.</span></h2>
+          <p>Four simple principles for building better tools and working better together.</p>
+        </div>
+        <div class="about-life-grid">
+          <article class="about-life-card about-life-listen"><strong>L</strong><h3>Listen</h3><p>Start with the people doing the work.</p></article>
+          <article class="about-life-card about-life-integrity"><strong>I</strong><h3>Integrity</h3><p>Make accuracy and trust part of every step.</p></article>
+          <article class="about-life-card about-life-focus"><strong>F</strong><h3>Focus</h3><p>Keep useful details clear and within reach.</p></article>
+          <article class="about-life-card about-life-excellence"><strong>E</strong><h3>Excellence</h3><p>Improve the everyday, one workflow at a time.</p></article>
+        </div>
+      </section>
+
+      <section class="about-approach-section" id="about-approach" aria-labelledby="aboutApproachHeading">
+        <div class="about-approach-mark" aria-hidden="true"><span>F</span><i></i><i></i><i></i><i></i></div>
+        <div>
+          <p class="about-eyebrow">OUR APPROACH</p>
+          <h2 id="aboutApproachHeading">Useful by design.<br><span>Thoughtful by default.</span></h2>
+          <p>We pair operational experience with straightforward digital tools. Workbooks can be handled on the device, repeat tasks get clear steps, and the interface is built to keep important inventory details easy to find.</p>
+          <div class="about-approach-points"><span><b>01</b> Start with the task</span><span><b>02</b> Make the next step clear</span><span><b>03</b> Keep the people in control</span></div>
+        </div>
+      </section>
+
+      <section class="about-insights-section" id="about-insights" aria-labelledby="aboutInsightsHeading">
+        <div class="about-insights-heading">
+          <p class="about-eyebrow">FIELD NOTES</p>
+          <h2 id="aboutInsightsHeading">Small details make<br><span>better counts.</span></h2>
+          <p>Practical reminders for more confident inventory work.</p>
+        </div>
+        <div class="about-insight-grid">
+          <article><span>01 · PREPARE</span><h3>A good count starts before the first item.</h3><p>Confirm the right list, clarify the area, and make sure everyone knows what they are counting.</p></article>
+          <article><span>02 · VERIFY</span><h3>Keep product and location together.</h3><p>SKU, barcode, description, and locator all help the team check they are counting the right item.</p></article>
+          <article><span>03 · CLOSE THE LOOP</span><h3>Make the next step visible.</h3><p>Clear print status and simple handoffs help teams know what is complete and what still needs attention.</p></article>
+        </div>
+      </section>
+
+      <section class="about-culture-section" id="about-careers" aria-labelledby="aboutCultureHeading">
+        <div class="about-culture-inner">
+          <div class="about-culture-copy">
+            <span class="about-join-badge"><i></i> PEOPLE FIRST, ALWAYS</span>
+            <p class="about-eyebrow">CULTURE &amp; CAREERS</p>
+            <h2 id="aboutCultureHeading">A better way to work<br>starts with <em>how we work.</em></h2>
+            <p>Our culture is rooted in practical collaboration, respect for frontline experience, and steady improvement. We listen to the people using the tools, share what we learn, and make changes that help teams do their work with less friction.</p>
+            <p>Our tools are local-first where it matters: inventory work stays in the browser, and teams can use the workflows on the devices they already rely on. We value clear communication, thoughtful ownership, and making useful things together.</p>
+            <div class="about-culture-tags"><span>People-centered</span><span>Practical by nature</span><span>Always learning</span></div>
+          </div>
+          <aside class="about-fit-card" aria-labelledby="aboutFitHeading">
+            <p class="about-fit-kicker">THE WAY WE WORK</p>
+            <h3 id="aboutFitHeading">Our Culture Fit</h3>
+            <ul>
+              <li><span aria-hidden="true">✓</span> You care about getting the details right.</li>
+              <li><span aria-hidden="true">✓</span> You make complex work easier to follow.</li>
+              <li><span aria-hidden="true">✓</span> You value teamwork and useful feedback.</li>
+              <li><span aria-hidden="true">✓</span> You keep looking for a better way.</li>
+            </ul>
+            <a class="about-roles-button" href="#about-contact">Explore Open Roles <span aria-hidden="true">↗</span></a>
+            <small>Ask your local system administrator about current opportunities.</small>
+          </aside>
+        </div>
+      </section>
+
+      <footer class="about-footer" id="about-contact">
+        <div class="about-footer-copy"><p class="about-eyebrow">LET'S MAKE THE WORKFLOW BETTER</p><h2>Questions, ideas, or feedback?</h2><p>We welcome practical feedback from the people using the system. Reach out through your local system administrator or check the latest workspace updates.</p></div>
+        <button class="about-footer-button" id="aboutUpdatesLink" type="button">Open workspace updates <span aria-hidden="true">↗</span></button>
+        <div class="about-footer-bottom"><span>FUJI CYCLE COUNT SYSTEM</span><button type="button" data-about-home>Back to workspace <span aria-hidden="true">↑</span></button></div>
+      </footer>
     </section>
     <section id="cigarsPanel" class="cigars-workspace" hidden aria-labelledby="cigarsHeading">
       <header class="cigars-heading">

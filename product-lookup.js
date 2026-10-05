@@ -3,6 +3,8 @@ const productDescriptionCache=new Map();
 const productImageCache=new Map();
 const homeNavigation=$('homeNav');
 const homePanel=$('homePanel');
+const aboutNavigation=$('creditsBtn');
+const aboutPanel=$('aboutPanel');
 const countSheetNavigation=$('countSheetNav');
 const cigarsNavigation=$('cigarsNav');
 const cigarsPanel=$('cigarsPanel');
@@ -367,6 +369,17 @@ async function showCountSheetWorkspace(){
 }
 
 homeNavigation.addEventListener('click',showHomePanel);
+function showAboutPanel(){
+  openLookupPanel(aboutPanel,aboutNavigation);
+  const aboutNav=$('aboutNav');
+  const menuToggle=$('aboutMenuToggle');
+  if(aboutNav&&menuToggle){
+    aboutNav.classList.remove('is-open');
+    menuToggle.setAttribute('aria-expanded','false');
+    menuToggle.setAttribute('aria-label','Open page navigation');
+  }
+}
+aboutNavigation.addEventListener('click',showAboutPanel);
 countSheetNavigation.addEventListener('click',showCountSheetWorkspace);
 cigarsNavigation.addEventListener('click',()=>{
   if(activeLookupPanel===cigarsPanel)closeLookupPanel();
@@ -398,6 +411,30 @@ shelfTagNavigation.addEventListener('click',()=>{
   else openLookupPanel(shelfTagLookupPanel,shelfTagNavigation);
 });
 $('backFromShelfTag').addEventListener('click',closeLookupPanel);
+$('aboutSearch').addEventListener('click',()=>productLookupNavigation.click());
+$('aboutUpdatesLink').addEventListener('click',()=>announcementsNavigation.click());
+document.querySelector('[data-about-home]').addEventListener('click',()=>homeNavigation.click());
+const aboutNav=$('aboutNav');
+const aboutMenuToggle=$('aboutMenuToggle');
+aboutMenuToggle.addEventListener('click',()=>{
+  const isOpen=aboutMenuToggle.getAttribute('aria-expanded')==='true';
+  aboutMenuToggle.setAttribute('aria-expanded',String(!isOpen));
+  aboutMenuToggle.setAttribute('aria-label',isOpen?'Open page navigation':'Close page navigation');
+  aboutNav.classList.toggle('is-open',!isOpen);
+});
+aboutNav.querySelectorAll('.about-nav-links a').forEach(link=>link.addEventListener('click',()=>{
+  aboutNav.classList.remove('is-open');
+  aboutMenuToggle.setAttribute('aria-expanded','false');
+  aboutMenuToggle.setAttribute('aria-label','Open page navigation');
+}));
+document.addEventListener('keydown',event=>{
+  if(event.key==='Escape'&&aboutNav.classList.contains('is-open')){
+    aboutNav.classList.remove('is-open');
+    aboutMenuToggle.setAttribute('aria-expanded','false');
+    aboutMenuToggle.setAttribute('aria-label','Open page navigation');
+    aboutMenuToggle.focus();
+  }
+});
 showHomePanel();
 $('productLookupForm').addEventListener('submit',searchMasterCatalog);
 $('productLookupMode').addEventListener('change',()=>{
