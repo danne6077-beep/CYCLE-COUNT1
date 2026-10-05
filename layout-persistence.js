@@ -345,10 +345,6 @@ updateGroupModeControl();
 layoutControlIds.forEach(id=>{const control=document.getElementById(id);control.addEventListener('change',()=>{saveLayoutSettings();if(typeof recordLocalHistory==='function')recordLocalHistory('Layout changed',`${id}: ${control.type==='checkbox'?control.checked:control.value}`)});control.addEventListener('input',saveLayoutSettings)});
 $('configureSheetBtn').onclick=()=>{showStep(3);refreshLayoutPreview()};
 
-$('creditsBtn').onclick=()=>{$('developersModal').hidden=false};
-$('closeDevelopers').onclick=()=>{$('developersModal').hidden=true};
-$('developersModal').onclick=event=>{if(event.target===$('developersModal'))$('developersModal').hidden=true};
-
 function updateSupplierFilter(){
 	const filter=$('supplierFilter');
 	if(!filter)return;

@@ -63,13 +63,14 @@
 .about-section-heading h2,.about-approach-section h2{margin:0;font-family:'Space Grotesk',sans-serif;font-size:clamp(32px,4vw,47px);line-height:1.08;letter-spacing:-.05em}
 .about-section-heading h2 span,.about-approach-section h2 span{color:#78758a}
 .about-section-heading>p:last-child{max-width:460px;margin:0;color:var(--text-muted);font-size:12px;line-height:1.8}
-.about-team-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.about-team-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
 .about-team-card{position:relative;display:flex;min-height:290px;flex-direction:column;padding:23px;border:1px solid #343247;border-radius:var(--radius-card);background:linear-gradient(145deg,#252239,#14141f 80%);box-shadow:0 15px 34px #1915261a;color:#f7f6ff;overflow:hidden}
 .about-team-card::after{position:absolute;right:-36px;bottom:-68px;width:180px;height:180px;border:1px solid #b3a8f01c;border-radius:50%;content:''}
 .about-team-card-ops{background:linear-gradient(145deg,#282138,#17141e 80%)}
 .about-team-card-process{background:linear-gradient(145deg,#22253a,#131621 80%)}
 .about-card-index{position:relative;z-index:1;color:#b1acc6;font-size:8px;font-weight:800;letter-spacing:.13em}
 .about-card-monogram{position:relative;z-index:1;display:grid;width:49px;height:49px;place-items:center;margin-top:30px;border:1px solid #b8aafa55;border-radius:15px;background:#9484ed1e;color:#c8bfff;font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700}
+.about-team-photo{position:relative;z-index:1;width:86px;height:86px;margin-top:22px;object-fit:cover;object-position:center 35%;border:2px solid #ffffff45;border-radius:24px;background:#333;box-shadow:0 12px 26px #0004}
 .about-principle{position:relative;z-index:1;flex:1;margin:19px 0 24px;color:#f0eef8;font-family:'Space Grotesk',sans-serif;font-size:16px;line-height:1.55;letter-spacing:-.02em}
 .about-person{position:relative;z-index:1;display:flex;flex-direction:column;gap:4px;padding-top:14px;border-top:1px solid #ffffff20}
 .about-person strong{font-size:11px}
@@ -172,7 +173,7 @@
   .about-section-heading{grid-template-columns:1fr;gap:12px}
   .about-section-heading .about-eyebrow{grid-column:auto}
   .about-team-section{padding-bottom:72px}
-  .about-team-grid{grid-template-columns:1fr}
+  .about-team-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .about-team-card{min-height:255px}
   .about-card-monogram{margin-top:20px}
   .about-life-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
@@ -201,6 +202,7 @@
   .about-life-card{min-height:167px}
   .about-footer-bottom{align-items:flex-start;flex-direction:column}
 }
+@media(max-width:520px){.about-team-grid{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){
   .about-page *{scroll-behavior:auto!important;transition-duration:.01ms!important}
 }

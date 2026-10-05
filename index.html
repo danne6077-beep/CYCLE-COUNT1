@@ -167,6 +167,7 @@
       .prince-logo,.prince-logo small{background:#fff!important;color:#000!important;border:1px solid #000!important}
     }
   </style>
+  <link rel="stylesheet" href="redesign.css">
 </head>
 <body class="auth-logged-out">
   <main class="login-page" id="loginPage">
@@ -296,21 +297,27 @@
         <div class="about-team-grid">
           <article class="about-team-card about-team-card-lead">
             <span class="about-card-index">01 / SYSTEM DESIGN</span>
-            <div class="about-card-monogram" aria-hidden="true">DL</div>
+            <img class="about-team-photo" src="profile-danne.jpg" alt="Danne Lozana">
             <p class="about-principle">Bring operational thinking and process clarity into tools people can use with confidence.</p>
             <div class="about-person"><strong>Danne Lozana</strong><span>Lead System Developer</span></div>
           </article>
           <article class="about-team-card about-team-card-ops">
             <span class="about-card-index">02 / DAILY OPERATIONS</span>
-            <div class="about-card-monogram" aria-hidden="true">JA</div>
+            <img class="about-team-photo" src="JIMBOY%20ABANTE.jpg" alt="Jimboy Abante">
             <p class="about-principle">Keep cycle-count tasks clear, practical, and connected to the real store workflow.</p>
             <div class="about-person"><strong>Jimboy Abante</strong><span>Operations Support</span></div>
           </article>
           <article class="about-team-card about-team-card-process">
             <span class="about-card-index">03 / INVENTORY PROCESS</span>
-            <div class="about-card-monogram" aria-hidden="true">RS</div>
+            <img class="about-team-photo" src="RIZ%20NESTY%20SAPUNGAN.jpg" alt="Riz Nesty Sapungan">
             <p class="about-principle">Build reliable workflows so item details and physical counts stay consistent.</p>
             <div class="about-person"><strong>Riz Nesty Sapungan</strong><span>Inventory Process</span></div>
+          </article>
+          <article class="about-team-card about-team-card-collab">
+            <span class="about-card-index">04 / SYSTEM COLLABORATION</span>
+            <img class="about-team-photo" src="PITPIT%20OMBION.jpg" alt="Pitpit Ombion">
+            <p class="about-principle">Collaborate on thoughtful improvements that make everyday counting easier.</p>
+            <div class="about-person"><strong>Pitpit Ombion</strong><span>System Collaboration</span></div>
           </article>
         </div>
         <p class="about-team-note">Principles shown here summarize each role’s contribution to the system.</p>
@@ -763,52 +770,6 @@
   </div>
 
   <div class="toast" id="toast" role="status"></div>
-  <div class="modal-backdrop" id="developersModal" hidden>
-    <div class="modal developer-modal">
-      <button class="close-modal" id="closeDevelopers">×</button>
-      <p class="section-kicker">FUJI</p>
-      <h2>About Us</h2>
-      <p class="modal-copy">We build practical inventory tools to help teams count faster, reduce stock errors, and keep operations moving with more confidence.</p>
-
-      <div class="developer-profile">
-        <div class="profile-photo" aria-label="Danne Lozana profile photo">
-          <img src="profile-danne.jpg" alt="Danne Lozana portrait" />
-        </div>
-        <div class="profile-details">
-          <h3>Danne Lozana</h3>
-          <p class="role">Lead System Developer</p>
-          <p>Danne Lozana leads the design and development of this cycle count platform, bringing together operational thinking, process clarity, and user-friendly tools for warehouse and retail teams.</p>
-        </div>
-      </div>
-
-      <div class="developer-list">
-        <div class="developer-card">
-          <img src="JIMBOY%20ABANTE.jpg" alt="Jimboy Abante" />
-          <div class="developer-card-details">
-          <strong>JIMBOY ABANTE</strong>
-          <span>Operations Support</span>
-          <p>Supports day-to-day store operations and helps keep cycle-count tasks clear and practical for the team.</p>
-          </div>
-        </div>
-        <div class="developer-card">
-          <img src="RIZ%20NESTY%20SAPUNGAN.jpg" alt="Riz Nesty Sapungan" />
-          <div class="developer-card-details">
-          <strong>RIZ NESTY SAPUNGAN</strong>
-          <span>Inventory Process</span>
-          <p>Helps shape reliable inventory workflows so item data and physical counts stay consistent.</p>
-          </div>
-        </div>
-        <div class="developer-card">
-          <img src="PITPIT%20OMBION.jpg" alt="Pitpit Ombion" />
-          <div class="developer-card-details">
-          <strong>PITPIT OMBION</strong>
-          <span>System Collaboration</span>
-          <p>Collaborates on system improvements that make the count-sheet process easier for users.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
   <div hidden><button id="generateBtn"></button><button id="goGenerate"></button><button id="backConfigure"></button><button id="printBtn"></button><button id="pdfBtn"></button><div id="tagSheet"></div><div id="generatedSummary"></div></div>
   <div class="modal-backdrop settings-backdrop" id="modalBackdrop" hidden>
     <section class="settings-hub" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">

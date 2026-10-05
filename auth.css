@@ -18,7 +18,7 @@
 .login-page{min-height:100vh;min-height:100svh;display:grid;place-items:center;padding:38px;background:#eef1ed}
 .login-page[hidden]{display:none!important}
 .auth-logged-out #appShell{display:none!important}
-.auth-logged-out #authModal,.auth-logged-out #developersModal,.auth-logged-out #modalBackdrop,.auth-logged-out #printConfirmationModal,.auth-logged-out #localHistoryModal,.auth-logged-out .toast{display:none!important}
+.auth-logged-out #authModal,.auth-logged-out #modalBackdrop,.auth-logged-out #printConfirmationModal,.auth-logged-out #localHistoryModal,.auth-logged-out .toast{display:none!important}
 .login-card{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(370px,.88fr);width:min(1120px,100%);min-height:610px;overflow:hidden;background:#fff;border:1px solid #dce2dc;border-radius:8px;box-shadow:0 18px 55px rgba(34,50,39,.1)}
 .login-visual{position:relative;display:flex;align-items:flex-end;min-height:610px;overflow:hidden;background:#dfe5dd}
 .login-brand-image{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center}
