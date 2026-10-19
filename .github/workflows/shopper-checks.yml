@@ -26,7 +26,12 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - name: Mobile browser flow
         run: |
-          node shopper/scripts/serve.mjs > /tmp/fuji-preview.log 2>&1 &
+          node shopper/scripts/serve.mjs --dist > /tmp/fuji-preview.log 2>&1 &
+          for attempt in $(seq 1 30); do
+            if curl --silent --fail http://127.0.0.1:4173/shopper/ > /dev/null; then break; fi
+            sleep 1
+          done
+          curl --silent --fail http://127.0.0.1:4173/shopper/ > /dev/null
           node scripts/shopper-smoke.cjs
           node scripts/shopper-swap-check.cjs
           node scripts/shopper-offline-check.cjs
