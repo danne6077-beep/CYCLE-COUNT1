@@ -6,7 +6,7 @@ self.addEventListener('fetch',event=>{
  const url=new URL(event.request.url);
  if(event.request.method!=='GET'||url.origin!==self.location.origin||!url.pathname.startsWith(new URL(self.registration.scope).pathname)||url.pathname.includes('/catalog/')||url.pathname.endsWith('account-config.json')||url.pathname.includes('staff'))return;
  if(event.request.mode==='navigate'){event.respondWith(fetch(event.request).catch(()=>caches.match(new URL('./index.html',self.registration.scope))));return;}
- event.respondWith(caches.match(event.request).then(hit=>hit||fetch(event.request).then(response=>{if(response.ok){const clone=response.clone();caches.open(CACHE).then(c=>c.put(event.request,clone));}return response;})));
+ event.respondWith((async()=>{const hit=await caches.match(event.request)||(!url.search?await caches.match(event.request,{ignoreSearch:true}):null);if(hit)return hit;const response=await fetch(event.request);if(response.ok){const clone=response.clone();caches.open(CACHE).then(c=>c.put(event.request,clone));}return response;})());
 });
 
 self.addEventListener('message',event=>{if(event.data?.type==='SHELL_STATUS')event.waitUntil((async()=>{const keys=(await(await caches.open(CACHE)).keys()).map(r=>r.url);event.ports[0]?.postMessage({version:CACHE.replace('fuji-shopper-shell-',''),complete:PRECACHE.every(file=>keys.includes(new URL(file,self.registration.scope).href))});})());});

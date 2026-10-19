@@ -13,6 +13,10 @@ let S={cart:[],budget:null,trips:[],lists:[{id:'next',name:'My next shop',items:
 let tab='shop',query='',category='',department='groceries',searchTimer,scanner,torch=false,lastResult=null,toastTimer,installPrompt,lastBudgetState='unset',searchLimit=24,account=null;
 const assistant=createAssistant({
  getState:()=>S,
+ setBudget(value){S.budget=value;afterCart('Trip budget updated.');},
+ setTheme(value){S.theme=value;applyTheme();save();},
+ addMany(lines){const grouped=new Map();for(const l of lines){const old=grouped.get(l.product.sku);if(old)old.quantity+=l.quantity;else grouped.set(l.product.sku,{...l});}for(const l of grouped.values())if((S.cart.find(x=>x.product.sku===l.product.sku)?.quantity||0)+l.quantity>9999){notify('Maximum quantity is 9,999.');return false;}for(const l of grouped.values()){const existing=S.cart.find(x=>x.product.sku===l.product.sku);if(existing)existing.quantity+=l.quantity;else S.cart.push({product:l.product,quantity:l.quantity,manualCentavos:null,note:'',checked:false});const planned=currentList().items.find(x=>x.product.sku===l.product.sku);if(planned)planned.checked=true;}afterCart();return true;},
+ removeMany(lines){for(const l of lines){const row=S.cart.find(x=>x.product.sku===l.sku);if(row)row.quantity=Math.max(0,row.quantity-l.quantity);}S.cart=S.cart.filter(x=>x.quantity>0);afterCart();},
  snapshot:()=>structuredClone({cart:S.cart,lists:S.lists}),
  add(p,quantity){if((S.cart.find(l=>l.product.sku===p.sku)?.quantity||0)+quantity>9999){notify('Maximum quantity is 9,999.');return false;}addProduct(p,quantity);return true;},
  remove(sku,quantity){const line=S.cart.find(l=>l.product.sku===sku);if(!line)return false;line.quantity-=quantity;if(line.quantity<=0)S.cart=S.cart.filter(l=>l!==line);afterCart();return true;},

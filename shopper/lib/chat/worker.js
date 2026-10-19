@@ -27,6 +27,7 @@ async function initialize(){
 self.onmessage=async event=>{
  const {id,type,...payload}=event.data;
  try{const bot=await initialize();if(type==='init'){if(payload.context)bot.restore(payload.context);self.postMessage({id,ready:true,count:bot.products.length,packageInfo,...(payload.debug&&/^(localhost|127\.0\.0\.1)$/.test(self.location.hostname)?{metrics}:{})});}
-  else if(type==='query'){const started=performance.now(),response=bot.respond(payload.question,payload.options);self.postMessage({id,response,elapsedMs:performance.now()-started});}}
+  else if(type==='games-data'){const pool=bot.products.filter(p=>p.priceCentavos>0&&!p.anomalyFlags?.length),step=Math.max(1,Math.floor(pool.length/40));self.postMessage({id,pool:pool.filter((_,i)=>i%step===0).slice(0,40),scenario:bot.planner.plan('weekly for 1 people 1 days budget 500',{language:'en',day:new Date().toISOString().slice(0,10)})?.plan});}
+  else if(type==='query'){if(payload.context)bot.restore(payload.context);const started=performance.now(),response=bot.respond(payload.question,payload.options);self.postMessage({id,response,elapsedMs:performance.now()-started});}}
  catch(error){self.postMessage({id,error:error.message||'Offline assistant could not start.'});}
 };

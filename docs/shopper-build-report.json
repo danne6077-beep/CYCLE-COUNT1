@@ -1,6 +1,5 @@
 {
-  "playbookGzipBytes": 14282,
-  "shellVersion": "dab66bc9f224",
+  "shellVersion": "3e7cac7c40c5",
   "priceAnomalies": {
     "flagged": 1611,
     "nonpositiveOrMissing": 0,
@@ -8,9 +7,26 @@
     "categoryPrice": 1001,
     "unitPrice": 693
   },
-  "initialJavaScriptGzipBytes": 46979,
-  "chatWorkerGzipBytes": 19841,
+  "initialJavaScriptGzipBytes": 48975,
+  "initialModules": [
+    "app.js",
+    "lib/catalog.js",
+    "lib/storage.js",
+    "lib/core.js",
+    "lib/icons.js",
+    "i18n.js",
+    "lib/art.js",
+    "lib/scanner.js",
+    "lib/chat/client.js",
+    "lib/chat/plan-ui.js",
+    "lib/chat/normalize.js",
+    "lib/chat/trust.js",
+    "lib/chat/offline.js",
+    "lib/chat/history.js"
+  ],
+  "chatWorkerGzipBytes": 20103,
   "chatSnapshotGzipBytes": 505129,
+  "playbookGzipBytes": 14282,
   "chatVersion": "c321c263705279dfb989",
   "scannerLazyGzipBytes": 116532,
   "catalogFiles": 136,
