@@ -138,7 +138,7 @@ input,select,textarea,.masterlist-controls select,.masterlist-controls input,.ot
 .sidebar-collapsed .sidebar-primary .nav-button,.sidebar-collapsed .sidebar-footer .nav-button,.sidebar-collapsed .sidebar-footer a.nav-button { justify-content: center; padding: 0; }
 .sidebar-collapsed .sidebar-collapse { right: 3px; width: 19px; }
 .sidebar-backdrop { display: none; }
-html[data-theme="dark"] { --accent: #55c6a0; --theme-purple: var(--accent); --theme-purple-dark: #91e0bf; --theme-purple-soft: #18382d; --theme-ink: #e6ede9; --theme-muted: #b0bdb6; --theme-line: #34413a; --paper: #17201b; --canvas: #101713; --theme-shadow: 0 1px 2px #0004; color-scheme: dark; }
+html[data-theme="dark"] { --accent: #34d399; --theme-purple: var(--accent); --theme-purple-dark: #91e0bf; --theme-purple-soft: #18382d; --theme-ink: #e8f0ec; --theme-muted: #9db0a7; --theme-line: #263832; --paper: #121d19; --canvas: #0c1512; --theme-shadow: 0 1px 2px #0004; color-scheme: dark; }
 html[data-theme="dark"] body { background: var(--canvas); color: var(--theme-ink); }
 html[data-theme="dark"] .topbar,html[data-theme="dark"] .app-sidebar,html[data-theme="dark"] .store-switcher,html[data-theme="dark"] .panel,html[data-theme="dark"] .section,html[data-theme="dark"] .cigars-card,html[data-theme="dark"] .cigars-monitor-card,html[data-theme="dark"] .masterlist-card,html[data-theme="dark"] .table-wrap,html[data-theme="dark"] .masterlist-table-wrap { background: var(--paper); color: var(--theme-ink); }
 html[data-theme="dark"] .sidebar-primary .nav-button[aria-current="page"] { color: var(--theme-purple-dark); }

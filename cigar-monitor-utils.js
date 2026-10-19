@@ -102,7 +102,9 @@
   }
 
   function escapeCsv(value){
-    const text=String(value??'');
+    const isNumber=typeof value==='number'&&Number.isFinite(value);
+    let text=String(value??'');
+    if(!isNumber&&/^[\t\r\n ]*[=+@-]/.test(text))text=`'${text}`;
     return/[",\r\n]/.test(text)?`"${text.replace(/"/g,'""')}"`:text;
   }
 

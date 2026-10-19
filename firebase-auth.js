@@ -4,8 +4,7 @@
   const localSessionKey='fuji-unified-local-session-v1';
   const localAnnouncementsKey='fuji-local-announcements-v1';
   const loginModeKey='fuji-login-mode-v1';
-  const passwordIterations=210000;
-  const validRoles=new Set(['admin','user']);
+  const validRoles=new Set(['admin','editor','viewer','user']);
   let currentUser=null;
   let loginMode='local';
   let firebaseAuth=null;
@@ -41,8 +40,8 @@
     byId('authModal').hidden=true;
     document.body.classList.toggle('auth-logged-out',!isAuthenticated);
   }
-  function updateAdminControl(control,isAdmin){
-    if(isAdmin){
+  function updateAdminControl(control,canEdit){
+    if(canEdit){
       if(control.dataset.authDisabled!==undefined){
         control.disabled=control.dataset.authDisabled==='true';
         delete control.dataset.authDisabled;
@@ -58,19 +57,21 @@
   }
   function applyRole(){
     const isAdmin=currentUser?.role==='admin';
+    const canEdit=isAdmin||currentUser?.role==='editor';
     document.body.classList.toggle('auth-role-admin',isAdmin);
-    document.body.classList.toggle('auth-role-user',currentUser?.role==='user');
-    byId('authProfileLabel').textContent=currentUser?`${currentUser.name} · ${isAdmin?'Admin':'User'}`:'Sign in';
+    document.body.classList.toggle('auth-role-editor',currentUser?.role==='editor');
+    document.body.classList.toggle('auth-role-user',['user','viewer'].includes(currentUser?.role));
+    byId('authProfileLabel').textContent=currentUser?`${currentUser.name} · ${isAdmin?'Admin':currentUser.role==='editor'?'Editor':'User'}`:'Sign in';
     byId('authProfileBtn').title=currentUser?'Open account':'Sign in';
     byId('authHeaderLogoutBtn').hidden=!currentUser;
     byId('announcementEditor').hidden=!isAdmin;
     document.querySelector('.announcements-readonly').innerHTML=isAdmin?'<span aria-hidden="true">●</span> ADMIN EDITOR':'<span aria-hidden="true">●</span> READ ONLY';
-    document.querySelectorAll('[data-admin-only]').forEach(control=>updateAdminControl(control,isAdmin));
-    byId('authCreateUserForm').hidden=!isAdmin||currentUser.authType==='online';
+    document.querySelectorAll('[data-admin-only]').forEach(control=>updateAdminControl(control,canEdit));
+    byId('authCreateUserForm').hidden=true;
     byId('authUserList').hidden=!isAdmin;
     byId('authStorageNote').textContent=currentUser?.authType==='online'
-      ?'Online identity and role are verified with Firebase.'
-      :'Local account and session stay on this computer.';
+      ?'Online identity is verified by Firebase; privileged roles come from server-managed token claims.'
+      :'No-password device workspace. Data stays on this device; local controls are not a cloud security boundary.';
     byId('authCurrentUser').textContent=currentUser?`Signed in ${currentUser.authType==='local'?'locally':'online'} as ${currentUser.email||currentUser.username} (${isAdmin?'Administrator':'User'}).`:'';
     if(isAdmin)renderUserList();
     publishAuthState();
@@ -91,59 +92,32 @@
     byId('loginPassword').value='';
     if(typeof window.refreshAnnouncements==='function')window.refreshAnnouncements();
   }
-  function toHex(bytes){return [...new Uint8Array(bytes)].map(value=>value.toString(16).padStart(2,'0')).join('')}
-  function fromHex(value){return new Uint8Array((value.match(/.{1,2}/g)||[]).map(byte=>parseInt(byte,16)))}
-  async function hashPassword(password,salt){
-    const key=await crypto.subtle.importKey('raw',new TextEncoder().encode(password),'PBKDF2',false,['deriveBits']);
-    return toHex(await crypto.subtle.deriveBits({name:'PBKDF2',salt,iterations:passwordIterations,hash:'SHA-256'},key,256));
-  }
   function readLocalUsers(){
     try{const users=JSON.parse(localStorage.getItem(localUsersKey)||'[]');return Array.isArray(users)?users:[]}
     catch(error){console.warn('Could not read local accounts:',error);return []}
   }
   async function seedLocalAccounts(){
-    const users=readLocalUsers();
-    let changed=false;
-    for(const [username,password,role] of [['admin','admin123','admin'],['user','user123','user']]){
-      if(users.some(user=>String(user.username).toLowerCase()===username))continue;
-      const salt=crypto.getRandomValues(new Uint8Array(16));
-      users.push({username,role,salt:toHex(salt),hash:await hashPassword(password,salt),iterations:passwordIterations});
-      changed=true;
-    }
-    if(changed)localStorage.setItem(localUsersKey,JSON.stringify(users));
+    // Versioned local-only migration: remove obsolete password hashes and roles, without touching inventory,
+    // backups, settings, or any other browser data. Local roles are only a trusted-device convenience.
+    if(localStorage.getItem('fuji-device-workspace-migrated-v1')==='1')return;
+    const users=readLocalUsers().map(user=>({username:String(user.username||'device'),role:'user'}));
+    localStorage.setItem(localUsersKey,JSON.stringify(users));
+    localStorage.setItem('fuji-device-workspace-migrated-v1','1');
   }
   function readLocalSession(){
     try{
       const session=JSON.parse(localStorage.getItem(localSessionKey)||'null');
+      if(session?.auth_type==='local-device')return {id:'local:device',username:'device',name:'This device',email:null,role:'admin',authType:'local'};
       if(session?.auth_type!=='local')return null;
       const account=readLocalUsers().find(user=>user.username===session.username&&user.role===session.role);
       if(!account||!validRoles.has(account.role))return null;
       return {id:`local:${account.username}`,username:account.username,name:account.username,email:null,role:account.role,authType:'local'};
     }catch(error){return null}
   }
-  function saveLocalSession(account){
-    const session={auth_type:'local',username:account.username,role:account.role,createdAt:new Date().toISOString()};
+  function openDeviceWorkspace(){
+    const session={auth_type:'local-device',username:'device',createdAt:new Date().toISOString()};
     localStorage.setItem(localSessionKey,JSON.stringify(session));
-    enterApp({id:`local:${account.username}`,username:account.username,name:account.username,email:null,role:account.role,authType:'local'});
-  }
-  async function loginLocally(username,password){
-    const account=readLocalUsers().find(user=>user.username.toLowerCase()===username.toLowerCase());
-    if(!account)return false;
-    const hash=await hashPassword(password,fromHex(account.salt));
-    if(hash!==account.hash)return false;
-    saveLocalSession(account);
-    return true;
-  }
-  async function createLocalUser(username,password,role){
-    const normalized=username.trim();
-    if(!/^[a-zA-Z0-9._-]{3,40}$/.test(normalized))throw new Error('Use 3–40 letters, numbers, dots, underscores, or hyphens for the username.');
-    if(password.length<6)throw new Error('Use a password with at least 6 characters.');
-    if(!validRoles.has(role))throw new Error('Choose a valid role.');
-    const users=readLocalUsers();
-    if(users.some(user=>user.username.toLowerCase()===normalized.toLowerCase()))throw new Error('That username already exists on this computer.');
-    const salt=crypto.getRandomValues(new Uint8Array(16));
-    users.push({username:normalized,role,salt:toHex(salt),hash:await hashPassword(password,salt),iterations:passwordIterations});
-    localStorage.setItem(localUsersKey,JSON.stringify(users));
+    enterApp({id:'local:device',username:'device',name:'This device',email:null,role:'admin',authType:'local'});
   }
   function loadScript(source){
     if(loadedScripts.has(source))return loadedScripts.get(source);
@@ -170,12 +144,11 @@
       }
       return Promise.resolve();
     }
-    return firestore.collection('users').doc(user.uid).get().then(snapshot=>{
+    if(!user.emailVerified){firebaseAuth.signOut().catch(()=>{});setLoginError('Verify your email address before signing in.');return Promise.resolve()}
+    return user.getIdTokenResult().then(token=>{
       if(resolution!==authResolution)return;
-      if(!snapshot.exists)throw new Error('Your account has no assigned application role. Contact the administrator.');
-      const profile=snapshot.data();
-      if(!validRoles.has(profile.role))throw new Error('Your account role is invalid. Contact the administrator.');
-      enterApp({id:user.uid,username:profile.username||user.displayName||user.email,name:profile.name||user.displayName||user.email, email:user.email,role:profile.role,authType:'online'});
+      const role=validRoles.has(token.claims.role)?token.claims.role:'viewer';
+      enterApp({id:user.uid,username:user.displayName||user.email,name:user.displayName||user.email,email:user.email,role,storeId:token.claims.storeId||user.uid,authType:'online'});
     }).catch(async error=>{
       if(resolution!==authResolution)return;
       console.error('Could not verify Firebase user role:',error);
@@ -228,7 +201,7 @@
     });
   }
   function guardAdminAction(event){
-    if(currentUser?.role==='admin')return;
+    if(['admin','editor'].includes(currentUser?.role))return;
     const target=event.target instanceof Element?event.target:null;
     const protectedControl=target?.closest('[data-admin-only],.edit-item,.delete-item,.shelf-edit-input,.shelf-qty-input,[data-shelf-select],#shelfApplyBulkPromo,#shelfAddRow,#shelfSelectAll,#shelfSelectNone,#saveShiftData,#clearLocalHistory');
     if(!protectedControl)return;
@@ -250,7 +223,7 @@
       if(control.matches('input[type="file"]'))control.closest('label')?.setAttribute('data-admin-only','true');
     }));
     document.querySelectorAll('#importPanel .dropzone,#importPanel .session-card').forEach(control=>control.dataset.adminOnly='true');
-    document.querySelectorAll('[data-admin-only]').forEach(control=>updateAdminControl(control,currentUser?.role==='admin'));
+    document.querySelectorAll('[data-admin-only]').forEach(control=>updateAdminControl(control,['admin','editor'].includes(currentUser?.role)));
   }
   markAdminControls();
   new MutationObserver(markAdminControls).observe(document.body,{childList:true,subtree:true});
@@ -265,11 +238,17 @@
       tab.setAttribute('aria-selected',String(active));
     });
     const online=mode==='online';
+    byId('loginUsernameLabel').hidden=!online;
+    byId('loginUsername').hidden=!online;
+    byId('loginPassword').closest('.password-field').hidden=!online;
+    byId('loginForm').querySelector('label[for="loginPassword"]').hidden=!online;
+    byId('openDeviceWorkspace').hidden=online;
     byId('loginUsernameLabel').textContent=online?'Email':'Username';
     byId('loginUsername').type=online?'email':'text';
     byId('loginUsername').placeholder=online?'name@company.com':'Enter username';
     byId('loginUsername').autocomplete=online?'username':'username';
-    byId('loginSubmitLabel').textContent=online?'Sign In Online':'Sign In Locally';
+    byId('loginSubmitLabel').textContent=online?'Sign In Online':'Open Device Workspace';
+    byId('onlineAuthActions').hidden=!online;
     byId('loginModeStatus').textContent=online?'ONLINE · FIREBASE AUTHENTICATION':'OFFLINE · THIS COMPUTER';
     byId('loginFootnoteMode').textContent=online?'SECURE CLOUD SESSION':'LOCAL WORKSPACE';
     updateLoginSubmitState();
@@ -290,16 +269,35 @@
       const username=byId('loginUsername').value.trim();
       const password=byId('loginPassword').value;
       if(loginMode==='local'){
-        const valid=await loginLocally(username,password);
-        if(!valid)throw new Error('Invalid username or password.');
+        openDeviceWorkspace();
       }else{
         const {auth}=await initializeFirebase();
-        await auth.signInWithEmailAndPassword(username,password);
+        const result=await auth.signInWithEmailAndPassword(username,password);
+        if(!result.user.emailVerified){await auth.signOut();throw new Error('Verify your email address before signing in.')}
       }
     }catch(error){
       const networkFailure=!navigator.onLine||error.code==='auth/network-request-failed'||/network|timed out|download/i.test(error.message||'');
       setLoginError(networkFailure?'Network error: Unable to connect to online server. Local Machine Login remains available.':error.message==='Invalid username or password.'?error.message:'Invalid username/email or password.');
     }finally{loginInProgress=false;updateLoginSubmitState();document.querySelectorAll('[data-login-mode]').forEach(tab=>{tab.disabled=false})}
+  });
+  byId('openDeviceWorkspace').addEventListener('click',()=>{
+    try{openDeviceWorkspace()}catch(error){setLoginError('This browser could not save a local session. Check its storage settings.');}
+  });
+  byId('createOnlineAccount').addEventListener('click',async()=>{
+    try{
+      const email=byId('loginUsername').value.trim(),password=byId('loginPassword').value;
+      if(!email||password.length<10)throw new Error('Enter your email and a password with at least 10 characters.');
+      const {auth}=await initializeFirebase();const result=await auth.createUserWithEmailAndPassword(email,password);
+      await result.user.sendEmailVerification();setLoginError('Account created. Verify the link sent to your email, then sign in.');await auth.signOut();
+    }catch(error){setLoginError(error.message||'Could not create the account.');}
+  });
+  byId('resetOnlinePassword').addEventListener('click',async()=>{
+    try{const email=byId('loginUsername').value.trim();if(!email)throw new Error('Enter your email first.');const {auth}=await initializeFirebase();await auth.sendPasswordResetEmail(email);setLoginError('Password reset instructions sent if this account exists.');}
+    catch(error){setLoginError(error.message||'Could not send password reset email.');}
+  });
+  byId('googleOnlineLogin').addEventListener('click',async()=>{
+    try{const {auth}=await initializeFirebase();const provider=new window.firebase.auth.GoogleAuthProvider();await auth.signInWithPopup(provider);}
+    catch(error){setLoginError(error.message||'Google sign-in is unavailable.');}
   });
   byId('authProfileBtn').addEventListener('click',()=>{
     if(!currentUser)return;
@@ -314,20 +312,6 @@
   byId('authModal').addEventListener('click',event=>{if(event.target===byId('authModal'))byId('authModal').hidden=true});
   document.addEventListener('keydown',event=>{
     if(event.key==='Escape'&&!byId('authModal').hidden)byId('authModal').hidden=true;
-  });
-  byId('authCreateUserForm').addEventListener('submit',async event=>{
-    event.preventDefault();
-    if(currentUser?.role!=='admin'||currentUser.authType!=='local'){setAccountStatus('Local account creation requires a local administrator.',true);return}
-    const submit=byId('authCreateUserForm').querySelector('button[type="submit"]');
-    submit.disabled=true;
-    setAccountStatus('Creating local account…');
-    try{
-      await createLocalUser(byId('authNewUsername').value,byId('authNewPassword').value,byId('authNewRole').value);
-      byId('authCreateUserForm').reset();
-      await renderUserList();
-      setAccountStatus('Local account created on this computer.');
-    }catch(error){setAccountStatus(error.message||'Could not create the local account.',true)}
-    finally{submit.disabled=false}
   });
   byId('announcementForm').addEventListener('submit',async event=>{
     event.preventDefault();
@@ -386,6 +370,7 @@
   window.fujiFirebase=null;
   window.fujiCurrentUser=null;
   window.fujiAuth={get user(){return currentUser},get isAuthenticated(){return Boolean(currentUser)},get authType(){return currentUser?.authType||null}};
+  setLoginMode('local');
   updateLoginSubmitState();
   setApplicationVisible(false);
   seedLocalAccounts().then(()=>{

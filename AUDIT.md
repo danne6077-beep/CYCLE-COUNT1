@@ -3,7 +3,7 @@
 **Audit date:** 2026-10-19  
 **Repository:** `danne6077-beep/CYCLE-COUNT1`  
 **Audited branch:** `upgrade/audit-ui-auth-ai`  
-**Phase 2 status:** Not started. No application fixes have been made. This audit and the linked color inventory are the only additions on this branch.
+**Audit snapshot:** The findings below describe the repository before the current implementation work. See the phase status and resolution notes at the end of this document for current progress; open infrastructure and validation gaps remain explicitly listed.
 
 ## Phase 0 — Discovery
 
@@ -133,7 +133,7 @@ Format: **ID | Severity | File:line | Problem | Impact | Exact fix | Status / Fi
 | Print regression | No before/after PDF baseline/diff assets found. Print must be treated as a protected business artifact before style changes. |
 | Storage migration | Current backup/restore is useful and must be preserved. There is no cross-device sync. Data migration and backwards-compatible restore tests are prerequisites for schema changes. |
 
-### Prioritized fix plan (for approval before Phase 2)
+### Original prioritized fix plan
 
 1. **P0 security/data safety:** replace or patch the vulnerable workbook parser; eliminate imported-data HTML injection; protect CSV exports against formulas; make local mode's non-security-boundary behavior explicit and remove default password accounts as specified.
 2. **P1 preserve and establish correctness:** characterize print outputs and current core workflow; define a versioned count/session model and calculation rules; add import mapping, row error reporting, duplicate/UPC validation, locator-prefix settings, and tests; preserve backup restore through migrations.
@@ -142,7 +142,18 @@ Format: **ID | Severity | File:line | Problem | Impact | Exact fix | Status / Fi
 5. **P2 design/performance:** inventory print-sensitive styles and tokens, migrate colors without changing physical print specs, progressively reduce script/CSS blocking, and benchmark large imports.
 6. **P3 UX polish/deploy:** simplify home/About, remove/relabel local newsletter and clutter per the brief, add PWA only after cache/offline semantics are tested, then verify Vercel settings, add headers, capture screenshots, and create a PR. No Phase 2 work starts until the user reviews this audit.
 
-## Phase 1 commit status
+## Implementation progress (2026-10-19)
 
-Audit documents are uncommitted pending the user's review. **No application fix commit exists.**
+This branch implements the feasible local application work from Phases 2–7 and the Phase 10 shell/design brief. Repository work is in progress; results are not production-verified until a Vercel preview is available.
+
+| Phase / area | Current result | Remaining verification |
+|---|---|---|
+| Security and data safety | Imported values are escaped before HTML rendering; spreadsheet CSV formula prefixes are neutralized; local password accounts and seeded credentials are removed via a one-time data-preserving migration; workbook parser is pinned to official SheetJS 0.20.3 CDN; headers and restrictive Firestore rules are added. | CDN libraries are not vendored or SRI-pinned; Firestore emulator, Firebase Console App Check/auth domain policy, Vercel secrets, and live auth/AI routes are not verified. |
+| Inventory correctness | Import mapping confirmation, row-numbered issue reporting, duplicate/check-digit validation, 50k row guard, configurable locator prefixes, count variance utilities, and print page estimate utilities are implemented and unit-tested. | Count sessions/variance are not wired into persisted operational workflow; business rule validation for cigarette quantity relationships is unresolved; no operator-approved tolerances. |
+| Design and UX | Tokenized themes, shell/navigation, internal design page, skip link, keyboard help, PWA shell, offline help, streamlined About/contact, reduced motion, and local preview server are implemented. | Full Lighthouse/axe/screen reader/keyboard-only signoff is outstanding; contrast tests cover selected semantic token pairs, not every computed component state. |
+| Performance and scale | Inventory display is paginated and file/row sizes are bounded at 20MB/50k; tests cover a 50k utility fixture. | Import parsing is still synchronous and retains rows; no device performance/memory benchmark, virtualization, or Lighthouse measurement. |
+| Print and regression | Print theme aliases stay light; screenshots and automated layout checks cover viewports, scales, themes, and primary screens when the visual run completes. | No printer/PDF reference baseline or barcode scanner validation; print output has not been compared to known production forms. |
+| Cloud and deployment | Firebase email verification, password reset, Google sign-in, claims provisioning script, role-checked rules, optional consent-gated server AI endpoint with rate limits, and Vercel config are implemented. | No cloud credentials are present; custom claims, rules emulator, provider quotas, Vercel preview deployment, and production deployment remain unverified until connected configuration is available. |
+
+Do not describe the application as cross-device synchronized: inventory and activity remain local browser data. The static Vercel app can deploy independently, while Firebase and Ask FUJI online features need external environment setup.
 

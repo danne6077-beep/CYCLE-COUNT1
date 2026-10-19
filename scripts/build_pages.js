@@ -7,7 +7,7 @@ const output=path.join(root,'dist');
 fs.rmSync(output,{recursive:true,force:true});
 fs.mkdirSync(output,{recursive:true});
 const excludedDirectories=new Set(['.git','.github','node_modules','dist','scripts','tests','qa']);
-const publicFileExtensions=new Set(['.html','.js','.css','.json','.jpg','.jpeg','.png','.webp','.svg','.ico','.woff','.woff2']);
+const publicFileExtensions=new Set(['.html','.js','.css','.json','.webmanifest','.md','.jpg','.jpeg','.png','.webp','.svg','.ico','.woff','.woff2']);
 for(const entry of fs.readdirSync(root,{withFileTypes:true})){
   if(entry.isDirectory()){
     if(excludedDirectories.has(entry.name)||entry.name.startsWith('.'))continue;

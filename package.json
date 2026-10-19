@@ -1,25 +1,29 @@
 {
   "name": "cycle-count1",
   "version": "1.0.0",
-  "description": "",
+  "description": "FUJI Cycle Count System",
   "main": "app.js",
   "scripts": {
     "test": "node --test",
+    "lint": "node scripts/check-js.js",
+    "build": "node scripts/build_pages.js",
     "build:pages": "node scripts/build_pages.js",
-    "test:visual": "npm run build:pages && node scripts/phase10-visual-regression.js"
+    "serve": "node scripts/serve-static.js",
+    "test:visual": "npm run build:pages && node scripts/phase10-visual-regression.js",
+    "check": "npm run lint && npm test && npm run build"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Fujitzu25/CYCLE-COUNT1.git"
+    "url": "git+https://github.com/danne6077-beep/CYCLE-COUNT1.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "bugs": {
-    "url": "https://github.com/Fujitzu25/CYCLE-COUNT1/issues"
+    "url": "https://github.com/danne6077-beep/CYCLE-COUNT1/issues"
   },
-  "homepage": "https://github.com/Fujitzu25/CYCLE-COUNT1#readme",
+  "homepage": "https://github.com/danne6077-beep/CYCLE-COUNT1#readme",
   "devDependencies": {
     "playwright": "^1.49.1"
   }

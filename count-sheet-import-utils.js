@@ -47,7 +47,7 @@
   const headerAliases={
     supplier:['supplier','supplier name','vendor','vendor name','principal'],
     locator:['locator','locator code','locator no','locator number','location','bin location','selling locator'],
-    sku:['sku','sku no','sku number','item code','item no','item number','product code'],
+    sku:['sku','sku no','sku number','item code','item no','item number','product code','product'],
     barcode:['upc','upc code','upc number','upc barcode','upc barcode number','barcode','barcode number','ean','gtin'],
     description:['description','item description','product description','product name','item name','name'],
     ccdNo:['ccd','ccd no','ccd number','ccdno'],
@@ -83,7 +83,55 @@
     }));
   }
 
-  const api={parseCsv,rowsFromMatrix,mapImportedRows};
+  const importFields=['supplier','locator','sku','barcode','description','category','department','departmentCode','ccdNo'];
+  function suggestColumnMapping(rows){
+    if(!Array.isArray(rows)||!rows.length)throw new Error('Import rows are required to suggest columns.');
+    const headers=Object.keys(rows[0]);
+    return Object.fromEntries(importFields.map(field=>{
+      const aliases=headerAliases[field]||[field];
+      const match=headers.find(header=>aliases.includes(normalizeHeader(header)));
+      return [field,match||''];
+    }));
+  }
+  function mapRowsWithColumns(rows,mapping){
+    return rows.map((row,index)=>({
+      ...row,
+      _sourceRow:index+2,
+      ...Object.fromEntries(importFields.map(field=>[field,String(mapping?.[field]?row[mapping[field]]??'':'' ).trim()])),
+      supplier:String(mapping?.supplier?row[mapping.supplier]??'':'').trim()||'Unassigned Supplier',
+      category:String(mapping?.category?row[mapping.category]??'':'').trim()||'Imported Items'
+    }));
+  }
+  function upcCheckDigitValid(value){
+    const digits=String(value??'').replace(/\D/g,'');
+    if(!/^\d{8}$|^\d{12}$|^\d{13}$|^\d{14}$/.test(digits))return null;
+    const body=digits.slice(0,-1).split('').reverse().map(Number);
+    const sum=body.reduce((total,digit,index)=>total+digit*(index%2===0?3:1),0);
+    return (10-sum%10)%10===Number(digits.at(-1));
+  }
+  function validateRows(rows){
+    const skuRows=new Map(),upcRows=new Map();
+    rows.forEach((row,index)=>{
+      const sku=String(row.sku||'').trim().toLowerCase(),upc=String(row.barcode||'').trim();
+      if(sku)skuRows.set(sku,[...(skuRows.get(sku)||[]),index]);
+      if(upc)upcRows.set(upc,[...(upcRows.get(upc)||[]),index]);
+    });
+    return rows.flatMap((row,index)=>{
+      const issues=[];
+      if(!String(row.sku||'').trim())issues.push({severity:'error',field:'sku',message:'SKU is missing.'});
+      const check=upcCheckDigitValid(row.barcode);
+      if(check===false)issues.push({severity:'warning',field:'barcode',message:'UPC/EAN check digit is invalid.'});
+      if((skuRows.get(String(row.sku||'').trim().toLowerCase())||[]).length>1)issues.push({severity:'warning',field:'sku',message:'SKU appears more than once in this file.'});
+      if((upcRows.get(String(row.barcode||'').trim())||[]).length>1)issues.push({severity:'warning',field:'barcode',message:'UPC appears more than once in this file.'});
+      return issues.map(issue=>({...issue,row:row._sourceRow||index+2}));
+    });
+  }
+  function recognizeLocatorArea(locator,prefixes={sa:'SA-',ba:'BA-',wh:'WH-'}){
+    const normalized=String(locator??'').trim().toUpperCase();
+    return Object.entries(prefixes).find(([,prefix])=>prefix&&normalized.startsWith(String(prefix).trim().toUpperCase()))?.[0]||'';
+  }
+
+  const api={parseCsv,rowsFromMatrix,mapImportedRows,suggestColumnMapping,mapRowsWithColumns,upcCheckDigitValid,validateRows,recognizeLocatorArea};
   if(typeof module!=='undefined'&&module.exports)module.exports=api;
   global.CountSheetImport=api;
 }(typeof window!=='undefined'?window:globalThis));

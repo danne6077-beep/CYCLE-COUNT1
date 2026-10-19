@@ -16,13 +16,13 @@ const previewServer = process.env.VISUAL_BASE_URL ? null : http.createServer((re
     response.writeHead(200,{'content-type':`${staticTypes[path.extname(file)] || 'application/octet-stream'}; charset=utf-8`}).end(content);
   });
 });
-const widths = [390, 768, 1024, 1280, 1366, 1440, 1920];
+const widths = [360, 390, 768, 1024, 1280, 1366, 1440, 1920];
 const scales = [1, 1.25, 1.5];
 const modules = [
   ['home', '#homeNav'], ['count-sheet', '#countSheetNav'], ['shelf-tag', '#shelfTagNav'],
   ['product-lookup', '#productLookupNav'], ['masterlist', '#masterlistNav'], ['cigarette-monitor', '#cigarsNav']
 ];
-const screenshotDir = path.resolve(__dirname, '..', 'qa', 'phase10', 'screenshots');
+const screenshotDir = path.resolve(__dirname, '..', 'qa', 'phase10', 'after');
 fs.mkdirSync(screenshotDir, { recursive: true });
 const browserOptions = { headless: true };
 const chromePath = process.env.CHROME_PATH || (process.platform === 'win32' ? 'C:/Program Files/Google/Chrome/Application/chrome.exe' : undefined);
@@ -33,14 +33,17 @@ const measurements = [];
 const screenshotDone = new Set();
 
 function fail(message) { failures.push(message); }
-async function signIn(page) {
+async function signIn(page, width, scale) {
   await page.goto(baseUrl, { waitUntil: 'domcontentloaded' });
   const loginWidth = await page.evaluate(() => Number.parseFloat(getComputedStyle(document.querySelector('.login-card')).width));
   if (loginWidth > 380) fail(`login card width ${loginWidth}px exceeds the 380px design target`);
   if (await page.locator('#loginPage').isVisible()) {
-    await page.locator('#loginUsername').fill('admin');
-    await page.locator('#loginPassword').fill('admin123');
-    await page.locator('#loginForm button[type="submit"]').click();
+    for (const theme of ['light', 'dark']) {
+      await page.evaluate(value => { localStorage.setItem('fuji-color-theme-v1', value); document.documentElement.dataset.theme=value; document.documentElement.style.colorScheme=value; }, theme);
+      await page.screenshot({ path:path.join(screenshotDir, `login-${theme}-${width}-${String(scale).replace('.','p')}.png`), fullPage:true });
+      screenshotDone.add(`login-${theme}-${width}-${scale}`);
+    }
+    await page.locator('#openDeviceWorkspace').click();
     await page.waitForFunction(() => !document.querySelector('#appShell')?.hidden, null, { timeout: 12000 });
   } else {
     await page.waitForFunction(() => !document.querySelector('#appShell')?.hidden, null, { timeout: 12000 });
@@ -69,7 +72,7 @@ async function inspect(page, label, width, scale, theme) {
   });
   if (result.document > width + 1 || result.body > width + 1) fail(`${label} ${width}px @${scale} ${theme}: horizontal overflow ${result.document}/${result.body}`);
   if (result.title && result.actions && result.title.right > result.actions.left + 1) fail(`${label} ${width}px @${scale} ${theme}: topbar title overlaps page actions`);
-  const expectedAccent = theme === 'dark' ? '#55c6a0' : '#08785b';
+  const expectedAccent = theme === 'dark' ? '#34d399' : '#08785b';
   if (result.accent.toLowerCase() !== expectedAccent) fail(`${label} ${width}px @${scale} ${theme}: accent ${result.accent} does not match the logo-derived palette ${expectedAccent}`);
   measurements.push({ screen:label,width,scale,theme,documentWidth:result.document,viewport:result.viewport,panel:result.panel });
 }
@@ -86,7 +89,7 @@ async function inspect(page, label, width, scale, theme) {
       const page = await context.newPage();
       const pageErrors = [];
       page.on('pageerror', error => pageErrors.push(error.message));
-      await signIn(page);
+      await signIn(page,width,scale);
       for (const theme of ['light','dark']) {
         await page.evaluate(themeValue => {
           localStorage.setItem('fuji-color-theme-v1', themeValue);
@@ -97,8 +100,8 @@ async function inspect(page, label, width, scale, theme) {
           await navigate(page,selector,width);
           await page.waitForTimeout(40);
           await inspect(page, name, width, scale, theme);
-          if (width === 1366 && scale === 1) {
-            const key = `${theme}-${name}`;
+          if ([360,768,1280,1366,1440,1920].includes(width)) {
+            const key = `${theme}-${name}-${width}-${String(scale).replace('.','p')}`;
             if (!screenshotDone.has(key)) {
               await page.screenshot({ path:path.join(screenshotDir, `${key}.png`), fullPage:true });
               screenshotDone.add(key);
@@ -109,8 +112,8 @@ async function inspect(page, label, width, scale, theme) {
         const settingsState = await page.evaluate(() => ({ visible:!document.querySelector('#settingsPage').hidden, backdrop:!document.querySelector('#modalBackdrop').hidden, visiblePanels:[...document.querySelectorAll('#mainContent > section:not([hidden])')].map(panel=>panel.id), columns:getComputedStyle(document.querySelector('.settings-hub')).gridTemplateColumns }));
         if (!settingsState.visible || settingsState.backdrop || settingsState.visiblePanels.length) fail(`settings ${width}px @${scale} ${theme}: page/backdrop state ${JSON.stringify(settingsState)}`);
         await inspect(page,'settings',width,scale,theme);
-        if (width === 1366 && scale === 1) {
-          const key = `${theme}-settings`;
+        if ([360,768,1280,1366,1440,1920].includes(width)) {
+          const key = `${theme}-settings-${width}-${String(scale).replace('.','p')}`;
           await page.screenshot({ path:path.join(screenshotDir, `${key}.png`), fullPage:true });
           screenshotDone.add(key);
         }

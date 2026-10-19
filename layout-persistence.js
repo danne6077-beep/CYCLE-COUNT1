@@ -355,7 +355,7 @@ function updateSupplierFilter(){
 	const category=$('countSheetCategoryFilter')?.value||'all';
 	const categoryKey=category==='__mix__'?'all':category;
 	const suppliers=CountSheetFilters.getDepartmentSupplierOptions(items,{ccd,department,category:categoryKey});
-	filter.innerHTML='<option value="all">All suppliers</option>'+suppliers.map(supplier=>`<option value="${supplier}">${supplier}</option>`).join('');
+  filter.replaceChildren(new Option('All suppliers','all'),...suppliers.map(supplier=>new Option(supplier,supplier)));
 	filter.value=suppliers.includes(current)?current:'all';
 	syncSupplierSelectionList();
 	updatePaperUseEstimate();
@@ -396,7 +396,7 @@ function updatePaperUseEstimate(){
 	if(!items.length){estimate.textContent='Import inventory to estimate bond-paper use.';return;}
 	const perPage=Math.max(1,Number($('rowsPerPage')?.value)||8);
 	const groupedRows=items.reduce((counts,item)=>{const supplier=item.supplier||'Unassigned Supplier';counts[supplier]=(counts[supplier]||0)+1;return counts},{});
-	const sheets=Object.values(groupedRows).reduce((total,count)=>total+Math.ceil(count/perPage),0);
+	const sheets=CountSessionUtils.pagesForGroups(Object.values(groupedRows),perPage);
 	const paper=$('paperSize').selectedOptions[0]?.textContent.split(' · ')[0]||'paper';
 	const orientation=$('orientation').value;
 	estimate.textContent=`Estimated sheets: ${sheets} · ${perPage} rows per sheet · ${paper} ${orientation}`;

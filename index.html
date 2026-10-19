@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FUJI CYCLE COUNT SHEET GENERATOR</title>
   <meta name="description" content="FUJI CYCLE COUNT SHEET GENERATOR">
+  <meta name="theme-color" content="#08785b">
+  <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="logo.jpg" type="image/jpeg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -57,7 +59,7 @@
     .layout-controls{background:#f7faf8;border:1px solid #e1e9e3;border-radius:8px;padding:16px}.layout-control-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px}.layout-control-grid label{color:#536158}.layout-control-grid output{float:right;color:var(--accent);font-weight:700}.layout-control-grid input[type=range]{padding:0;border:0;accent-color:var(--accent);margin-top:10px}.layout-toggles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:15px}.layout-toggles .toggle-row{background:#fff}.layout-preview-note{display:flex;align-items:center;gap:9px;color:#6d7971;font-size:11px;margin-top:14px}.count-sheet-table td{height:var(--sheet-row-height,50px);font-size:var(--sheet-font-size,11px)}.count-sheet-table td:nth-child(3) .small-barcode{width:var(--sheet-barcode-width,110px)}.count-line{width:var(--sheet-count-width,88%)}.sheet-hide-barcode .count-sheet-table td:nth-child(3)>*{visibility:hidden}.sheet-hide-locator .count-sheet-table th:nth-child(5),.sheet-hide-locator .count-sheet-table td:nth-child(5){display:none}@media print{@page{size:var(--print-paper,Letter) var(--print-orientation,portrait);margin:var(--print-margin,.28in)}}@media(max-width:800px){.layout-control-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.layout-toggles{grid-template-columns:1fr}} 
   </style>
   <style>
-    #goGenerate{display:none!important}.print-count-sheet .page-shell>section#countSheetPanel{display:block!important;visibility:visible!important}.print-count-sheet .page-shell>section:not(#countSheetPanel){display:none!important}
+    .print-count-sheet .page-shell>section#countSheetPanel{display:block!important;visibility:visible!important}.print-count-sheet .page-shell>section:not(#countSheetPanel){display:none!important}
     .layout-live-preview{margin-top:18px;border:1px solid #dce5df;border-radius:8px;background:#eef2ef;padding:12px}.live-preview-heading{display:flex;justify-content:space-between;align-items:center;color:#526158;font-size:10px;letter-spacing:.7px;margin:0 3px 9px}.live-preview-heading span{font-weight:400;letter-spacing:0;color:#87928a}.layout-live-preview #countSheetLivePreview{max-height:430px;overflow:auto;background:#dfe5e1;padding:12px}.layout-live-preview .count-sheet-page{width:100%!important;max-width:100%!important;min-width:0!important;margin:0 auto!important;overflow:hidden}.layout-live-preview .count-sheet-page+.count-sheet-page{display:none}.layout-live-preview .reference-sheet-label{display:none}.layout-live-preview .reference-sheet-header{min-height:58px;padding-bottom:7px}.layout-live-preview .reference-title{font-size:16px}.layout-live-preview .reference-title span{font-size:9px}.layout-live-preview .reference-meta{font-size:8px;margin-top:3px;white-space:nowrap;overflow:hidden}.layout-live-preview .reference-table{width:100%!important;min-width:0!important;table-layout:fixed}.layout-live-preview .reference-table th,.layout-live-preview .reference-table td{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.layout-live-preview .reference-table th:nth-child(1){width:3%!important}.layout-live-preview .reference-table th:nth-child(2){width:7%!important}.layout-live-preview .reference-table th:nth-child(3){width:12%!important}.layout-live-preview .reference-table th:nth-child(4){width:25%!important}.layout-live-preview .reference-table th:nth-child(5){width:10%!important}.layout-live-preview .reference-table th:nth-child(6){width:6%!important}.layout-live-preview .reference-table th:nth-child(7){width:10%!important}.layout-live-preview .reference-table th:nth-child(8){width:6%!important}.layout-live-preview .reference-table th:nth-child(9){width:15%!important}.layout-live-preview .reference-table th:nth-child(10){width:6%!important}.layout-live-preview .reference-table th{font-size:8px!important;padding:3px 2px!important}.layout-live-preview .reference-table td{font-size:8px!important;height:var(--sheet-row-height,50px);padding:3px 2px!important}.layout-live-preview .small-barcode{width:100%!important;height:17px}.layout-live-preview .reference-table td:nth-child(3) small{font-size:6px}.layout-live-preview .reference-signoff{font-size:8px;margin-top:10px}.live-empty{padding:45px;text-align:center;color:#87928a;font-size:12px;background:#fff;border:1px dashed #cbd8cf}
   </style>
   <style>
@@ -172,10 +174,10 @@
   </style>
   <link rel="stylesheet" href="redesign.css">
   <link rel="stylesheet" href="app-shell.css">
+  <link rel="stylesheet" href="tokens.css">
 </head>
 <body class="auth-logged-out">
   <a class="skip-link" href="#loginTitle">Skip to content</a>
-  <div class="scroll-progress" id="scrollProgress" role="progressbar" aria-label="Page scroll progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span></span></div>
   <main class="login-page" id="loginPage">
     <section class="login-card" aria-labelledby="loginTitle">
       <div class="login-visual">
@@ -192,12 +194,15 @@
         <p class="login-mode-status" id="loginModeStatus">OFFLINE · THIS COMPUTER</p>
         <form id="loginForm" class="login-form" novalidate>
           <label id="loginUsernameLabel" for="loginUsername">Username</label>
-          <input id="loginUsername" name="username" type="text" autocomplete="username" placeholder="Enter username" required>
+          <input id="loginUsername" name="username" type="text" autocomplete="username" placeholder="Enter username">
           <label for="loginPassword">Password</label>
-          <div class="password-field"><input id="loginPassword" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" required><button class="password-toggle" type="button" data-password-toggle="loginPassword" aria-label="Show password" aria-pressed="false">Show</button></div>
+          <div class="password-field"><input id="loginPassword" name="password" type="password" autocomplete="current-password" placeholder="Enter your password"><button class="password-toggle" type="button" data-password-toggle="loginPassword" aria-label="Show password" aria-pressed="false">Show</button></div>
           <p class="login-error" id="loginError" role="alert" aria-live="polite"></p>
           <button class="login-submit" id="loginSubmit" type="submit"><span id="loginSubmitLabel">Sign In Locally</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button>
+          <div class="online-auth-actions" id="onlineAuthActions" hidden><button type="button" id="createOnlineAccount">Create account</button><button type="button" id="resetOnlinePassword">Forgot password?</button><button type="button" id="googleOnlineLogin">Continue with Google</button></div>
         </form>
+        <button class="secondary-button device-workspace-button" id="openDeviceWorkspace" type="button">Open this device workspace</button>
+        <p class="device-workspace-note">Offline mode · Data stays on this device</p>
         <p class="login-footnote">FUJI CYCLE COUNT SYSTEM <span>·</span> <span id="loginFootnoteMode">LOCAL WORKSPACE</span></p>
       </div>
     </section>
@@ -411,10 +416,6 @@
         <details><summary>Can I use this on a phone?</summary><p>Yes. Navigation and workspace panels adapt to smaller screens. Spreadsheet importing and printing work best on a desktop browser.</p></details>
         <details><summary>How do I publish an update?</summary><p>Administrators can use the Updates workspace after signing in. Website code changes are published from the main branch.</p></details>
       </section>
-      <section class="newsletter-card" aria-labelledby="newsletterHeading">
-        <div><p class="about-eyebrow">PRODUCT NOTES</p><h2 id="newsletterHeading">Get occasional workflow updates</h2><p>Save your interest on this device. This static site does not send email or share your address.</p></div>
-        <form id="newsletterForm"><label for="newsletterEmail">Email address</label><div class="newsletter-form-row"><input id="newsletterEmail" type="email" autocomplete="email" placeholder="you@example.com" required><button class="primary-button" type="submit">Sign up</button></div><p id="newsletterStatus" role="status" aria-live="polite"></p></form>
-      </section>
     </section>
     <section id="cigarsPanel" class="cigars-workspace" hidden aria-labelledby="cigarsHeading">
       <header class="cigars-heading">
@@ -509,6 +510,7 @@
     <section id="dataPanel" class="panel" hidden>
       <div class="panel-heading data-heading"><div><p class="section-kicker">STEP 02</p><h2>Validate & edit inventory</h2><p id="dataSummary">Review imported rows before generating the count sheet.</p></div><div class="heading-actions"><button class="secondary-button" id="reuploadBtn">↥ Re-upload</button><button class="secondary-button" id="addItemBtn">＋ Add item</button><button class="primary-button" id="countSheetBtn">▦ Generate Count Sheet</button></div></div>
       <div class="data-toolbar"><label class="search-box">⌕<input id="searchInput" placeholder="Search SKU, Locator, Description, Barcode..."></label><div class="toolbar-meta"><span id="rowCount">0 rows</span><select id="sortSelect"><option value="locator">Sort: Locator</option><option value="sku">Sort: SKU</option><option value="description">Sort: Description</option></select></div></div>
+      <section id="importIssueReport" class="import-issue-report" aria-live="polite" hidden><strong id="importIssueHeading"></strong><ul id="importIssueList"></ul></section>
       <div class="table-wrap"><table><thead><tr><th>LOCATOR</th><th>SKU</th><th>UPC / BARCODE</th><th>DESCRIPTION</th><th class="align-right">ACTIONS</th></tr></thead><tbody id="inventoryBody"></tbody></table><div class="empty-state" id="emptyState" hidden>No inventory rows match your search.</div></div>
       <div class="bottom-actions"><button class="secondary-button" id="backImport">← Back to import</button><button class="primary-button" id="configureSheetBtn">Configure Count Sheet →</button></div>
     </section>
@@ -778,7 +780,6 @@
     <div id="siteSearchResults" class="site-search-results" role="listbox" aria-label="Search results"></div>
   </dialog>
   <dialog class="confirm-dialog" id="confirmDialog" aria-labelledby="confirmHeading"><p class="section-kicker">PLEASE CONFIRM</p><h2 id="confirmHeading">Are you sure?</h2><p id="confirmMessage"></p><div class="confirm-actions"><button class="secondary-button" id="confirmCancel" type="button">Cancel</button><button class="danger-button" id="confirmAccept" type="button">Continue</button></div></dialog>
-  <a class="floating-contact" id="floatingContact" href="#about-contact" aria-label="Contact the workspace team">✉ <span>Contact</span></a>
   <button class="back-to-top" id="backToTop" type="button" aria-label="Back to top" title="Back to top">↑</button>
   <div class="cookie-banner" id="cookieBanner" role="region" aria-label="Cookie preferences" hidden><div><strong>Your browser, your choice</strong><p>This site uses essential local storage for sign-in, preferences, and saved inventory.</p></div><div class="cookie-actions"><button class="secondary-button" id="cookieEssential" type="button">Essential only</button><button class="primary-button" id="cookieAccept" type="button">Accept</button></div></div>
 
@@ -806,7 +807,7 @@
   </div>
 
   <div class="toast" id="toast" role="status"></div>
-  <div hidden><button id="generateBtn"></button><button id="goGenerate"></button><button id="backConfigure"></button><button id="printBtn"></button><button id="pdfBtn"></button><div id="tagSheet"></div><div id="generatedSummary"></div></div>
+  <div hidden><button id="generateBtn"></button><button id="backConfigure"></button><button id="printBtn"></button><button id="pdfBtn"></button><div id="tagSheet"></div><div id="generatedSummary"></div></div>
   <div class="modal-backdrop settings-backdrop" id="modalBackdrop" hidden>
     <section class="settings-hub" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
       <header class="settings-hub-header">
@@ -830,6 +831,8 @@
             <label>System name<input id="systemNameField" type="text" maxlength="70" placeholder="FUJI CYCLE COUNT SHEET GENERATOR"></label>
             <label>Editor name<input id="editorName" type="text" maxlength="70" placeholder="Name shown on count sheets"></label>
             <label class="settings-field-wide">Store name<input id="settingsStoreName" type="text" maxlength="100" placeholder="Store or branch name"></label>
+            <fieldset class="locator-prefix-settings settings-field-wide"><legend>Locator area prefixes</legend><label>SA area prefix<input id="prefixSA" maxlength="12" value="SA-" autocomplete="off"></label><label>BA area prefix<input id="prefixBA" maxlength="12" value="BA-" autocomplete="off"></label><label>WH area prefix<input id="prefixWH" maxlength="12" value="WH-" autocomplete="off"></label><small>Used to recognize locator areas when reviewing imported inventory. Keep prefixes distinct.</small></fieldset>
+            <label class="settings-field-wide ai-consent-setting"><input id="aiSharingConsent" type="checkbox"> Allow Ask FUJI to send my questions to the configured AI provider after I press Ask. Inventory is not sent.</label>
           </div>
         </section>
         <section class="settings-view" role="tabpanel" data-settings-view="palette" hidden>
@@ -857,15 +860,17 @@
     </section>
   </div>
   <div id="printToast" class="print-toast" aria-live="polite" aria-atomic="true" hidden><div class="print-toast__content"><span class="print-toast__icon">✓</span><div><strong>Print status</strong><p>Count sheet sent to printer successfully.</p></div><button type="button" class="print-toast__close" aria-label="Close notification">×</button></div></div>
-  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" crossorigin="anonymous"></script>
+  <script src="safe-text-utils.js"></script>
+  <script src="count-session-utils.js"></script>
+  <script src="count-sheet-import-utils.js"></script>
   <script src="count-sheet-filter-utils.js"></script>
   <script src="app.js"></script>
   <script src="count-sheet-reference.js"></script>
   <script src="layout-persistence.js"></script>
-  <script src="count-sheet-import-utils.js"></script>
   <script src="print-controller.js"></script>
   <script src="product-lookup.js"></script>
   <script src="cigar-expiry-utils.js"></script>

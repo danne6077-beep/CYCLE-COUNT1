@@ -1,0 +1,10 @@
+{
+  "name": "FUJI Cycle Count System",
+  "short_name": "FUJI Count",
+  "description": "Inventory count sheets and shelf tags for retail teams.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7faf8",
+  "theme_color": "#08785b",
+  "icons": [{ "src": "/logo.jpg", "sizes": "512x512", "type": "image/jpeg", "purpose": "any" }]
+}

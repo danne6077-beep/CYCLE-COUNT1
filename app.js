@@ -8,6 +8,7 @@ const sampleItems=[
 ];
 let items=[];let currentStep=1;var start=0;let countSheetUsesMasterlist=false;
 const $=id=>document.getElementById(id);
+function escapeSheetText(value){return FujiSafeText.escapeHtml(value)}
 const localCycleDataKey='fuji-cycle-count-local-data-v1';
 const localCycleHistoryKey='fuji-cycle-count-local-history-v1';
 const localCycleDatabaseName='fuji-cycle-count-local-v1';
@@ -86,6 +87,12 @@ function getInventoryPager(){
   return pager;
 }
 function renderItems(rebuildView=true){
+  const importIssues=CountSheetImport.validateRows(items);
+  const issueRows=new Map();importIssues.forEach(issue=>issueRows.set(issue.row,[...(issueRows.get(issue.row)||[]),issue]));
+  const report=$('importIssueReport');report.hidden=importIssues.length===0;
+  $('importIssueHeading').textContent=importIssues.length?`${importIssues.length} data quality issue${importIssues.length===1?'':'s'} found · review rows before printing`:'';
+  const issueList=$('importIssueList');issueList.replaceChildren();importIssues.slice(0,100).forEach(issue=>{const li=document.createElement('li');li.textContent=`Row ${issue.row}: ${issue.message}`;issueList.append(li)});
+  if(importIssues.length>100){const li=document.createElement('li');li.textContent=`And ${importIssues.length-100} more issues.`;issueList.append(li)}
   const term=$('searchInput').value.trim().toLowerCase();
   const sort=$('sortSelect').value;
   const key=`${term}\u0000${sort}`;
@@ -104,7 +111,7 @@ function renderItems(rebuildView=true){
   inventoryPage=Math.min(inventoryPage,pageCount);
   const startIndex=(inventoryPage-1)*inventoryPageSize;
   const pageIndexes=indexes.slice(startIndex,startIndex+inventoryPageSize);
-  $('inventoryBody').innerHTML=pageIndexes.map(index=>{const item=items[index];return`<tr><td><span class="locator">${item.locator||''}</span></td><td class="code">${item.sku||''}</td><td class="code">${item.barcode||'<span style="color:#b05b48">NO BARCODE</span>'}</td><td>${item.description||''}</td><td><div class="item-actions"><button class="icon-button edit-item" data-index="${index}" title="Edit item">✎</button><button class="icon-button delete-item" data-index="${index}" title="Delete item">×</button></div></td></tr>`}).join('');
+  $('inventoryBody').innerHTML=pageIndexes.map(index=>{const item=items[index];const row=item._sourceRow||index+2;const messages=(issueRows.get(row)||[]).map(issue=>issue.message).join(' · ');return`<tr class="${messages?'has-import-issues':''}"><td><span class="locator">${escapeSheetText(item.locator||'')}</span></td><td class="code">${escapeSheetText(item.sku||'')}</td><td class="code">${item.barcode?escapeSheetText(item.barcode):'<span class="barcode-missing">NO BARCODE</span>'}</td><td>${escapeSheetText(item.description||'')}${messages?` <span class="row-issue" title="${escapeSheetText(messages)}" aria-label="Data issue: ${escapeSheetText(messages)}">!</span>`:''}</td><td><div class="item-actions"><button class="icon-button edit-item" data-index="${index}" title="Edit item">✎</button><button class="icon-button delete-item" data-index="${index}" title="Delete item">×</button></div></td></tr>`}).join('');
   $('rowCount').textContent=`${indexes.length} of ${items.length} rows`;
   $('emptyState').hidden=indexes.length>0;
   const pager=getInventoryPager();
@@ -113,8 +120,8 @@ function renderItems(rebuildView=true){
   $('inventoryPrevPage').disabled=inventoryPage===1;
   $('inventoryNextPage').disabled=inventoryPage===pageCount;
 }
-function renderGenerated(){const tagSheet=$('tagSheet');tagSheet.innerHTML=items.map((item,index)=>`<article class="count-tag"><div class="tag-header"><strong>LOCATOR: ${item.locator||'UNASSIGNED'}</strong><span class="copy-number">#${item.copy||String(index+1).padStart(3,'0')}</span><span class="prince-logo">prince<small> biscuits</small></span></div><div class="tag-info"><b>SKU: ${item.sku||'—'}</b><b>UPC: ${item.barcode||'—'}</b><strong>${item.description||'UNNAMED ITEM'}</strong></div><div class="tag-barcode"><div class="barcode-lines"></div><span>${item.barcode||'NO BARCODE'}</span></div><div class="count-box">COUNT</div><div class="signoff"><div><b>Counter :</b><span></span></div><div><b>Scanner :</b><span></span></div><div><b>Validator :</b><span></span></div><small>Powered by: DECStudioHub</small></div></article>`).join('')}
-function renderCountSheet(){const groups=items.reduce((result,item)=>{const key=item.supplier||'Unassigned Supplier';(result[key]??=[]).push(item);return result},{});$('countSheetPages').innerHTML=Object.entries(groups).map(([supplier,rows],groupIndex)=>`<article class="count-sheet-page"><header class="sheet-header"><div><h3>COUNT SHEET <span>PHYSICAL INVENTORY</span></h3><p><b>SUPPLIER:</b> ${supplier} &nbsp; <b>STORE:</b> ${$('storeField').value||'Store #14014 - Retail'} &nbsp; <b>DATE:</b> ${$('dateField').value||'2026-09-11'}</p></div><div class="sheet-locator"><b>LOCATORS:</b><strong>${[...new Set(rows.map(row=>row.locator||'—'))].join(', ')}</strong><div class="mini-bars"></div><small>PAGE ${groupIndex+1} OF ${Object.keys(groups).length}</small></div></header><table class="count-sheet-table"><thead><tr><th>#</th><th>SKU</th><th>BARCODE</th><th>DESCRIPTION</th><th>LOCATOR</th><th>COUNT</th></tr></thead><tbody>${rows.map((item,index)=>`<tr><td>${index+1}</td><td>${item.sku||'—'}</td><td><div class="small-barcode"></div><small>${item.barcode||'—'}</small></td><td>${item.description||'—'}</td><td>${item.locator||'—'}</td><td><span class="count-line"></span></td></tr>`).join('')}</tbody></table></article>`).join('');$('countSheetSummary').textContent=`${Object.keys(groups).length} supplier sheets prepared; locators are included on every line.`}
+function renderGenerated(){const tagSheet=$('tagSheet');tagSheet.innerHTML=items.map((item,index)=>`<article class="count-tag"><div class="tag-header"><strong>LOCATOR: ${escapeSheetText(item.locator||'UNASSIGNED')}</strong><span class="copy-number">#${escapeSheetText(item.copy||String(index+1).padStart(3,'0'))}</span><span class="prince-logo">prince<small> biscuits</small></span></div><div class="tag-info"><b>SKU: ${escapeSheetText(item.sku||'—')}</b><b>UPC: ${escapeSheetText(item.barcode||'—')}</b><strong>${escapeSheetText(item.description||'UNNAMED ITEM')}</strong></div><div class="tag-barcode"><div class="barcode-lines"></div><span>${escapeSheetText(item.barcode||'NO BARCODE')}</span></div><div class="count-box">COUNT</div><div class="signoff"><div><b>Counter :</b><span></span></div><div><b>Scanner :</b><span></span></div><div><b>Validator :</b><span></span></div><small>Powered by: DECStudioHub</small></div></article>`).join('')}
+function renderCountSheet(){const groups=items.reduce((result,item)=>{const key=item.supplier||'Unassigned Supplier';(result[key]??=[]).push(item);return result},{});$('countSheetPages').innerHTML=Object.entries(groups).map(([supplier,rows],groupIndex)=>`<article class="count-sheet-page"><header class="sheet-header"><div><h3>COUNT SHEET <span>PHYSICAL INVENTORY</span></h3><p><b>SUPPLIER:</b> ${escapeSheetText(supplier)} &nbsp; <b>STORE:</b> ${escapeSheetText($('storeField').value||'Store #14014 - Retail')} &nbsp; <b>DATE:</b> ${escapeSheetText($('dateField').value||'2026-09-11')}</p></div><div class="sheet-locator"><b>LOCATORS:</b><strong>${[...new Set(rows.map(row=>escapeSheetText(row.locator||'—')))].join(', ')}</strong><div class="mini-bars"></div><small>PAGE ${groupIndex+1} OF ${Object.keys(groups).length}</small></div></header><table class="count-sheet-table"><thead><tr><th>#</th><th>SKU</th><th>BARCODE</th><th>DESCRIPTION</th><th>LOCATOR</th><th>COUNT</th></tr></thead><tbody>${rows.map((item,index)=>`<tr><td>${index+1}</td><td>${escapeSheetText(item.sku||'—')}</td><td><div class="small-barcode"></div><small>${escapeSheetText(item.barcode||'—')}</small></td><td>${escapeSheetText(item.description||'—')}</td><td>${escapeSheetText(item.locator||'—')}</td><td><span class="count-line"></span></td></tr>`).join('')}</tbody></table></article>`).join('');$('countSheetSummary').textContent=`${Object.keys(groups).length} supplier sheets prepared; locators are included on every line.`}
 function loadItems(nextItems,filename='inventory.csv'){inventoryTouchedThisSession=true;countSheetUsesMasterlist=false;items=nextItems;if(typeof resetCombinedPrintStatus==='function')resetCombinedPrintStatus();inventoryPage=1;inventoryViewCache={key:'',indexes:[]};renderItems();if(typeof updateSupplierFilter==='function')updateSupplierFilter();$('dataSummary').textContent=`${items.length} inventory rows imported from ${filename}. Check each row for missing or incorrect values.`;$('resetBtn').hidden=false;showStep(2);if(typeof refreshLayoutPreview==='function')refreshLayoutPreview();persistLocalCycleData('Inventory imported',`${filename} · ${items.length} rows`);toast(`${items.length} inventory rows imported`)}
 function normalizeCountSheetSku(value){return String(value??'').trim().replace(/\.0$/,'').toUpperCase().replace(/[^A-Z0-9]/g,'')}
 function updateCountSheetCcdFilter(){
@@ -265,7 +272,8 @@ async function parseInventorySheet(worksheet,sheetName,sheetIndex){
   if(headerIndex<0)return [];
 
   const headers=[];
-  for(let column=range.s.c;column<=range.e.c;column++)headers.push(normalizeImportHeader(readWorksheetCell(worksheet,headerIndex,column)));
+  const sourceHeaders=[];
+  for(let column=range.s.c;column<=range.e.c;column++){const raw=readWorksheetCell(worksheet,headerIndex,column);headers.push(normalizeImportHeader(raw));sourceHeaders.push(raw||`Column ${column-range.s.c+1}`)}
   const columnIndexes={};
   Object.entries(importHeaderAliases).forEach(([field,aliases],index)=>{
     columnIndexes[field]=useStandardColumnOrder?range.s.c+index:range.s.c+headers.findIndex(header=>aliases.includes(header));
@@ -285,7 +293,10 @@ async function parseInventorySheet(worksheet,sheetName,sheetIndex){
       locator:readField('locator'),
       sku:readField('sku'),
       barcode:readField('barcode'),
-      description:readField('description')
+      description:readField('description'),
+      _sourceRow:row+1,
+      _sourceHeaders:sourceHeaders,
+      _sourceValues:Array.from({length:range.e.c-range.s.c+1},(_,index)=>readWorksheetCell(worksheet,row,range.s.c+index))
     };
     if(item.locator||item.sku||item.barcode||item.description)rows.push(item);
     if((row-headerIndex)%5000===0){
@@ -297,6 +308,43 @@ async function parseInventorySheet(worksheet,sheetName,sheetIndex){
 }
 
 let importInProgress=false;
+const importFieldAliases={supplier:['supplier','supplier name','vendor','vendor name','brand','principal'],locator:['locator','locator code','location','bin','bin location','selling locator'],sku:['sku','sku no','sku number','item code','item no','item number','product code'],barcode:['upc','upc code','barcode','barcode number','ean','gtin'],description:['description','item description','product description','product name','item name','name']};
+function showColumnMapping(rows,filename){
+  return new Promise(resolve=>{
+    let dialog=document.getElementById('importMappingDialog');
+    if(!dialog){
+      dialog=document.createElement('dialog');dialog.id='importMappingDialog';dialog.className='help-assistant-dialog import-mapping-dialog';dialog.setAttribute('aria-labelledby','importMappingTitle');
+      dialog.innerHTML='<header><div><p class="section-kicker">IMPORT REVIEW</p><h2 id="importMappingTitle">Confirm spreadsheet columns</h2></div><button type="button" class="help-close" aria-label="Close column mapping">×</button></header><p class="help-intro" id="importMappingSummary"></p><form id="importMappingForm"><div class="import-mapping-fields"></div><div class="feedback-actions"><button type="button" class="secondary-button" data-map-cancel>Cancel import</button><button type="submit" class="primary-button">Map columns and continue</button></div></form>';
+      document.body.append(dialog);
+    }
+    const headers=[...new Set(rows.flatMap(row=>row._sourceHeaders||[]))];
+    const fields=[['supplier','Supplier'],['locator','Locator'],['sku','SKU'],['barcode','UPC / Barcode'],['description','Description']];
+    const container=dialog.querySelector('.import-mapping-fields');container.replaceChildren();
+    fields.forEach(([field,label])=>{
+      const wrapper=document.createElement('label');wrapper.textContent=label;
+      const select=document.createElement('select');select.dataset.importField=field;
+      const keep=new Option(field==='supplier'?'Use detected supplier':'Use detected value','');select.add(keep);
+      headers.forEach(header=>select.add(new Option(header,header)));
+      const aliases=importFieldAliases[field]||[];const suggestion=headers.find(header=>aliases.includes(normalizeImportHeader(header)));
+      if(suggestion)select.value=suggestion;
+      wrapper.append(select);container.append(wrapper);
+    });
+    dialog.querySelector('#importMappingSummary').textContent=`${filename} · ${rows.length.toLocaleString()} data rows found. Choose the source column for each field. Values remain in this browser.`;
+    const cleanup=()=>{dialog.removeEventListener('close',onClose);dialog.querySelector('.help-close').removeEventListener('click',cancel);dialog.querySelector('[data-map-cancel]').removeEventListener('click',cancel);dialog.querySelector('#importMappingForm').removeEventListener('submit',submit)};
+    const cancel=()=>dialog.close('cancel');
+    const onClose=()=>{cleanup();if(dialog.returnValue!=='continue')resolve(null)};
+    const submit=event=>{
+      event.preventDefault();
+      const mapping=Object.fromEntries([...container.querySelectorAll('select')].map(select=>[select.dataset.importField,select.value]));
+      const mapped=rows.map(row=>{
+        const read=field=>{const header=mapping[field];if(!header)return row[field]||'';const index=(row._sourceHeaders||[]).indexOf(header);return index<0?'':String(row._sourceValues?.[index]??'').trim()};
+        return {...row,supplier:read('supplier')||'Unassigned Supplier',locator:read('locator'),sku:read('sku'),barcode:read('barcode'),description:read('description')};
+      });
+      dialog.returnValue='continue';dialog.close();cleanup();resolve(mapped);
+    };
+    dialog.addEventListener('close',onClose,{once:true});dialog.querySelector('.help-close').addEventListener('click',cancel);dialog.querySelector('[data-map-cancel]').addEventListener('click',cancel);dialog.querySelector('#importMappingForm').addEventListener('submit',submit);dialog.showModal();
+  });
+}
  function handleFile(file){
    if(!file)return;
   if(importInProgress){toast('An inventory file is already being imported.');return;}
@@ -306,6 +354,7 @@ let importInProgress=false;
      toast('Unsupported file type. Please upload a CSV or Excel file.');
      return;
    }
+   if(file.size>20*1024*1024){toast('Files larger than 20 MB are not supported. Split the workbook into smaller files and import them one at a time.');return;}
    if(typeof XLSX==='undefined'){
      toast('Spreadsheet reader is unavailable. Check your internet connection and try again.');
      return;
@@ -325,12 +374,14 @@ let importInProgress=false;
          const sheetName=workbook.SheetNames[sheetIndex];
          const sheetRows=await parseInventorySheet(workbook.Sheets[sheetName],sheetName,sheetIndex);
          for(const row of sheetRows)rows.push(row);
+         if(rows.length>50000)throw new Error('This import contains more than 50,000 rows. Split it into smaller workbooks.');
        }
        if(!rows.length){
          toast('No inventory rows found. Check that the file has column headers such as SKU and DESCRIPTION.');
          return;
        }
-       loadItems(rows,filename);
+       const mapped=await showColumnMapping(rows,filename);
+       if(mapped)loadItems(mapped,filename);
      }catch(error){
        console.error('Inventory import failed:',error);
        toast('Unable to read this file. Please check the file and try again.');
@@ -424,7 +475,7 @@ document.querySelectorAll('.step').forEach(el=>el.onclick=()=>{const step=Number
 $('settingsBtn').onclick=()=>{$('modalBackdrop').hidden=false};$('closeModal').onclick=()=>{$('modalBackdrop').hidden=true};$('modalBackdrop').onclick=e=>{if(e.target===$('modalBackdrop'))$('modalBackdrop').hidden=true};$('saveSettings').onclick=()=>{$('modalBackdrop').hidden=true;document.documentElement.dataset.accent=$('accentSelect').value;const colors={emerald:'#047857',sapphire:'#1d4ed8',amber:'#b45309'};document.documentElement.style.setProperty('--accent',colors[$('accentSelect').value]);toast('Settings saved')};
 $('resetBtn').onclick=async()=>{if(!await (window.fujiConfirm?.('Clear the current inventory from this browser? Download a backup first if you may need these items later.','Clear current inventory') ?? Promise.resolve(window.confirm('Clear the current inventory from this browser?'))))return;const removedCount=items.length;countSheetUsesMasterlist=false;items=[];if(typeof resetCombinedPrintStatus==='function')resetCombinedPrintStatus();inventoryTouchedThisSession=true;inventoryViewCache={key:'',indexes:[]};$('fileInput').value='';$('resetBtn').hidden=true;renderItems();persistLocalCycleData('Inventory cleared',`${removedCount} rows removed`);showStep(1);toast('Session reset')};
 $('storeField').value=restoredLocalCycleData.store||'';
-$('dateField').value=restoredLocalCycleData.date||new Date().toISOString().slice(0,10);
+$('dateField').value=restoredLocalCycleData.date||new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
 if(items.length){
   renderItems();
   $('dataSummary').textContent=`${items.length} inventory rows restored from this computer.`;
@@ -535,9 +586,11 @@ async function restoreLocalInventory(){
 restoreLocalInventory();
 
 const workspaceSettingsKey='cycle-count-workspace-settings-v1';
-const defaultWorkspaceSettings={systemName:'FUJI CYCLE COUNT SHEET GENERATOR',editorName:'',storeName:'',accent:'emerald',customAccent:'#047857',logoData:''};
+const defaultWorkspaceSettings={systemName:'FUJI CYCLE COUNT SHEET GENERATOR',editorName:'',storeName:'',accent:'emerald',customAccent:'#047857',logoData:'',locatorPrefixes:{sa:'SA-',ba:'BA-',wh:'WH-'},aiSharingConsent:false};
 let workspaceSettings={...defaultWorkspaceSettings};
 try{workspaceSettings={...defaultWorkspaceSettings,...JSON.parse(localStorage.getItem(workspaceSettingsKey)||'{}')}}catch(error){console.warn('Could not restore workspace settings:',error)}
+workspaceSettings.locatorPrefixes={...defaultWorkspaceSettings.locatorPrefixes,...(workspaceSettings.locatorPrefixes||{})};
+window.fujiWorkspaceSettings=workspaceSettings;
 const systemNameField=$('systemNameField');
 const editorNameField=$('editorName');
 const settingsStoreField=$('settingsStoreName');
@@ -549,6 +602,9 @@ editorNameField.value=workspaceSettings.editorName||'';
 settingsStoreField.value=workspaceSettings.storeName||$('storeField').value;
 accentSelect.value=workspaceSettings.accent||'emerald';
 customAccentField.value=workspaceSettings.customAccent||'#047857';
+const locatorPrefixFields={sa:$('prefixSA'),ba:$('prefixBA'),wh:$('prefixWH')};
+Object.entries(locatorPrefixFields).forEach(([key,input])=>input.value=workspaceSettings.locatorPrefixes?.[key]??defaultWorkspaceSettings.locatorPrefixes[key]);
+$('aiSharingConsent').checked=workspaceSettings.aiSharingConsent===true;
 
 const settingsPalettes={
   emerald:{color:'#047857',dark:'#065f46',soft:'#ecfdf5'},
@@ -614,17 +670,22 @@ $('customLogoInput').addEventListener('change',event=>{
 $('removeLogoBtn').addEventListener('click',()=>{currentLogoData='';$('customLogoInput').value='';applyWorkspaceAppearance()});
 
 function saveWorkspaceSettings(){
+  const prefixes=Object.values(locatorPrefixFields).map(input=>input.value.trim().toUpperCase()).filter(Boolean);
+  if(new Set(prefixes).size!==prefixes.length){$('settingsSaveStatus').textContent='Each locator prefix must be distinct.';return}
   workspaceSettings={
     systemName:systemNameField.value.trim()||defaultWorkspaceSettings.systemName,
     editorName:editorNameField.value.trim(),
     storeName:settingsStoreField.value.trim(),
     accent:accentSelect.value,
     customAccent:customAccentField.value,
-    logoData:currentLogoData
+    logoData:currentLogoData,
+    locatorPrefixes:Object.fromEntries(Object.entries(locatorPrefixFields).map(([key,input])=>[key,input.value.trim().toUpperCase()])),
+    aiSharingConsent:$('aiSharingConsent').checked
   };
   $('storeField').value=workspaceSettings.storeName;
   $('storeField').dispatchEvent(new Event('change'));
   try{localStorage.setItem(workspaceSettingsKey,JSON.stringify(workspaceSettings));$('settingsSaveStatus').textContent='Settings saved in this browser.'}catch(error){$('settingsSaveStatus').textContent='Settings could not be saved in this browser.';console.warn('Could not save workspace settings:',error)}
+  window.fujiWorkspaceSettings=workspaceSettings;
   applyWorkspaceAppearance();
   $('modalBackdrop').hidden=true;
   if(typeof refreshLayoutPreview==='function')refreshLayoutPreview();
@@ -660,6 +721,8 @@ $('restoreBackupInput').addEventListener('change',async event=>{
     $('dateField').value=inventory.date||$('dateField').value;
     if(backup.settings&&typeof backup.settings==='object'){
       workspaceSettings={...defaultWorkspaceSettings,...backup.settings};
+      workspaceSettings.locatorPrefixes={...defaultWorkspaceSettings.locatorPrefixes,...(backup.settings.locatorPrefixes||{})};
+      window.fujiWorkspaceSettings=workspaceSettings;
       systemNameField.value=workspaceSettings.systemName;
       editorNameField.value=workspaceSettings.editorName;
       settingsStoreField.value=workspaceSettings.storeName||inventory.store||'';
@@ -678,12 +741,15 @@ $('restoreBackupInput').addEventListener('change',async event=>{
 $('resetSettingsBtn').addEventListener('click',async()=>{
   if(!await (window.fujiConfirm?.('Reset system name, editor, store, logo, and color settings? Inventory will be kept.','Reset workspace settings') ?? Promise.resolve(window.confirm('Reset system name, editor, store, logo, and color settings? Inventory will be kept.'))))return;
   workspaceSettings={...defaultWorkspaceSettings};
+  window.fujiWorkspaceSettings=workspaceSettings;
   currentLogoData='';
   systemNameField.value=defaultWorkspaceSettings.systemName;
   editorNameField.value='';
   settingsStoreField.value='';
   accentSelect.value='emerald';
   customAccentField.value='#047857';
+  Object.entries(locatorPrefixFields).forEach(([key,input])=>input.value=defaultWorkspaceSettings.locatorPrefixes[key]);
+  $('aiSharingConsent').checked=false;
   $('storeField').value='';
   $('storeField').dispatchEvent(new Event('change'));
   localStorage.removeItem(workspaceSettingsKey);
@@ -745,7 +811,7 @@ function renderCountSheet(){
     }
   });
 
-  $('countSheetPages').innerHTML=pages.map(({supplier,rows,startIndex},pageIndex)=>`<article class="count-sheet-page"><header class="sheet-header"><div><h3>COUNT SHEET <span>PHYSICAL INVENTORY</span></h3><p>${showSupplier?`<b>SUPPLIER:</b> ${supplier} &nbsp;`:''}<b>STORE:</b> ${$('storeField').value||'Store #14014 - Retail'} &nbsp; <b>DATE:</b> ${$('dateField').value||'2026-09-11'}</p></div><div class="sheet-locator"><b>LOCATORS:</b><strong>${[...new Set(rows.map(row=>row.locator||'—'))].join(', ')}</strong><div class="mini-bars"></div><small>PAGE ${pageIndex+1} OF ${pages.length}</small></div></header><table class="count-sheet-table"><thead><tr><th>#</th><th>SKU</th><th>BARCODE</th><th>DESCRIPTION</th><th>LOCATOR</th><th>COUNT</th></tr></thead><tbody>${rows.map((item,index)=>`<tr><td>${startIndex + index}</td><td>${item.sku||'—'}</td><td><div class="small-barcode"></div><small>${item.barcode||'—'}</small></td><td>${item.description||'—'}</td><td>${item.locator||'—'}</td><td><span class="count-line"></span></td></tr>`).join('')}</tbody></table></article>`).join('');
+  $('countSheetPages').innerHTML=pages.map(({supplier,rows,startIndex},pageIndex)=>`<article class="count-sheet-page"><header class="sheet-header"><div><h3>COUNT SHEET <span>PHYSICAL INVENTORY</span></h3><p>${showSupplier?`<b>SUPPLIER:</b> ${escapeSheetText(supplier)} &nbsp;`:''}<b>STORE:</b> ${escapeSheetText($('storeField').value||'Store #14014 - Retail')} &nbsp; <b>DATE:</b> ${escapeSheetText($('dateField').value||'2026-09-11')}</p></div><div class="sheet-locator"><b>LOCATORS:</b><strong>${[...new Set(rows.map(row=>escapeSheetText(row.locator||'—')))].join(', ')}</strong><div class="mini-bars"></div><small>PAGE ${pageIndex+1} OF ${pages.length}</small></div></header><table class="count-sheet-table"><thead><tr><th>#</th><th>SKU</th><th>BARCODE</th><th>DESCRIPTION</th><th>LOCATOR</th><th>COUNT</th></tr></thead><tbody>${rows.map((item,index)=>`<tr><td>${startIndex + index}</td><td>${escapeSheetText(item.sku||'—')}</td><td><div class="small-barcode"></div><small>${escapeSheetText(item.barcode||'—')}</small></td><td>${escapeSheetText(item.description||'—')}</td><td>${escapeSheetText(item.locator||'—')}</td><td><span class="count-line"></span></td></tr>`).join('')}</tbody></table></article>`).join('');
 
   $('countSheetSummary').textContent=`${pages.length} supplier count-sheet page${pages.length===1?'':'s'} prepared; locators are included on every line.`;
 }

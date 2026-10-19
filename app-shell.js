@@ -144,7 +144,7 @@
 
   const helpDialog = document.createElement('dialog');
   helpDialog.id = 'helpAssistantDialog'; helpDialog.className = 'help-assistant-dialog'; helpDialog.setAttribute('aria-labelledby', 'helpAssistantTitle');
-  helpDialog.innerHTML = '<header><div><p class="section-kicker">OFFLINE HELP · NO AI SERVICE</p><h2 id="helpAssistantTitle">How can we help?</h2></div><button type="button" class="help-close" aria-label="Close help">×</button></header><p class="help-intro">Search the in-app guides. Your question and inventory stay on this device.</p><label class="help-search-label" for="helpAssistantSearch">Search help topics</label><input id="helpAssistantSearch" type="search" placeholder="Try “import”, “print”, or “SKU”" autocomplete="off"><div class="help-suggestions"><button type="button">How do I import a file?</button><button type="button">Why were rows flagged?</button><button type="button" data-feedback-open>Report a problem</button></div><div id="helpAssistantResults" class="help-results" aria-live="polite"></div><footer><small>No inventory, file contents, or personal data are transmitted.</small><button type="button" class="secondary-button" id="helpFeedbackButton">Submit feedback</button></footer>';
+  helpDialog.innerHTML = '<header><div><p class="section-kicker">OFFLINE HELP + OPTIONAL AI</p><h2 id="helpAssistantTitle">How can we help?</h2></div><button type="button" class="help-close" aria-label="Close help">×</button></header><p class="help-intro">Search device help, or ask an online AI provider after enabling consent in Settings. Inventory is never sent by this assistant.</p><label class="help-search-label" for="helpAssistantSearch">Search help topics</label><input id="helpAssistantSearch" type="search" placeholder="Try “import”, “print”, or “SKU”" autocomplete="off"><div class="help-suggestions"><button type="button">How do I import a file?</button><button type="button">Why were rows flagged?</button><button type="button" data-feedback-open>Report a problem</button></div><div id="helpAssistantResults" class="help-results" aria-live="polite"></div><section class="help-ai-panel"><h3>Ask FUJI</h3><label for="helpAiQuestion">Question for the AI assistant</label><textarea id="helpAiQuestion" rows="2" maxlength="3000" placeholder="Ask about importing, grouping, or count practices"></textarea><div class="help-ai-actions"><button type="button" class="primary-button" id="helpAiAsk">Ask FUJI</button><button type="button" class="secondary-button" id="helpAiStop" hidden>Stop</button><span id="helpAiStatus" role="status" aria-live="polite">Enable AI question sharing in Settings to start.</span></div><div id="helpAiAnswer" class="help-ai-answer" aria-live="polite"></div></section><footer><small>Offline guide searches stay on this device. Online AI receives your typed question and recent chat only.</small><button type="button" class="secondary-button" id="helpFeedbackButton">Submit feedback</button></footer>';
   document.body.append(helpDialog);
   const docs = [
     ['Import a count sheet','import spreadsheet CSV Excel columns SKU UPC description quantity vendor','1. Choose Count Sheet. 2. Select Import inventory and choose a CSV or Excel workbook. 3. Match the SKU, description, quantity, and supplier columns, then review the imported row count. Keep a backup of your original file.'],
@@ -174,6 +174,27 @@
   showHelp(); $('helpAssistantTrigger')?.addEventListener('click', () => { helpDialog.showModal(); helpInput.focus(); });
   helpDialog.querySelector('.help-close').addEventListener('click', () => helpDialog.close());
   helpInput.addEventListener('input', () => showHelp(helpInput.value));
+  const aiMessagesByUser = new Map(); let aiAbort = null;
+  const aiConsentEnabled = () => { try { return JSON.parse(localStorage.getItem('cycle-count-workspace-settings-v1') || '{}').aiSharingConsent === true; } catch { return false; } };
+  const aiMessages = () => { const id=window.fujiCurrentUser?.id||'anonymous'; if(!aiMessagesByUser.has(id))aiMessagesByUser.set(id,[]); return aiMessagesByUser.get(id); };
+  const aiQuestion=$('helpAiQuestion'), aiAnswer=$('helpAiAnswer'), aiStatus=$('helpAiStatus'), aiAsk=$('helpAiAsk'), aiStop=$('helpAiStop');
+  aiAsk.addEventListener('click',async()=>{
+    const question=aiQuestion.value.trim(); const auth=window.fujiFirebase?.auth; const user=auth?.currentUser;
+    if(!aiConsentEnabled()){aiStatus.textContent='Enable AI question sharing in Settings first.';return;}
+    if(!user){aiStatus.textContent='Sign in with an online account to use Ask FUJI.';return;}
+    if(!question){aiStatus.textContent='Enter a question first.';return;}
+    const history=aiMessages();history.push({role:'user',content:question});while(history.length>12)history.shift();
+    const responseNode=document.createElement('p');responseNode.className='help-ai-response';responseNode.textContent='';aiAnswer.append(responseNode);aiStatus.textContent='FUJI is thinking…';aiAsk.disabled=true;aiStop.hidden=false;aiAbort=new AbortController();
+    try{
+      const token=await user.getIdToken();const response=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({messages:history,consent:true}),signal:aiAbort.signal});
+      if(!response.ok){const data=await response.json().catch(()=>({}));throw new Error(data.error||'Ask FUJI is unavailable. Offline help remains available.');}
+      const reader=response.body.getReader(),decoder=new TextDecoder();let buffer='',answer='';
+      while(true){const{value,done}=await reader.read();if(done)break;buffer+=decoder.decode(value,{stream:true});const lines=buffer.split('\n');buffer=lines.pop()||'';for(const line of lines)if(line.startsWith('data: ')&&line!=='data: [DONE]'){try{const part=JSON.parse(line.slice(6)).text||'';answer+=part;responseNode.textContent=answer}catch{}}}
+      history.push({role:'assistant',content:answer});while(history.length>12)history.shift();aiStatus.textContent='Answer complete. Your question and answer remain in this session.';
+    }catch(error){responseNode.textContent=error.name==='AbortError'?'Response stopped.':error.message;aiStatus.textContent='';}
+    finally{aiAbort=null;aiAsk.disabled=false;aiStop.hidden=true;}
+  });
+  aiStop.addEventListener('click',()=>aiAbort?.abort());
   helpDialog.querySelectorAll('.help-suggestions button:not([data-feedback-open])').forEach(button => button.addEventListener('click', () => { helpInput.value = button.textContent; showHelp(helpInput.value); helpInput.focus(); }));
   const feedback = document.createElement('dialog'); feedback.id='localFeedbackDialog'; feedback.className='help-assistant-dialog feedback-dialog'; feedback.setAttribute('aria-labelledby','feedbackTitle'); feedback.innerHTML='<header><div><p class="section-kicker">LOCAL DRAFT</p><h2 id="feedbackTitle">Send feedback</h2></div><button type="button" class="help-close" aria-label="Close feedback">×</button></header><p class="help-intro">This static site has no shared feedback database. Save a draft on this device to review and share with your administrator.</p><form id="feedbackDraftForm"><label>Type<select name="type"><option>Bug</option><option>Idea</option><option>Question</option></select></label><label>Title<input name="title" maxlength="120" required></label><label>Details<textarea name="description" maxlength="2000" rows="5" required></textarea></label><p class="feedback-status" role="status"></p><div class="feedback-actions"><button type="button" class="secondary-button help-cancel">Cancel</button><button type="submit" class="primary-button">Save draft</button></div></form>';
   document.body.append(feedback);
@@ -216,4 +237,5 @@
   document.body.append(shortcutDialog);
   shortcutDialog.querySelector('.help-close').addEventListener('click', () => shortcutDialog.close());
   document.addEventListener('keydown', event => { if (event.key === '?' && !event.ctrlKey && !event.metaKey && !['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName) && !document.querySelector('dialog[open]')) shortcutDialog.showModal(); });
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) navigator.serviceWorker.register('/service-worker.js').catch(error => console.warn('Offline shell could not be registered:', error));
 })();
