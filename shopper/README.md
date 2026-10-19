@@ -71,7 +71,7 @@ The existing repository already has a working GitHub → Vercel integration for 
 - Set any optional environment values in **both Production and Preview** as appropriate. Keep GitHub publishing credentials on Production only if previews must not publish to the production branch. A token needs contents write on this one repository; never put it in browser configuration.
 - The default app needs **no secrets, no Firebase account and no AI key**. Never enable a paid plan implicitly.
 
-The current branch may be deployed without optional cloud features. Publishing prices, online AI and cloud sync fail closed until their required settings are present. A successful Vercel build is not a physical-camera or Firestore-rules test.
+The feature branch is deployed as a [protected Vercel preview](https://fujisupersystem-git-codex-fuji-shopper-hypermart-fuji-92d1.vercel.app/shopper/) and linked to [PR #2](https://github.com/danne6077-beep/CYCLE-COUNT1/pull/2). Vercel sign-in is required. The dashboard confirms the team is on Hobby; commercial store operation requires an eligible plan or a different eligible host. Production merge has not been performed. Publishing prices, online AI and cloud sync fail closed until their required settings are present.
 
 ## Free-tier review — checked 19 October 2026
 
@@ -96,7 +96,7 @@ The optional account supports existing Firebase email/password sign-in and expli
 
 The included rules allow users to read/write only their own `shopperUsers/{uid}/snapshots/current`; other paths remain denied under the existing rule set. The test checks cross-user access, unauthenticated access, payload limits, unexpected fields and role escalation.
 
-With Java 21+, Firebase CLI, `firebase` and `@firebase/rules-unit-testing` installed in a disposable development environment:
+The separate CI job installs the pinned dependencies from shopper/emulator/package.json and runs the checks against demo-fuji-shopper with Java 21. These isolation/security checks passed; they do not deploy production rules. For a local run with Java 21+, Firebase CLI, `firebase` and `@firebase/rules-unit-testing` installed in a disposable development environment:
 
 ```sh
 firebase emulators:exec --only firestore --project demo-fuji-shopper "node shopper/emulator/firestore.mjs"
@@ -108,4 +108,4 @@ This is an emulator test, never a command to deploy production rules. The snapsh
 
 The app has no ads, analytics, tracking pixels or automatic scan telemetry. Missing-item reports are stored locally after an explicit shopper action. The in-app privacy notice explains local storage, optional cloud sharing, deletion and backup. The store should supply its contact and retention policy and assess its obligations under [RA 10173](https://privacy.gov.ph/data-privacy-act/).
 
-See [test status](../docs/shopper-validation.md), [device checklist](../docs/shopper-device-checklist.md) and [design system](../docs/shopper-design-system.md). Do not claim Lighthouse targets, iPhone camera behavior, cloud rules deployment or an online URL until those have actually been verified.
+See [test status](../docs/shopper-validation.md), [device checklist](../docs/shopper-device-checklist.md) and [design system](../docs/shopper-design-system.md). The generated build scored Lighthouse mobile Performance 97 / Accessibility 100 in CI. Physical iPhone/Android camera behavior, production rules deployment and live optional services remain unverified.
