@@ -35,6 +35,8 @@ const screenshotDone = new Set();
 function fail(message) { failures.push(message); }
 async function signIn(page) {
   await page.goto(baseUrl, { waitUntil: 'domcontentloaded' });
+  const loginWidth = await page.evaluate(() => Number.parseFloat(getComputedStyle(document.querySelector('.login-card')).width));
+  if (loginWidth > 380) fail(`login card width ${loginWidth}px exceeds the 380px design target`);
   if (await page.locator('#loginPage').isVisible()) {
     await page.locator('#loginUsername').fill('admin');
     await page.locator('#loginPassword').fill('admin123');
@@ -61,11 +63,14 @@ async function inspect(page, label, width, scale, theme) {
       title: title ? rect(title) : null,
       actions: actions ? rect(actions) : null,
       panel: [...document.querySelectorAll('#mainContent > section')].find(x => !x.hidden)?.id || 'settings',
-      theme: document.documentElement.dataset.theme
+      theme: document.documentElement.dataset.theme,
+      accent: getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()
     };
   });
   if (result.document > width + 1 || result.body > width + 1) fail(`${label} ${width}px @${scale} ${theme}: horizontal overflow ${result.document}/${result.body}`);
   if (result.title && result.actions && result.title.right > result.actions.left + 1) fail(`${label} ${width}px @${scale} ${theme}: topbar title overlaps page actions`);
+  const expectedAccent = theme === 'dark' ? '#55c6a0' : '#08785b';
+  if (result.accent.toLowerCase() !== expectedAccent) fail(`${label} ${width}px @${scale} ${theme}: accent ${result.accent} does not match the logo-derived palette ${expectedAccent}`);
   measurements.push({ screen:label,width,scale,theme,documentWidth:result.document,viewport:result.viewport,panel:result.panel });
 }
 

@@ -561,7 +561,8 @@ function applyWorkspaceAppearance(){
   const palette=settingsPalettes[selected];
   const color=palette?.color||customAccentField.value||'#047857';
   document.documentElement.dataset.accent=selected;
-  document.documentElement.style.setProperty('--accent',color);
+  if(selected==='emerald')document.documentElement.style.removeProperty('--accent');
+  else document.documentElement.style.setProperty('--accent',color);
   document.documentElement.style.setProperty('--emerald',color);
   document.documentElement.style.setProperty('--emerald-dark',palette?.dark||color);
   document.documentElement.style.setProperty('--emerald-soft',palette?.soft||`${color}1a`);
