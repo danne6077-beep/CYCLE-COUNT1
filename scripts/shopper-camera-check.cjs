@@ -4,9 +4,11 @@ const url=process.env.SHOPPER_TEST_URL||'http://127.0.0.1:4173/shopper/';
 const output=path.resolve(__dirname,'../qa/shopper');let browser;
 (async()=>{
  fs.mkdirSync(output,{recursive:true});
- browser=await chromium.launch({headless:true,...(process.env.TEST_BROWSER_CHANNEL?{channel:process.env.TEST_BROWSER_CHANNEL}:{}),args:['--use-fake-ui-for-media-stream','--use-fake-device-for-media-stream']});
+ const launchOptions={headless:true,...(process.env.TEST_BROWSER_CHANNEL?{channel:process.env.TEST_BROWSER_CHANNEL}:{}),args:['--use-fake-ui-for-media-stream','--use-fake-device-for-media-stream']};
  const checks=[];
  for(const mode of ['no-native-detector','broken-native-detector','denied-photo-fallback']){
+  // Isolate the simulated camera device as well as site permissions between scenarios.
+  browser=await chromium.launch(launchOptions);
   const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
   await context.addInitScript(mode=>{
    window.__cameraStreams=[];window.__cameraRequests=0;
@@ -41,9 +43,8 @@ const output=path.resolve(__dirname,'../qa/shopper');let browser;
   }
   await page.locator('[data-action=close-sheet]').click();
   assert.equal(await page.evaluate(()=>window.__cameraStreams.every(stream=>stream.getTracks().every(track=>track.readyState==='ended'))),true);
-  assert.deepEqual(errors,[]);checks.push({mode,status:'passed'});await context.close();
+  assert.deepEqual(errors,[]);checks.push({mode,status:'passed'});await context.close();await browser.close();browser=null;
  }
- await browser.close();
  fs.writeFileSync(path.join(output,'camera-report.json'),JSON.stringify({status:'passed',url,checks,measurement:'Isolated Chromium using its simulated camera. Real getUserMedia/video playback and shipped ZXing/photo decoding; physical phone hardware remains unverified.'},null,2));
  console.log('Camera checks passed: automatic permission request, live video without native BarcodeDetector, broken-native fallback, denied-permission guidance, photo barcode lookup and stream cleanup.');
 })().catch(async error=>{console.error(error);await browser?.close();process.exitCode=1;});
