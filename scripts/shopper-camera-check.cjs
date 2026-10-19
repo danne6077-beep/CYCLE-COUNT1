@@ -30,6 +30,7 @@ const output=path.resolve(__dirname,'../qa/shopper');let browser;
    await page.locator('#barcode-photo').setInputFiles({name:'barcode.png',mimeType:'image/png',buffer:Buffer.from(png.split(',')[1],'base64')});
    await page.locator('#scan-result [data-price="486522"]').waitFor({timeout:30000});
    assert.match(await page.locator('#scan-result').innerText(),/₱14\.05/);
+   assert.equal(await page.locator('#torch-button').isVisible(),false,'Photo mode must hide the inactive torch control.');
    await page.screenshot({path:path.join(output,'camera-photo-fallback.png')});
   }else{
    try{await page.locator('#camera-state').filter({hasText:'Keep the barcode inside the frame.'}).waitFor({timeout:15000});}

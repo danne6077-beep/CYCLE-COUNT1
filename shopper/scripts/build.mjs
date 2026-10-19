@@ -16,7 +16,7 @@ const shell=[];
 function collect(dir){for(const e of fs.readdirSync(dir,{withFileTypes:true})){const p=path.join(dir,e.name),rel=path.relative(out,p).replaceAll('\\','/');if(e.isDirectory()){if(e.name!=='catalog')collect(p);}else if(!['staff.html','staff.js'].includes(rel))shell.push('./'+rel);}}
 collect(out);
 // Version these entry points so an older active worker cannot serve the old camera code.
-for(const file of ['./app.js','./lib/scanner.js'])shell[shell.indexOf(file)]=file+'?v=camera2';
+for(const file of ['./app.js','./lib/scanner.js','./design.css'])shell[shell.indexOf(file)]=file+'?v=camera2';
 const hash=createHash('sha256');for(const file of shell)hash.update(fs.readFileSync(path.join(out,file.split('?')[0])));const version=hash.digest('hex').slice(0,12);
 const sw=fs.readFileSync(path.join(root,'sw.js'),'utf8').replace('__SHELL_VERSION__',version).replace(/\/\*PRECACHE\*\/\[[^\n]*\]/,JSON.stringify(shell));fs.writeFileSync(path.join(out,'sw.js'),sw);
 let jsBytes=0;for(const file of ['app.js','i18n.js',...fs.readdirSync(path.join(out,'lib')).filter(s=>s.endsWith('.js')).map(s=>'lib/'+s)])jsBytes+=gzipSync(fs.readFileSync(path.join(out,file))).length;
