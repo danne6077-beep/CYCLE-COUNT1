@@ -1,0 +1,516 @@
+{
+  "nicknames": [
+    "julian",
+    "julyan",
+    "hulyan",
+    "julz",
+    "jul",
+    "julien"
+  ],
+  "pools": {
+    "price": [
+      {
+        "lang": "en",
+        "text": "Julian asks for the price, then gives the receipt a dramatic pause."
+      },
+      {
+        "lang": "en",
+        "text": "The price is real; Julian’s shocked reaction is the bonus scene."
+      },
+      {
+        "lang": "en",
+        "text": "Julian can negotiate with the calculator, but the digits stay honest."
+      },
+      {
+        "lang": "tl",
+        "text": "Kay Julian, kahit resibo may plot twist. Heto ang totoong presyo."
+      },
+      {
+        "lang": "tl",
+        "text": "Nagulat na naman si Julian sa presyo—parang may entrance music."
+      },
+      {
+        "lang": "tl",
+        "text": "Kalma, Julian. Presyo lang ito, hindi finale ng teleserye."
+      },
+      {
+        "lang": "taglish",
+        "text": "Beshie Julian, may price check tayo, hindi press conference."
+      },
+      {
+        "lang": "taglish",
+        "text": "Julian, sis, naka-two decimals ang presyo; bawal ang dramatic rounding."
+      },
+      {
+        "lang": "taglish",
+        "text": "Ay Julian, ready na ang breakdown. Ikaw na lang ang kulang sa attendance."
+      },
+      {
+        "lang": "taglish",
+        "text": "Price reveal, Julian! Walang suspense fee, promise."
+      }
+    ],
+    "rice": [
+      {
+        "lang": "en",
+        "text": "Julian brought a rice question with a red-carpet entrance."
+      },
+      {
+        "lang": "en",
+        "text": "Rice first, Julian’s acceptance speech later."
+      },
+      {
+        "lang": "en",
+        "text": "Julian’s shopping list has rice and three dramatic intermissions."
+      },
+      {
+        "lang": "tl",
+        "text": "Bigas ang hanap ni Julian, pero pang-awards night ang dating."
+      },
+      {
+        "lang": "tl",
+        "text": "Julian, pili muna ng bigas bago ang mahabang talumpati."
+      },
+      {
+        "lang": "tl",
+        "text": "May bigas sa listahan; si Julian may kuwento sa bawat butil."
+      },
+      {
+        "lang": "taglish",
+        "text": "Beshie Julian, rice ranking ito, hindi casting call."
+      },
+      {
+        "lang": "taglish",
+        "text": "Julian, sis, kanin ang order natin—hindi season two ng drama."
+      },
+      {
+        "lang": "taglish",
+        "text": "Bigas muna, Julian. The plot can simmer later."
+      },
+      {
+        "lang": "taglish",
+        "text": "Julian has entered the rice aisle. Cue the imaginary spotlight!"
+      }
+    ],
+    "premium": [
+      {
+        "lang": "en",
+        "text": "Julian requested premium vibes; the calculator requested evidence."
+      },
+      {
+        "lang": "en",
+        "text": "Julian’s dramatic entrance is premium. The price list is still literal."
+      },
+      {
+        "lang": "en",
+        "text": "Luxury soundtrack, ordinary shopping question: classic Julian."
+      },
+      {
+        "lang": "tl",
+        "text": "Premium ang entrance ni Julian, pero walang extra charge sa sagot."
+      },
+      {
+        "lang": "tl",
+        "text": "Julian, hindi porke may spotlight ay may dagdag sa presyo."
+      },
+      {
+        "lang": "tl",
+        "text": "Ang arte ng entrance ni Julian, pero malinaw dapat ang presyo."
+      },
+      {
+        "lang": "taglish",
+        "text": "Premium energy si Julian, sis. We still check the actual numbers."
+      },
+      {
+        "lang": "taglish",
+        "text": "Julian, beshie, expensive taste is a query—not a budget increase."
+      },
+      {
+        "lang": "taglish",
+        "text": "May premium request si Julian. Calculator, take the stage."
+      },
+      {
+        "lang": "taglish",
+        "text": "Julian, slay the comparison, not the budget."
+      }
+    ],
+    "drinks": [
+      {
+        "lang": "en",
+        "text": "Julian gives the water bottle a dramatic toast."
+      },
+      {
+        "lang": "en",
+        "text": "Julian’s drink order comes with an imaginary fanfare."
+      },
+      {
+        "lang": "en",
+        "text": "A glass of water and Julian’s five-part story, please."
+      },
+      {
+        "lang": "tl",
+        "text": "Tubig lang ang kukunin ni Julian, may pa-toast pa."
+      },
+      {
+        "lang": "tl",
+        "text": "Si Julian, pati pagpili ng baso may dress rehearsal."
+      },
+      {
+        "lang": "tl",
+        "text": "May inumin sa listahan, may monologo si Julian."
+      },
+      {
+        "lang": "taglish",
+        "text": "Julian, hydration break muna before the next plot twist."
+      },
+      {
+        "lang": "taglish",
+        "text": "Beshie, even Julian’s water has a grand entrance."
+      },
+      {
+        "lang": "taglish",
+        "text": "Julian, sis, label check muna bago ang dramatic cheers."
+      },
+      {
+        "lang": "taglish",
+        "text": "Drinks question, Julian edition: may imaginary background music."
+      }
+    ],
+    "beauty": [
+      {
+        "lang": "en",
+        "text": "Julian’s mirror has probably heard this speech already."
+      },
+      {
+        "lang": "en",
+        "text": "Julian turned a shampoo question into a dressing-room announcement."
+      },
+      {
+        "lang": "en",
+        "text": "The skincare shelf called: Julian’s entrance is ready."
+      },
+      {
+        "lang": "tl",
+        "text": "Si Julian, may rehearsal bago lumapit sa salamin."
+      },
+      {
+        "lang": "tl",
+        "text": "Shampoo lang ang tanong ni Julian, pang-grand reveal ang tono."
+      },
+      {
+        "lang": "tl",
+        "text": "Julian, puwedeng simple ang listahan kahit bongga ang entrance."
+      },
+      {
+        "lang": "taglish",
+        "text": "Beshie Julian, label muna before the glow-up monologue."
+      },
+      {
+        "lang": "taglish",
+        "text": "Julian’s beauty routine has a season finale, sis."
+      },
+      {
+        "lang": "taglish",
+        "text": "Julian, slay the shelf check. No invented beauty claims here."
+      },
+      {
+        "lang": "taglish",
+        "text": "May beauty question si Julian. Spotlight on the actual label, please."
+      }
+    ],
+    "late": [
+      {
+        "lang": "en",
+        "text": "Julian’s imaginary arrival time has a director’s cut."
+      },
+      {
+        "lang": "en",
+        "text": "Julian said ‘one minute’ and the soundtrack started another song."
+      },
+      {
+        "lang": "en",
+        "text": "Julian’s grand entrance is still buffering—in joke time."
+      },
+      {
+        "lang": "tl",
+        "text": "Si Julian, kahit sa usapan may pa-late entrance."
+      },
+      {
+        "lang": "tl",
+        "text": "Oras na ng tanong; si Julian nasa opening credits pa."
+      },
+      {
+        "lang": "tl",
+        "text": "Julian, dito walang traffic. Puwede ka nang magtanong."
+      },
+      {
+        "lang": "taglish",
+        "text": "Julian, beshie, your entrance is loading at dramatic speed."
+      },
+      {
+        "lang": "taglish",
+        "text": "On the way na ang sagot, Julian. Mas punctual ito sa imaginary cameo mo."
+      },
+      {
+        "lang": "taglish",
+        "text": "Julian, sis, the calculator arrived before the plot twist."
+      },
+      {
+        "lang": "taglish",
+        "text": "Late entrance, early price check. Balance lang, Julian!"
+      }
+    ],
+    "budget": [
+      {
+        "lang": "en",
+        "text": "Julian’s budget requested a quiet scene; Julian brought a musical."
+      },
+      {
+        "lang": "en",
+        "text": "Julian’s calculator is the calmest member of this imaginary cast."
+      },
+      {
+        "lang": "en",
+        "text": "The budget has numbers. Julian supplied the dramatic soundtrack."
+      },
+      {
+        "lang": "tl",
+        "text": "May budget si Julian; may sariling opinyon ang resibo."
+      },
+      {
+        "lang": "tl",
+        "text": "Julian, puwedeng bongga ang tanong kahit maingat ang gastos."
+      },
+      {
+        "lang": "tl",
+        "text": "Nag-meeting na ang budget at resibo ni Julian. Heto ang resulta."
+      },
+      {
+        "lang": "taglish",
+        "text": "Beshie Julian, budget check muna bago ang imaginary shopping montage."
+      },
+      {
+        "lang": "taglish",
+        "text": "Julian, sis, remaining balance is a number—not a cliffhanger."
+      },
+      {
+        "lang": "taglish",
+        "text": "Your wallet gets a speaking role today, Julian. Let’s read the breakdown."
+      },
+      {
+        "lang": "taglish",
+        "text": "Julian, the budget is giving ‘check the total first’ energy."
+      }
+    ],
+    "who": [
+      {
+        "lang": "en",
+        "text": "Julian is today’s honorary director of dramatic entrances. Friendly joke!"
+      },
+      {
+        "lang": "en",
+        "text": "In this inside joke, Julian manages the imaginary spotlight."
+      },
+      {
+        "lang": "en",
+        "text": "Julian’s fictional job title: chief officer of ‘wait, one more story’."
+      },
+      {
+        "lang": "tl",
+        "text": "Sa biro nating ito, si Julian ang direktor ng bonggang entrance."
+      },
+      {
+        "lang": "tl",
+        "text": "Si Julian ang bida ng munting inside joke—walang ibang ibig sabihin."
+      },
+      {
+        "lang": "tl",
+        "text": "Julian: honorary tagapamahala ng imaginary red carpet."
+      },
+      {
+        "lang": "taglish",
+        "text": "Beshie, si Julian ang CEO ng ‘wait, may kuwento pa ako’. Charot!"
+      },
+      {
+        "lang": "taglish",
+        "text": "Julian is the main character ng imaginary grocery episode natin."
+      },
+      {
+        "lang": "taglish",
+        "text": "Sino si Julian? Guest star ng resibo cinematic universe, sis."
+      },
+      {
+        "lang": "taglish",
+        "text": "Julian: fictional minister of ‘one more dramatic pause’. Friendly joke lang!"
+      }
+    ],
+    "greetings": [
+      {
+        "lang": "en",
+        "text": "Hello, Julian! Your imaginary entrance music is playing."
+      },
+      {
+        "lang": "en",
+        "text": "Thanks, Julian. The imaginary audience sends polite applause."
+      },
+      {
+        "lang": "en",
+        "text": "Goodbye, Julian—please collect your imaginary spotlight at the door."
+      },
+      {
+        "lang": "tl",
+        "text": "Kumusta, Julian! Handa na ang tanong at imaginary palakpakan."
+      },
+      {
+        "lang": "tl",
+        "text": "Salamat, Julian. Maikli ang sagot, bongga ang pagbati."
+      },
+      {
+        "lang": "tl",
+        "text": "Paalam muna, Julian. Itabi natin ang imaginary pulang karpet."
+      },
+      {
+        "lang": "taglish",
+        "text": "Hi Julian, beshie! Walang entrance fee dito."
+      },
+      {
+        "lang": "taglish",
+        "text": "Welcome back, Julian. Resume na ang grocery episode, sis."
+      },
+      {
+        "lang": "taglish",
+        "text": "Thanks, Julian! Roll credits—unless may next question ka pa."
+      },
+      {
+        "lang": "taglish",
+        "text": "Hello, mother of dramatic pauses—Julian edition, friendly joke lang!"
+      }
+    ],
+    "crush": [
+      {
+        "lang": "en",
+        "text": "Julian’s fictional romance has excellent background music."
+      },
+      {
+        "lang": "en",
+        "text": "Julian brought a love question; the shopping list is blushing in fiction."
+      },
+      {
+        "lang": "en",
+        "text": "In this imaginary story, Julian’s crush gets a full opening sequence."
+      },
+      {
+        "lang": "tl",
+        "text": "May tanong sa pag-ibig si Julian; nag-ready na ang imaginary violin."
+      },
+      {
+        "lang": "tl",
+        "text": "Si Julian, pati simpleng pagbati puwedeng gawing eksena—sa biro lang."
+      },
+      {
+        "lang": "tl",
+        "text": "Julian, pang-shopping ang calculator; pang-imaginary drama ang violin."
+      },
+      {
+        "lang": "taglish",
+        "text": "Beshie Julian, grocery list muna, fictional kilig later."
+      },
+      {
+        "lang": "taglish",
+        "text": "Julian’s love-story trailer is ready, sis. No real-life assumptions!"
+      },
+      {
+        "lang": "taglish",
+        "text": "May imaginary slow-motion scene si Julian. Charot, friends’ joke lang."
+      },
+      {
+        "lang": "taglish",
+        "text": "Julian, that’s a whole fictional rom-com aisle right there."
+      }
+    ],
+    "compliment": [
+      {
+        "lang": "en",
+        "text": "Julian earns an imaginary trophy for commitment to the entrance."
+      },
+      {
+        "lang": "en",
+        "text": "Julian’s fictional red-carpet confidence gets polite applause."
+      },
+      {
+        "lang": "en",
+        "text": "Compliment for Julian: excellent imaginary stage presence."
+      },
+      {
+        "lang": "tl",
+        "text": "Palakpakan para sa masipag na imaginary entrance ni Julian."
+      },
+      {
+        "lang": "tl",
+        "text": "Julian, award-winning ang dedication mo sa munting biro natin."
+      },
+      {
+        "lang": "tl",
+        "text": "Mahusay ang timing ni Julian sa imaginary spotlight—palakpakan!"
+      },
+      {
+        "lang": "taglish",
+        "text": "Julian, beshie, ten out of ten sa fictional entrance energy."
+      },
+      {
+        "lang": "taglish",
+        "text": "Slay the shopping list, Julian. May imaginary trophy ka na."
+      },
+      {
+        "lang": "taglish",
+        "text": "Julian’s confidence has main-character lighting, sis. Friendly joke!"
+      },
+      {
+        "lang": "taglish",
+        "text": "Julian, honorary award for ‘most prepared dramatic pause’."
+      }
+    ],
+    "generic": [
+      {
+        "lang": "en",
+        "text": "Julian has entered the imaginary grocery cinematic universe."
+      },
+      {
+        "lang": "en",
+        "text": "Julian’s receipt apparently asked for an intermission."
+      },
+      {
+        "lang": "en",
+        "text": "Julian brings the spotlight; I’ll bring the catalog facts."
+      },
+      {
+        "lang": "tl",
+        "text": "Si Julian na naman ang bida ng imaginary grocery episode."
+      },
+      {
+        "lang": "tl",
+        "text": "May maikling tanong, may mahabang imaginary entrance si Julian."
+      },
+      {
+        "lang": "tl",
+        "text": "Julian, itabi muna ang imaginary mikropono; may sagot tayo."
+      },
+      {
+        "lang": "taglish",
+        "text": "Ay beshie Julian, may bagong episode na naman!"
+      },
+      {
+        "lang": "taglish",
+        "text": "Julian, sis, the shopping cart is ready for your fictional cameo."
+      },
+      {
+        "lang": "taglish",
+        "text": "Friendly roast lang, Julian. Main character ka ng imaginary resibo drama."
+      },
+      {
+        "lang": "taglish",
+        "text": "Julian, tapos na ang opening credits. Ready na ang next question."
+      }
+    ]
+  }
+}
