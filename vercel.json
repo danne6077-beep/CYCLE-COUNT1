@@ -67,6 +67,10 @@
       ]
     },
     {
+      "source": "/shopper/catalog/starter-prices.json",
+      "headers": [{"key":"Cache-Control","value":"no-store"}]
+    },
+    {
       "source": "/shopper/account-config.json",
       "headers": [
         {

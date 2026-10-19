@@ -50,7 +50,7 @@ interface ShopRepository {
 
 @Singleton
 class LocalRepository @Inject constructor(private val database: FujiDatabase,
-    @ApplicationContext private val context: Context) : ShopRepository {
+    @param:ApplicationContext private val context: Context) : ShopRepository {
     private val dao = database.dao()
     private val mutableState = MutableStateFlow(CatalogState())
     override val state: StateFlow<CatalogState> = mutableState
@@ -122,6 +122,7 @@ class LocalRepository @Inject constructor(private val database: FujiDatabase,
     override suspend fun shelfPrice(line: BasketLine, value: Long) = database.withTransaction {
         require(value in 0..Money.MAX)
         dao.basketLine(line.sku)?.let { dao.basket(it.copy(price = value, shelfPrice = true)) }
+        Unit
     }
     override suspend fun finish(budget: Long) = database.withTransaction {
         val lines = dao.basket().first()
@@ -156,6 +157,7 @@ class LocalRepository @Inject constructor(private val database: FujiDatabase,
             val old = dao.photo(sku).first()
             dao.photo(ProductPhoto(sku, target.path))
             old?.let { File(it.path).takeIf { file -> file.parentFile?.canonicalPath == directory.canonicalPath }?.delete() }
+            Unit
         } catch (e: Exception) { target.delete(); throw e }
     }
     override suspend fun clearPhotos() = withContext(Dispatchers.IO) {

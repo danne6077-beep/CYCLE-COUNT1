@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.PlaylistAdd
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -72,7 +73,7 @@ import java.io.File
                 FilledTonalIconButton({ vm.action { vm.settings.favorite(sku) } }) { Icon(if (favorite) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder, stringResource(if (favorite) R.string.unfavorite else R.string.favorite)) }
             }
         }
-        item { OutlinedButton({ pickingList = true }, Modifier.fillMaxWidth()) { Icon(Icons.Rounded.PlaylistAdd, null); Spacer(Modifier.width(8.dp)); Text(stringResource(R.string.save_to_list)) } }
+        item { OutlinedButton({ pickingList = true }, Modifier.fillMaxWidth()) { Icon(Icons.AutoMirrored.Rounded.PlaylistAdd, null); Spacer(Modifier.width(8.dp)); Text(stringResource(R.string.save_to_list)) } }
         item {
             Card { Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(stringResource(if (p.masterMatched) R.string.master_match else R.string.master_unmatched), color = MaterialTheme.colorScheme.primary)

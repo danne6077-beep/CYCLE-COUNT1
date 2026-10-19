@@ -1,5 +1,7 @@
 import fs from 'node:fs';import path from 'node:path';import {createHash} from 'node:crypto';import {gzipSync} from 'node:zlib';import {build} from 'esbuild';
+import {preparePrices} from './prepare-prices.mjs';
 const root=path.resolve(import.meta.dirname,'..'),out=path.join(root,'dist');
+preparePrices(root);
 if(path.dirname(out)!==root||path.basename(out)!=='dist')throw new Error('Unexpected output path');
 fs.rmSync(out,{recursive:true,force:true});fs.mkdirSync(out,{recursive:true});
 const files=['index.html','app.js','style.css','i18n.js','icon.svg','manifest.webmanifest','staff.html','staff.js','account-config.json','catalog.schema.json'];

@@ -13,13 +13,14 @@ export class Catalog {
     this.departmentLoads=new Map();
     if(quick&&this.meta.starterPath){this.rows=await this.file(this.meta.starterPath);for(const row of this.rows)this.bySku.set(row[0],row);this.starterOnly=true;}
     else await this.loadDepartment(this.meta.defaultDepartment||'groceries');
-    await this.refreshPrices();
+    await this.refreshPrices({quick});
     return this;
   }
   isDepartmentLoaded(department='groceries') {
     return this.meta.departments.every((name,i)=>!(department==='all'||(department==='groceries'?['FMCG','FRESH & STAPLE'].includes(name):name===department))||this.loadedDepartments.has(i));
   }
   async loadDepartment(department='groceries') {
+    if(this.quickPricesOnly)await this.fullPrices();
     if(this.starterOnly){this.rows=[];this.starterOnly=false;}
     const wanted=this.meta.departments.map((name,i)=>({name,i})).filter(d=>department==='all'||(department==='groceries'?['FMCG','FRESH & STAPLE'].includes(d.name):d.name===department));
     for(const d of wanted) {
@@ -33,14 +34,18 @@ export class Catalog {
       await this.departmentLoads.get(d.i);
     }
   }
-  async refreshPrices() {
-    let data=await read('prices','catalog');
-    try{const r=await fetch(new URL('catalog/catalog-prices.json',base),{cache:'no-store'});if(r.ok){const next=await r.json();if(Array.isArray(next.items)){data=next;await write('prices',data,'catalog');}}}catch{}
+  async refreshPrices({quick=false}={}) {
+    const small=quick&&this.meta.mode==='priced-assortment',key=small?'starter-prices':'prices';
+    let data=await read(key,'catalog');
+    try{const r=await fetch(new URL(small?'catalog/starter-prices.json':'catalog/catalog-prices.json',base),{cache:'no-store'});if(r.ok){const next=await r.json();if(Array.isArray(next.items)){data=next;await write(key,data,'catalog');}}}catch{}
+    if(!data&&small)data=await read('prices','catalog');
+    this.quickPricesOnly=small;
     this.priceVersion=data?.version||0;
     this.prices=new Map((data?.items||[]).map(p=>[p.sku,p]));
     this.priceAsOf=data?.effectiveDate||null;
     this.pricesImportedAt=data?.updatedAt||null;
   }
+  async fullPrices(){if(!this.fullPriceLoad)this.fullPriceLoad=this.refreshPrices().catch(error=>{this.fullPriceLoad=null;throw error;});await this.fullPriceLoad;}
   async file(path) {
     if(this.parts.has(path))return this.parts.get(path);
     const promise=(async()=>{
@@ -94,6 +99,7 @@ export class Catalog {
     return matches.map(r=>this.product(r));
   }
   async lookup(raw) {
+    if(this.quickPricesOnly)await this.fullPrices();
     const skus=new Set();
     for(const code of barcodeVariants(raw)) {
       if(!this.bySku.has(code)&&/^[A-Za-z0-9_-]{1,32}$/.test(code))await this.details(code);
@@ -113,6 +119,7 @@ export class Catalog {
     return row?{barcodes:row[5],sourceStatus:row[6],sellingUnit:row[7]}:null;
   }
   async downloadAll(onProgress=()=>{}) {
+    if(this.quickPricesOnly)await this.fullPrices();
     let done=0;
     // Three concurrent requests avoid flooding mobile connections.
     const queue=[...this.meta.files];

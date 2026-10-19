@@ -186,6 +186,8 @@ def run(source, assortment_source=None):
         price_items=[{'sku':sku,'name':p[1],'category':categories[p[2]],'subcategory':subcategories[p[3]],'department':departments[p[4]],'priceCentavos':selected[sku]['priceCentavos'],'priceAsOf':None,'priceSource':'Supplied price list','masterMatched':p[6]!=''} for sku,p in products.items()]
         prices={'schemaVersion':1,'sourceSheet':'HYPERMART','version':1,'updatedAt':meta['updatedAt'],'effectiveDate':None,'sourceName':Path(assortment_source).name,'items':price_items,'history':[]}
         (output/'catalog-prices.json').write_text(json.dumps(prices,ensure_ascii=False,separators=(',',':')),encoding='utf8')
+        starter_skus={row[0] for row in starter}
+        (output/'starter-prices.json').write_text(json.dumps({**prices,'items':[p for p in price_items if p['sku'] in starter_skus]},ensure_ascii=False,separators=(',',':')),encoding='utf8')
         (ROOT/'docs'/'assortment-import-report.json').write_text(json.dumps(assortment_report,ensure_ascii=False,indent=2),encoding='utf8')
     (output/'catalog-meta.json').write_text(json.dumps(meta,ensure_ascii=False,separators=(',',':')),encoding='utf8')
     (ROOT/'docs'/'catalog-import-report.json').write_text(json.dumps(meta,ensure_ascii=False,indent=2),encoding='utf8')
