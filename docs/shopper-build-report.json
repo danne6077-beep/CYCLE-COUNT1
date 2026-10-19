@@ -1,0 +1,10 @@
+{
+  "shellVersion": "7d5a95a431cc",
+  "initialJavaScriptGzipBytes": 45215,
+  "chatWorkerGzipBytes": 14573,
+  "chatSnapshotGzipBytes": 498732,
+  "chatVersion": "1005bde1110d54ebbdf4",
+  "scannerLazyGzipBytes": 116532,
+  "catalogFiles": 136,
+  "itemCount": 14076
+}

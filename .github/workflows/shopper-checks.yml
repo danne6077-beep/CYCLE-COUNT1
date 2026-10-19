@@ -3,7 +3,7 @@ on:
   pull_request:
     paths: ['shopper/**', 'api/**', 'server/**', 'firestore.rules', 'scripts/**', 'vercel.json']
   push:
-    branches: ['codex/fuji-shopper-hypermart']
+    branches: ['codex/fuji-shopper-hypermart', 'feat/offline-chatbot']
 permissions:
   contents: read
 concurrency:
@@ -40,12 +40,14 @@ jobs:
           node scripts/shopper-offline-check.cjs
           node scripts/shopper-bundle-check.cjs
           node scripts/shopper-camera-check.cjs
+          node scripts/shopper-chat-check.cjs
           SHOPPER_PREVIEW_PORT=4184 node shopper/scripts/serve.mjs --dist --standalone > /tmp/fuji-standalone.log 2>&1 &
           for attempt in $(seq 1 30); do
             if curl --silent --fail http://127.0.0.1:4184/ > /dev/null; then break; fi
             sleep 1
           done
           SHOPPER_TEST_URL=http://127.0.0.1:4184/ node scripts/shopper-camera-check.cjs
+          SHOPPER_TEST_URL=http://127.0.0.1:4184/ node scripts/shopper-chat-check.cjs
       - name: Lighthouse mobile
         run: |
           export CHROME_PATH="$(node -p "require('playwright').chromium.executablePath()")"
