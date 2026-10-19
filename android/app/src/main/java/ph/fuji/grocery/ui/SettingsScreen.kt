@@ -17,7 +17,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ph.fuji.grocery.BuildConfig
 import ph.fuji.grocery.R
 
-const val WEBSITE = "https://fujisupersystem-git-codex-fuji-shopper-hypermart-fuji-92d1.vercel.app/shopper/"
+const val WEBSITE = "https://fuji-grocery-tracker-git-codex-fuji-shopper-hypermart-fuji-92d1.vercel.app/"
 
 @Composable fun SettingsScreen(vm: ShopperViewModel) {
     val preferences by vm.preferences.collectAsStateWithLifecycle()

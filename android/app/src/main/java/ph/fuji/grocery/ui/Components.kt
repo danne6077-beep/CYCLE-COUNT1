@@ -103,13 +103,16 @@ fun categoryIcon(category: String): ImageVector = when {
 @Composable fun MoneyDialog(title: Int, initial: Long, dismiss: () -> Unit, save: (String) -> Boolean, hint: Int? = null) {
     var value by remember { mutableStateOf(if (initial == 0L) "" else java.math.BigDecimal.valueOf(initial, 2).toPlainString()) }
     var error by remember { mutableStateOf(false) }
-    AlertDialog(onDismissRequest = dismiss, title = { Text(stringResource(title)) }, text = {
+    val keyboard = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
+    val focus = androidx.compose.ui.platform.LocalFocusManager.current
+    val close = { keyboard?.hide(); focus.clearFocus(); dismiss() }
+    AlertDialog(onDismissRequest = close, title = { Text(stringResource(title)) }, text = {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedTextField(value, { value = it.take(15); error = false }, singleLine = true, label = { Text(stringResource(R.string.amount)) },
                 prefix = { Text("₱") }, isError = error, keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal))
             if (error) Text(stringResource(R.string.invalid_money), color = MaterialTheme.colorScheme.error)
             if (hint != null) Text(stringResource(hint), style = MaterialTheme.typography.bodySmall)
         }
-    }, confirmButton = { TextButton({ if (save(value)) dismiss() else error = true }) { Text(stringResource(R.string.save)) } },
-        dismissButton = { TextButton(dismiss) { Text(stringResource(R.string.cancel)) } })
+    }, confirmButton = { TextButton({ if (save(value)) close() else error = true }) { Text(stringResource(R.string.save)) } },
+        dismissButton = { TextButton(close) { Text(stringResource(R.string.cancel)) } })
 }

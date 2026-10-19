@@ -7,4 +7,4 @@ FUJI Grocery Tracker native Android review build (Android 8.0+).
 
 This is an Android debug-signed APK for review, not a Google Play release. Enable installation from your browser or file manager when Android asks, then open the APK. Debug build signatures can change between CI builds; do not assume an in-place update is possible across review builds.
 
-Website: https://fujisupersystem-git-codex-fuji-shopper-hypermart-fuji-92d1.vercel.app/shopper/ (protected Vercel review preview).
+Website: https://fuji-grocery-tracker-git-codex-fuji-shopper-hypermart-fuji-92d1.vercel.app/ (protected Vercel review preview).

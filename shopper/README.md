@@ -80,7 +80,7 @@ The existing repository already has a working GitHub → Vercel integration for 
 - Set any optional environment values in **both Production and Preview** as appropriate. Keep GitHub publishing credentials on Production only if previews must not publish to the production branch. A token needs contents write on this one repository; never put it in browser configuration.
 - The default app needs **no secrets, no Firebase account and no AI key**. Never enable a paid plan implicitly.
 
-The feature branch is deployed as a [protected Vercel preview](https://fujisupersystem-git-codex-fuji-shopper-hypermart-fuji-92d1.vercel.app/shopper/) and linked to [PR #2](https://github.com/danne6077-beep/CYCLE-COUNT1/pull/2). Vercel sign-in is required. The dashboard confirms the team is on Hobby; commercial store operation requires an eligible plan or a different eligible host. Production merge has not been performed. Publishing prices, online AI and cloud sync fail closed until their required settings are present.
+The feature branch is deployed as a [protected Vercel preview](https://fuji-grocery-tracker-git-codex-fuji-shopper-hypermart-fuji-92d1.vercel.app/) and linked to [PR #2](https://github.com/danne6077-beep/CYCLE-COUNT1/pull/2). Vercel sign-in is required. The dashboard confirms the team is on Hobby; commercial store operation requires an eligible plan or a different eligible host. Production merge has not been performed. Publishing prices, online AI and cloud sync fail closed until their required settings are present.
 
 ## Free-tier review — checked 19 October 2026
 

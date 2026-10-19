@@ -6,6 +6,7 @@ import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Rule
+import org.junit.After
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -30,11 +31,11 @@ class ShopperFlowTest {
         rule.onNodeWithText("Amount in pesos").performTextInput("20")
         rule.onNodeWithText("Save", substring = false).performClick()
         rule.onNodeWithContentDescription("Increase quantity").performClick()
-        rule.onNodeWithText("Over budget", substring = false).assertIsDisplayed()
+        rule.onNodeWithText("Over budget", substring = false).performScrollTo().assertIsDisplayed()
         rule.onNodeWithText("Edit shelf price").performScrollTo().performClick()
         rule.onNodeWithText("Amount in pesos").performTextReplacement("15.01")
         rule.onNodeWithText("Save", substring = false).performClick()
-        rule.onAllNodesWithText("₱30.02").onFirst().assertIsDisplayed()
+        rule.onAllNodesWithText("₱30.02").onFirst().performScrollTo().assertIsDisplayed()
         screenshot("basket-dark.png")
         rule.onNodeWithText("Save finished trip").performScrollTo().performClick()
         rule.onAllNodesWithText("Save finished trip").onLast().performClick()
@@ -49,6 +50,7 @@ class ShopperFlowTest {
         rule.onNodeWithText("₱14.05").performScrollTo().assertIsDisplayed()
         screenshot("catalog-light.png")
     }
+    @After fun captureFinalScreen() { runCatching { screenshot("last-screen.png") } }
     private fun screenshot(name: String) {
         rule.waitForIdle()
         val context = InstrumentationRegistry.getInstrumentation().targetContext
