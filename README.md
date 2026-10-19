@@ -51,3 +51,7 @@ Open **Cigarette Monitor** and import the local monitoring workbook. Daily Monit
 The app uses a collapsible left sidebar with a mobile drawer below 900px, a compact page header, and light/dark themes. Sidebar collapse and theme preference are saved locally. Printing uses a light paper palette. Use the sidebar Help control for local, offline FAQ search; it does not call an AI provider or include inventory data. Feedback is saved as a draft in the current browser because this static deployment has no shared feedback service. The internal component sample is available at `/design/`.
 
 Run unit tests with `npm test`. Run the browser visual check with `npm run test:visual` after installing the Playwright package and a Chromium browser; it checks navigation, settings, local help, theme, responsive widths, and print visibility. The script can write review screenshots to `qa/phase10/screenshots/`, which the static-site build excludes.
+
+## FUJI Grocery Tracker
+
+The Hypermart-only shopper app lives in `/shopper/`. See [setup, catalog publication, privacy and free-tier notes](shopper/README.md), [catalog discovery](docs/catalog-gap.md), and [validation status](docs/shopper-validation.md). The supplied sheet has no selling prices; unknown prices remain explicit and shoppers may enter shelf prices privately.

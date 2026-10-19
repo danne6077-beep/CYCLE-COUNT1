@@ -26,6 +26,18 @@ service cloud.firestore {
       allow create, update, delete: if false;
     }
 
+    // Shopper snapshots are private. This does not grant shoppers admin roles.
+    match /shopperUsers/{userId}/snapshots/{snapshotId} {
+      allow read, delete: if signedIn() && request.auth.uid == userId;
+      allow create, update: if signedIn() && request.auth.uid == userId
+        && snapshotId == 'current'
+        && request.resource.data.keys().hasOnly(['payload', 'updatedAt', 'schemaVersion'])
+        && request.resource.data.payload is string
+        && request.resource.data.payload.size() <= 500000
+        && request.resource.data.updatedAt is timestamp
+        && request.resource.data.schemaVersion == 1;
+    }
+
     match /announcements/{announcementId} {
       allow read: if signedIn();
       allow create: if isAdmin()

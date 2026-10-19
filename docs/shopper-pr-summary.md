@@ -1,0 +1,13 @@
+# Add a Hypermart shopper app with honest price estimates
+
+The supplied item master has products and barcodes but no selling prices. This adds `/shopper/` alongside the existing cycle-count system, with unknown prices kept explicit and device-only shelf-price entry for an accurate known subtotal. Every shopping flow carries the estimate/cashier warning.
+
+The app imports only HYPERMART, preserves SKU/barcode aliases, resolves ambiguous scans through shopper selection and caches compressed reference partitions in IndexedDB. It adds a camera/manual scanner, budgets, cart quantities and Undo, shopping lists, saved trips, charts, CSV/image exports, theme preferences, Filipino navigation and a deterministic local catalog helper. Savings use verified prices, net sizes, comparison groups and confirmed stock; missing data never produces invented savings.
+
+An isolated staff workspace validates enrichment/promos and supports versioned publication/rollback. Online publication requires a server-verified Firebase administrator and repository-scoped server credentials. Optional accounts, private snapshots and online intent classification stay disabled until configured. Vercel and GitHub Pages build configuration retain the admin root and add the shopper output; API source and private settings are excluded from static output.
+
+Validation: 56 unit/data/API/contrast checks pass. Mobile Chrome automation passes a mocked camera read plus five real SKU lookups, exact shelf-price totals, budget overrun, trip history, offline reload and theme screenshots. A separate intercepted-price fixture verifies an exact ₱20 swap and budget rescue. Full-catalog offline lookup passes for an unvisited department, retaining two parsed partitions; cached desktop lookup maximum was 0.1 ms. Source JS is about 34 KB gzipped, excluding lazy scanner/QR bundles.
+
+Pending before merge: install dependencies, run typecheck and production build, run Lighthouse and Firestore emulator checks, and complete physical Android/iPhone camera checks. Automated permission review prevented dependency installation and remote branch/PR creation in this session, so no production deployment or Lighthouse scores are claimed. See `shopper-validation.md` and screenshots in the local `qa/shopper/` directory.
+
+Data decisions: require staff prices/net sizes before enabling savings; keep stock/brand unknown until supplied; no automatic analytics; email sign-in/private snapshot sync is optional; streaming AI, Google sign-in and complete Filipino translation are deferred. Vercel Hobby's commercial-use restriction conflicts with a store-owned public app and needs an eligible hosting plan decision without an automatic paid upgrade.

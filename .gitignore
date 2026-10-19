@@ -6,3 +6,8 @@ __pycache__/
 !.env.example
 dist/
 qa/phase10/screenshots/
+.task/
+shopper/dist/
+shopper/vendor/
+qa/shopper/
+shopper/.npmrc
