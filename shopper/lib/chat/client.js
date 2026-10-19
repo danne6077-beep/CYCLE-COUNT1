@@ -1,10 +1,12 @@
-import {read,write} from '../storage.js';
+import {prepareShell} from './offline.js';
+import {read,write,storageStatus} from '../storage.js';
 import {provenance,priceCaveat} from './trust.js';
 import {sanitizeHistory} from './history.js';
 import {pesos} from './normalize.js';
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const questions=['Pinakamurang bigas','Cheapest cooking oil','Magkano ang itlog?','May ₱500 ako, ano mabibili?','Compare Coke vs Pepsi','Ano ang promo ngayon?'];
 export function createAssistant(hooks){
+ const expectedShell='__SHELL_EXPECTED__';
  let worker,ready=false,preparing,busy=false,messages=[],options={language:'auto'},context={},sequence=0,opener,loaded=false;
  const pending=new Map(),products=new Map();
  const panel=document.createElement('dialog');panel.id='fuji-chat';panel.className='fuji-chat';panel.setAttribute('aria-label','Ask FUJI / Tanungin si FUJI');
@@ -21,10 +23,11 @@ export function createAssistant(hooks){
  async function prepare(){
   if(ready)return;if(preparing)return preparing;
   preparing=(async()=>{
-   await load();status('Preparing saved catalog…');$('#chat-error').hidden=true;
-   if(!worker){worker=new Worker(new URL('./worker.js?v=chat1',import.meta.url),{type:'module'});worker.onmessage=event=>{const data=event.data,job=pending.get(data.id);if(!job)return;pending.delete(data.id);if(data.error)job.reject(new Error(data.error));else job.resolve(data);};worker.onerror=()=>{const error=new Error('The offline worker could not start. Reconnect once and retry.');for(const job of pending.values())job.reject(error);pending.clear();worker.terminate();worker=null;ready=false;showError(error);};}
+   await load();const shellReady=prepareShell(expectedShell);status('Preparing saved catalog…');$('#chat-error').hidden=true;
+   if(!worker){worker=new Worker(new URL('./worker.js?v=harden1',import.meta.url),{type:'module'});worker.onmessage=event=>{const data=event.data,job=pending.get(data.id);if(!job)return;pending.delete(data.id);if(data.error)job.reject(new Error(data.error));else job.resolve(data);};worker.onerror=()=>{const error=new Error('The offline worker could not start. Reconnect once and retry.');for(const job of pending.values())job.reject(error);pending.clear();worker.terminate();worker=null;ready=false;showError(error);};}
    const result=await request('init',{context});ready=true;
-   if('serviceWorker' in navigator){await navigator.serviceWorker.ready;status(`Offline ready ✓ · ${result.count.toLocaleString()} saved items`);}else status(`Saved catalog ready · ${result.count.toLocaleString()} items; offline page installation is unavailable in this browser.`);
+   const cached=await shellReady;status(`${cached?'Offline ready ✓':'Catalog ready · offline page cache unavailable'} · ${result.count.toLocaleString()} saved items${result.packageInfo?.usingOlder?' · older saved version':''}`);
+   if(!storageStatus().persistent||result.packageInfo?.storage?.persistent===false){const notice=document.createElement('p');notice.className='chat-storage-warning';notice.setAttribute('role','status');notice.textContent='Device storage unavailable or full. Changes stay in this tab; history may be lost / Puno o walang storage; maaaring mawala ang usapan.';$('.chat-preferences').append(notice);}
   })().catch(error=>{ready=false;showError(error);throw error;}).finally(()=>{preparing=null;});return preparing;
  }
  async function persist(){messages=messages.slice(-200);await Promise.all([write('chat-history',messages),write('chat-context',context),write('chat-settings',options)]);}

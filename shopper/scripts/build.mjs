@@ -19,10 +19,12 @@ const shell=[];
 function collect(dir){for(const e of fs.readdirSync(dir,{withFileTypes:true})){const p=path.join(dir,e.name),rel=path.relative(out,p).replaceAll('\\','/');if(e.isDirectory()){if(e.name!=='catalog')collect(p);}else if(!['staff.html','staff.js'].includes(rel))shell.push('./'+rel);}}
 collect(out);
 // Version entry points to bypass an older active service worker during an update.
-for(const [file,tag] of Object.entries({'./app.js':'chat1','./lib/scanner.js':'camera2','./design.css':'camera2','./chat.css':'chat1','./lib/chat/client.js':'chat1','./lib/chat/worker.js':'chat1'}))shell[shell.indexOf(file)]=file+'?v='+tag;
+for(const [file,tag] of Object.entries({'./app.js':'harden1','./lib/scanner.js':'camera2','./design.css':'camera2','./chat.css':'harden1','./lib/chat/client.js':'harden1','./lib/chat/worker.js':'harden1'}))shell[shell.indexOf(file)]=file+'?v='+tag;
+for(let i=0;i<shell.length;i++)if(shell[i].startsWith('./chat-data/'))shell[i]+='?v='+chatReport.version;
 const hash=createHash('sha256');for(const file of shell)hash.update(fs.readFileSync(path.join(out,file.split('?')[0])));const version=hash.digest('hex').slice(0,12);
+const clientPath=path.join(out,'lib/chat/client.js');fs.writeFileSync(clientPath,fs.readFileSync(clientPath,'utf8').replace('__SHELL_EXPECTED__',version));
 const sw=fs.readFileSync(path.join(root,'sw.js'),'utf8').replace('__SHELL_VERSION__',version).replace(/\/\*PRECACHE\*\/\[[^\n]*\]/,JSON.stringify(shell));fs.writeFileSync(path.join(out,'sw.js'),sw);
-let jsBytes=0;for(const file of ['app.js','i18n.js','lib/chat/client.js','lib/chat/normalize.js','lib/chat/trust.js','lib/chat/history.js',...fs.readdirSync(path.join(out,'lib')).filter(s=>s.endsWith('.js')).map(s=>'lib/'+s)])jsBytes+=gzipSync(fs.readFileSync(path.join(out,file))).length;
+let jsBytes=0;for(const file of ['app.js','i18n.js','lib/chat/client.js','lib/chat/normalize.js','lib/chat/trust.js','lib/chat/history.js','lib/chat/offline.js',...fs.readdirSync(path.join(out,'lib')).filter(s=>s.endsWith('.js')).map(s=>'lib/'+s)])jsBytes+=gzipSync(fs.readFileSync(path.join(out,file))).length;
 if(jsBytes>150*1024)throw new Error('Initial JavaScript exceeds 150 KB gzipped');
 const meta=JSON.parse(fs.readFileSync(path.join(out,'catalog/catalog-meta.json'),'utf8'));for(const file of meta.files){const bytes=fs.readFileSync(path.join(out,file.path));if(createHash('sha256').update(bytes).digest('hex')!==file.checksum)throw new Error('Catalog checksum mismatch: '+file.path);}
 let playbookGzipBytes=0;for(const file of fs.readdirSync(path.join(out,'chat-data/playbooks')))playbookGzipBytes+=gzipSync(fs.readFileSync(path.join(out,'chat-data/playbooks',file))).length;if(playbookGzipBytes>60*1024)throw new Error('Playbooks exceed 60 KiB gzip');

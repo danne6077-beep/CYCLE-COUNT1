@@ -1,6 +1,6 @@
 {
   "playbookGzipBytes": 14282,
-  "shellVersion": "ba61fcb3e43e",
+  "shellVersion": "dab66bc9f224",
   "priceAnomalies": {
     "flagged": 1611,
     "nonpositiveOrMissing": 0,
@@ -8,8 +8,8 @@
     "categoryPrice": 1001,
     "unitPrice": 693
   },
-  "initialJavaScriptGzipBytes": 45911,
-  "chatWorkerGzipBytes": 19401,
+  "initialJavaScriptGzipBytes": 46979,
+  "chatWorkerGzipBytes": 19841,
   "chatSnapshotGzipBytes": 505129,
   "chatVersion": "c321c263705279dfb989",
   "scannerLazyGzipBytes": 116532,

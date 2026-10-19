@@ -5,7 +5,7 @@ import {icon,categoryIcon,basketArt} from './lib/icons.js';
 import {strings} from './i18n.js';
 import {categoryArt} from './lib/art.js';
 import {Scanner,decodePhoto,CAMERA_MESSAGES} from './lib/scanner.js?v=camera2';
-import {createAssistant} from './lib/chat/client.js?v=chat1';
+import {createAssistant} from './lib/chat/client.js?v=harden1';
 
 const $=s=>document.querySelector(s),esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const catalog=new Catalog();
@@ -191,5 +191,5 @@ window.addEventListener('offline',()=>{const c=$('#connection');if(c){c.classLis
 window.addEventListener('hashchange',()=>{const next=location.hash.slice(1);if(navKeys.includes(next)&&next!==tab){tab=next;renderPage();}});
 matchMedia('(prefers-color-scheme:dark)').addEventListener('change',()=>{if(S.theme==='system')applyTheme();});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&scanner?.stream){scanner.stop();const label=$('#camera-state');if(label)label.textContent='Camera paused. Tap Start camera to continue.';const button=$('[data-action=camera-start]');if(button){button.disabled=false;button.textContent='Start camera';}}});
-async function init(){try{const saved=await read('user');if(saved)S={...S,...saved};if(!S.lists.length)S.lists=[{id:'next',name:'My next shop',items:[]}];applyTheme();await catalog.init({quick:true});department=catalog.meta.defaultDepartment||'groceries';account=await read('account');const hash=location.hash.slice(1);if(navKeys.includes(hash))tab=hash;lastBudgetState=budgetStatus(totals(S.cart).knownCentavos,S.budget).state;shell();if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js',{scope:'./'}).then(()=>navigator.serviceWorker.ready).then(()=>assistant.prepare()).catch(()=>notify('Offline preparation is incomplete. Connect and open Ask FUJI to retry.'));if(!S.welcomed)showBudget(true);}catch(e){$('#app').innerHTML=`<div class="initial-loading"><span class="brand-symbol">F<span>•</span></span><h1>Let’s get you connected.</h1><p>${esc(e.message)}</p><button class="btn primary" id="retry-load">Try again</button></div>`;$('#retry-load').onclick=()=>location.reload();}}
+async function init(){try{const saved=await read('user');if(saved)S={...S,...saved};if(!S.lists.length)S.lists=[{id:'next',name:'My next shop',items:[]}];applyTheme();await catalog.init({quick:true});department=catalog.meta.defaultDepartment||'groceries';account=await read('account');const hash=location.hash.slice(1);if(navKeys.includes(hash))tab=hash;lastBudgetState=budgetStatus(totals(S.cart).knownCentavos,S.budget).state;shell();requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(()=>assistant.prepare().catch(()=>notify('Offline preparation is incomplete. Connect and open Ask FUJI to retry.')),250)));if(!S.welcomed)showBudget(true);}catch(e){$('#app').innerHTML=`<div class="initial-loading"><span class="brand-symbol">F<span>•</span></span><h1>Let’s get you connected.</h1><p>${esc(e.message)}</p><button class="btn primary" id="retry-load">Try again</button></div>`;$('#retry-load').onclick=()=>location.reload();}}
 init();
