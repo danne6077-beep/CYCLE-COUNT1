@@ -10,7 +10,9 @@ try{
  await assertSucceeds(getDoc(doc(alice,'shopperUsers/alice/snapshots/current')));
  await assertFails(getDoc(doc(bob,'shopperUsers/alice/snapshots/current')));
  await assertFails(setDoc(doc(bob,'shopperUsers/alice/snapshots/current'),payload));
+ await assertFails(deleteDoc(doc(bob,'shopperUsers/alice/snapshots/current')));
  await assertFails(getDoc(doc(guest,'shopperUsers/alice/snapshots/current')));
+ await assertFails(setDoc(doc(guest,'shopperUsers/alice/snapshots/current'),payload));
  await assertFails(setDoc(doc(alice,'shopperUsers/alice/snapshots/current'),{...payload,payload:'x'.repeat(500001)}));
  await assertFails(setDoc(doc(alice,'shopperUsers/alice/snapshots/other'),payload));
  await assertFails(setDoc(doc(alice,'shopperUsers/alice/snapshots/current'),{...payload,role:'admin'}));
