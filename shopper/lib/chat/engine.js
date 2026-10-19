@@ -65,8 +65,9 @@ export class ChatEngine{
   return {rows,terms,topic,corrections,text};
  }
  restore(focus){if(focus&&Array.isArray(focus.ids))this.focus={...focus,ids:focus.ids.filter(id=>this.byId.has(id))};}
- respond(raw,{language='auto',basket=[],budget=null,day='2026-10-19'}={}){
+ respond(raw,{language='auto',basket=[],budget=null,day=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Manila',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())}={}){
   raw=String(raw??'').slice(0,500).trim();const lang=language==='auto'?detectLanguage(raw):language;
+  if(/\b(weather|forecast|politics|president|homework|dosage|dose|diagnosis|cure|medical advice|legal advice|eleksyon)\b/i.test(raw)&&!/stock|supplies|kit/.test(raw))return {intent:'UNKNOWN',lang,text:choose(lang,'I can help with saved Hypermart items and shopping plans. General knowledge, medical, legal and live-store questions are outside my saved data.','Tungkol sa na-save na Hypermart items at plano sa pamimili ang kaya ko. Hindi sakop ang pangkalahatang kaalaman, payong medikal/legal o live-store na tanong.'),cards:[],actions:[],quickReplies:initial.slice(0,3),confidence:0,context:{...this.focus}};
   if(wantsPlan(raw,this.focus.planContext)&&this.planner.books.length){const planned=this.planner.plan(raw,{language,day,budget},this.focus.planContext);if(planned){if(/cheapest rice.*(?:and|at)/i.test(raw)){const simple=this.respond('cheapest rice',{language,basket,budget,day});planned.parts=[simple.text,planned.text];planned.text=simple.text+'\n\n'+planned.text;}this.focus={...planned.context};return planned;}}
   const q=classify(raw,this.focus),reply={text:'',lang,cards:[],table:null,actions:[],quickReplies:initial,confidence:1,intent:q.intent,followUpHint:'',context:null};
   const say=(en,tl,mixed)=>choose(lang,en,tl,mixed),source=say('Based on the saved Hypermart catalog. Price date unavailable.','Batay sa na-save na Hypermart catalog. Walang petsa ng presyo.','Saved Hypermart catalog ito; walang price date.');

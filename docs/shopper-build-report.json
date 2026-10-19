@@ -1,5 +1,5 @@
 {
-  "shellVersion": "42a658c172c1",
+  "shellVersion": "670b245e41b3",
   "priceAnomalies": {
     "flagged": 1611,
     "nonpositiveOrMissing": 0,
@@ -7,7 +7,7 @@
     "categoryPrice": 1001,
     "unitPrice": 693
   },
-  "initialJavaScriptGzipBytes": 45670,
+  "initialJavaScriptGzipBytes": 47652,
   "initialModules": [
     "app.js",
     "lib/catalog.js",
@@ -18,13 +18,14 @@
     "lib/art.js",
     "lib/scanner.js",
     "lib/chat/client.js",
+    "lib/chat/feedback.js",
     "lib/chat/plan-ui.js",
     "lib/chat/normalize.js",
     "lib/chat/trust.js",
     "lib/chat/offline.js",
     "lib/chat/history.js"
   ],
-  "chatWorkerGzipBytes": 20055,
+  "chatWorkerGzipBytes": 20337,
   "chatSnapshotGzipBytes": 505129,
   "playbookGzipBytes": 14282,
   "chatVersion": "c321c263705279dfb989",
