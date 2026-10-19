@@ -6,6 +6,9 @@ on:
     branches: ['codex/fuji-shopper-hypermart']
 permissions:
   contents: read
+concurrency:
+  group: shopper-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -35,6 +38,12 @@ jobs:
           node scripts/shopper-smoke.cjs
           node scripts/shopper-swap-check.cjs
           node scripts/shopper-offline-check.cjs
+          node scripts/shopper-bundle-check.cjs
+      - name: Lighthouse mobile
+        run: |
+          export CHROME_PATH="$(node -p "require('playwright').chromium.executablePath()")"
+          npx --yes lighthouse@13.5.0 http://127.0.0.1:4173/shopper/ --chrome-flags="--headless --no-sandbox" --only-categories=performance,accessibility --output=json --output=html --output-path=qa/shopper/lighthouse --quiet
+          node scripts/shopper-lighthouse-check.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -42,3 +51,4 @@ jobs:
           path: |
             qa/shopper
             docs/shopper-build-report.json
+            shopper/pnpm-lock.yaml
