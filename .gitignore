@@ -11,3 +11,10 @@ shopper/dist/
 shopper/vendor/
 qa/shopper/
 shopper/.npmrc
+.toolchains/
+android/.gradle/
+android/.kotlin/
+android/**/build/
+android/local.properties
+*.apk
+*.jks

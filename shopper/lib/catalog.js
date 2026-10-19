@@ -12,7 +12,7 @@ export class Catalog {
     this.loadedDepartments=new Set();
     this.departmentLoads=new Map();
     if(quick&&this.meta.starterPath){this.rows=await this.file(this.meta.starterPath);for(const row of this.rows)this.bySku.set(row[0],row);this.starterOnly=true;}
-    else await this.loadDepartment('groceries');
+    else await this.loadDepartment(this.meta.defaultDepartment||'groceries');
     await this.refreshPrices();
     return this;
   }
@@ -38,7 +38,8 @@ export class Catalog {
     try{const r=await fetch(new URL('catalog/catalog-prices.json',base),{cache:'no-store'});if(r.ok){const next=await r.json();if(Array.isArray(next.items)){data=next;await write('prices',data,'catalog');}}}catch{}
     this.priceVersion=data?.version||0;
     this.prices=new Map((data?.items||[]).map(p=>[p.sku,p]));
-    this.priceAsOf=data?.updatedAt||null;
+    this.priceAsOf=data?.effectiveDate||null;
+    this.pricesImportedAt=data?.updatedAt||null;
   }
   async file(path) {
     if(this.parts.has(path))return this.parts.get(path);

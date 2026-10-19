@@ -1,7 +1,7 @@
 const {chromium}=require('playwright');const fs=require('node:fs'),path=require('node:path'),z=require('node:zlib'),assert=require('node:assert/strict');let browser;
 (async()=>{
  const root=path.resolve(__dirname,'..'),meta=JSON.parse(fs.readFileSync(path.join(root,'shopper/catalog/catalog-meta.json')));
- const other=JSON.parse(z.gunzipSync(fs.readFileSync(path.join(root,'shopper/catalog/search.v1.0.json.gz'))))[0];
+ const other=JSON.parse(z.gunzipSync(fs.readFileSync(path.join(root,`shopper/catalog/search.v${meta.version}.0.json.gz`))))[0];
  browser=await chromium.launch({headless:true,...(process.env.TEST_BROWSER_CHANNEL?{channel:process.env.TEST_BROWSER_CHANNEL}:{})});const context=await browser.newContext({viewport:{width:360,height:800}}),page=await context.newPage();
  await page.goto(process.env.SHOPPER_TEST_URL||'http://127.0.0.1:4173/shopper/',{waitUntil:'networkidle'});await page.locator('#budget-input').waitFor();await page.getByRole('button',{name:'Let’s make a good shop'}).click();
  const downloaded=await page.evaluate(async()=>{const {Catalog}=await import('./lib/catalog.js');const c=await new Catalog().init();await c.downloadAll();return {files:c.meta.files.length,parsedPartitionsRetained:c.parts.size};});

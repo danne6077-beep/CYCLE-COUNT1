@@ -1,14 +1,17 @@
 {
-  "version": 1,
+  "version": 2,
   "schemaVersion": 1,
-  "mode": "reference-only",
+  "mode": "priced-assortment",
   "sourceSheet": "HYPERMART",
   "sourceName": "ITEM MASTER AS OF 09-02-2026 1.xlsx",
-  "updatedAt": "2026-10-19T04:06:49.161614+00:00",
+  "updatedAt": "2026-10-19T05:48:33.579895+00:00",
   "priceAsOf": null,
-  "itemCount": 672040,
-  "pricedItemCount": 0,
-  "checksum": "acd592867dd80fcb60e994366d5ae6341bb98978a626f2bbab63d2730679c212",
+  "itemCount": 14076,
+  "pricedItemCount": 14076,
+  "defaultDepartment": "all",
+  "starterPath": "catalog/starter.v2.json.gz",
+  "sourceChecksum": "6158fed2e87cddf3dd8ae974a172b06710ae4a3b4639da4a7e9e89a40b73d7c8",
+  "checksum": "16cdef13f1b19460d80b90a525d39cafc44c311116d6d68b3dc617b9ceb954e2",
   "categories": [
     "INFANTS",
     "INNER",
@@ -69,7 +72,8 @@
     "TELECOMMUNICATION",
     "DELIVERY FEE",
     "SERVICE FEE",
-    "MC NON-MERCHANDISE"
+    "MC NON-MERCHANDISE",
+    "UNCATEGORIZED"
   ],
   "subcategories": [
     "SOCKS",
@@ -2649,7 +2653,8 @@
     "RTD MILK",
     "GIFT SETS",
     "GIRLS PEDAL-TO BE USED",
-    "TRUNDLE BED"
+    "TRUNDLE BED",
+    "NOT IN MASTER"
   ],
   "departments": [
     "DEPARTMENT STORE",
@@ -2657,683 +2662,689 @@
     "FURNITURES & APPLIANCE",
     "FRESH & STAPLE",
     "FMCG",
-    "NON-MERCHANDISE"
+    "NON-MERCHANDISE",
+    "UNMAPPED ITEMS"
   ],
   "files": [
     {
-      "path": "catalog/search.v1.0.json.gz",
-      "bytes": 4463692,
-      "checksum": "d6e5b01b434f60f75743ed01866425db9692fefd1c5f3593dc646fe05f5d2322"
+      "path": "catalog/search.v2.0.json.gz",
+      "bytes": 56012,
+      "checksum": "5c83c22f44e4bffb89480cee2d9e5c12c6f867eb3780ad6059584c3409e0b319"
     },
     {
-      "path": "catalog/search.v1.1.json.gz",
-      "bytes": 1385306,
-      "checksum": "1a891c2f5d762119816aed241f57627e1389c876958f8e1a667ab857d8d9fc49"
+      "path": "catalog/search.v2.1.json.gz",
+      "bytes": 29059,
+      "checksum": "ee8ad69ace457447d9d5853d33eac8b89c296cef14c87584b2ab5b5d64d96021"
     },
     {
-      "path": "catalog/search.v1.2.json.gz",
-      "bytes": 261052,
-      "checksum": "e892a83951e220cca38157ffd0b66e80ed283692b32057d35ce84c9b81bc5667"
+      "path": "catalog/search.v2.2.json.gz",
+      "bytes": 7966,
+      "checksum": "1ec279cf14dd176b02877b71fb014ce4db227c28bff39e417121b742568e8a95"
     },
     {
-      "path": "catalog/search.v1.3.json.gz",
-      "bytes": 331715,
-      "checksum": "b2e772be440b85175a7d3be5ade723e0214df23f54a468119c2a8af263cb67c3"
+      "path": "catalog/search.v2.3.json.gz",
+      "bytes": 7803,
+      "checksum": "84f5fb8ddb7f36bbb12ff279b826187e603ab840b4c597828f5d549f6faad613"
     },
     {
-      "path": "catalog/search.v1.4.json.gz",
-      "bytes": 2228914,
-      "checksum": "11b71c93cf4d1aa9cefd4173f43c04e54d5e71c1728a2a85c2033c8b02192790"
+      "path": "catalog/search.v2.4.json.gz",
+      "bytes": 124171,
+      "checksum": "59b1ffa39f104190b20813178ba9c80f7cb1888bc72b6cd676be0a66fe769456"
     },
     {
-      "path": "catalog/search.v1.5.json.gz",
-      "bytes": 529,
-      "checksum": "99a811232688d1243ca2e52d8a956849f6c6c68c3555d491a4f8018147054926"
+      "path": "catalog/search.v2.5.json.gz",
+      "bytes": 22,
+      "checksum": "61663fde99b3394d71653f41c19fe91269442622a4a6695f8352a70fbf5ca4c1"
     },
     {
-      "path": "catalog/products.v1.0.json.gz",
-      "bytes": 678483,
-      "checksum": "3c85d1472d34fd8d40c645dfe6b6852daaa4d35f4d0e04b5166be7718b689abe"
+      "path": "catalog/search.v2.6.json.gz",
+      "bytes": 988,
+      "checksum": "87ed750515495bb439517b0087b9186cd81668c89d67871fd61874834fe8a4a6"
     },
     {
-      "path": "catalog/products.v1.1.json.gz",
-      "bytes": 618756,
-      "checksum": "4859f3acf2d9f0e2253eba40f4a5778fdcc76f1fe887ce131df291517834d033"
+      "path": "catalog/starter.v2.json.gz",
+      "bytes": 8253,
+      "checksum": "1d5f827b3d82ae90a6b944d3049f19195f980be46d4cb227b8f6fe6897bbd8d0"
     },
     {
-      "path": "catalog/products.v1.2.json.gz",
-      "bytes": 554152,
-      "checksum": "a5573a40b070f8823003e76408c350f2d4fb402e637102160e7c4145a796a10f"
+      "path": "catalog/products.v2.0.json.gz",
+      "bytes": 21720,
+      "checksum": "4c04534fa383d1beb142d7b0627f226a668c1c034cc752c3281832351bdca70a"
     },
     {
-      "path": "catalog/products.v1.3.json.gz",
-      "bytes": 491122,
-      "checksum": "703714307c4ebc55d9c0372e20089d6ed426c78fc897226c30a65e012d487dc6"
+      "path": "catalog/products.v2.1.json.gz",
+      "bytes": 22391,
+      "checksum": "22b27b4c22da8340cd099d5ac79af5d6aea34e4752f5c4df4f1c3fbb4a2b7529"
     },
     {
-      "path": "catalog/products.v1.4.json.gz",
-      "bytes": 433008,
-      "checksum": "ff8336e3445280cb8f7e8871dcd8335e279d379e2b53d781fe32058ff3fea13b"
+      "path": "catalog/products.v2.2.json.gz",
+      "bytes": 22019,
+      "checksum": "9d8f29bec54b142d804b7ca213809eca8c50f4026945e107b145b3172242ae54"
     },
     {
-      "path": "catalog/products.v1.5.json.gz",
-      "bytes": 380460,
-      "checksum": "cc0a6e274b1d39c038d28795ccb1760c3fc9b823faaa4aea501031eab8bb8dd3"
+      "path": "catalog/products.v2.3.json.gz",
+      "bytes": 19876,
+      "checksum": "7cf0209e8c5f736cd34ea5d0caa7587fd0d5504e6953ee330e8b5d9392260545"
     },
     {
-      "path": "catalog/products.v1.6.json.gz",
-      "bytes": 328910,
-      "checksum": "72b5ab6eb47e65043206986d1cabfb202fe4e989c0e6417a248ad09355106253"
+      "path": "catalog/products.v2.4.json.gz",
+      "bytes": 18084,
+      "checksum": "9480056312b84806a2a2c6733a05169595a850a0516e7052590abbeda646df2a"
     },
     {
-      "path": "catalog/products.v1.7.json.gz",
-      "bytes": 285982,
-      "checksum": "ccb8c7d76388dd7b40a2505586d2db5595ddbfc0b9e50ca0844cdf6f1cd97b73"
+      "path": "catalog/products.v2.5.json.gz",
+      "bytes": 16901,
+      "checksum": "d8cfa53e8c1ccc553c90fda9f5431e8b7be8020fb6322ec7ab48d15e47a111af"
     },
     {
-      "path": "catalog/products.v1.8.json.gz",
-      "bytes": 246897,
-      "checksum": "da89ac387b19319276400119227d9aa79b18fddfe5888831374f9934811fcc90"
+      "path": "catalog/products.v2.6.json.gz",
+      "bytes": 14630,
+      "checksum": "8e1328fa277440925e2c414e66edb6a716633698b32e60cb80a5e5366197bd77"
     },
     {
-      "path": "catalog/products.v1.9.json.gz",
-      "bytes": 212762,
-      "checksum": "c8d48648d9c9c9aa0a0d800aaa58566d6761f5a4440260055dc9438b844c14a8"
+      "path": "catalog/products.v2.7.json.gz",
+      "bytes": 13174,
+      "checksum": "17458a5c5e5817672f7979f8f36deca94c355a29b3eac162359a7c30d8651ed3"
     },
     {
-      "path": "catalog/products.v1.10.json.gz",
-      "bytes": 183679,
-      "checksum": "fbeda5b5e19a37328cf4410f617958fdda7d5cf46e9c6ec82d4b9e7e12200d08"
+      "path": "catalog/products.v2.8.json.gz",
+      "bytes": 10920,
+      "checksum": "6d4c820a5840ea0991df51478dfe42d3e54313fc6d31df147fb46cd6cd40c94d"
     },
     {
-      "path": "catalog/products.v1.11.json.gz",
-      "bytes": 158394,
-      "checksum": "b350c6ea82db81a6d93694be4f76a6bd7e8ba6dfcbd74995c7c821a3964684c7"
+      "path": "catalog/products.v2.9.json.gz",
+      "bytes": 10197,
+      "checksum": "c722cbbd1a4ebee8c0ce1fbee2b7a1bea6033db7cedf62288e8d35411085da36"
     },
     {
-      "path": "catalog/products.v1.12.json.gz",
-      "bytes": 136669,
-      "checksum": "32fce778f6d949c1dbcb8aab2059c99b39a6e6f770a81ec36f342c5bb41471b5"
+      "path": "catalog/products.v2.10.json.gz",
+      "bytes": 8560,
+      "checksum": "f229ea6f8c0f4eee5a7fa1f7516ef5e9f9aac4c0cc140e2fe92f2686d41d1f01"
     },
     {
-      "path": "catalog/products.v1.13.json.gz",
-      "bytes": 116779,
-      "checksum": "542b86caa7ce4da8e8f9cd5d88c46a5f3a1ec3b4a1d1b28a6a36a444cbee236d"
+      "path": "catalog/products.v2.11.json.gz",
+      "bytes": 6977,
+      "checksum": "52a713f0797ab305467ba3ea51434c098fd8324de6108a22793c4c4ac80ca74a"
     },
     {
-      "path": "catalog/products.v1.14.json.gz",
-      "bytes": 98739,
-      "checksum": "f594df8de23ee7760c22b313beaf90486336d4d272ce6fb3fc877833018a7530"
+      "path": "catalog/products.v2.12.json.gz",
+      "bytes": 5792,
+      "checksum": "9195ea3566940b8dc8362a61bc7052f6fed4b12a44f7f6bb65678831bacde595"
     },
     {
-      "path": "catalog/products.v1.15.json.gz",
-      "bytes": 84014,
-      "checksum": "53f6146227956305fbb3e96553ea003b929028cc09b6655c0dabc006ca3fa953"
+      "path": "catalog/products.v2.13.json.gz",
+      "bytes": 5284,
+      "checksum": "c2e669373141e3170fde4bd0c799f8fb6a2bc66186774e27a463148db37628bb"
     },
     {
-      "path": "catalog/products.v1.16.json.gz",
-      "bytes": 70041,
-      "checksum": "aad1732163fbbe5fa0d7627bb89716f5ab79a51593899957852947f4cd025f8e"
+      "path": "catalog/products.v2.14.json.gz",
+      "bytes": 3502,
+      "checksum": "895d549f12171ee2f3a5a3908141836c0ca621c4b5774d7b510bdd3844879ea7"
     },
     {
-      "path": "catalog/products.v1.17.json.gz",
-      "bytes": 58190,
-      "checksum": "bfc1c8f6454611319713dc87ac5aa53a19b0f4516e6b154fa619edeb7ba727b6"
+      "path": "catalog/products.v2.15.json.gz",
+      "bytes": 3134,
+      "checksum": "040d6d572084b182bdf54ff0d188c49408b6dfe2d62339ed4ada0d0d3cf1fac8"
     },
     {
-      "path": "catalog/products.v1.18.json.gz",
-      "bytes": 47469,
-      "checksum": "c048d2cc779ab654e4592f3dfdbdbdd0118ccde3ac1d05ec18e2b0f396061ffb"
+      "path": "catalog/products.v2.16.json.gz",
+      "bytes": 2332,
+      "checksum": "3cd513051812378ef2305431cad1f5cf77406b578dba99d12ef67dc494c80c7b"
     },
     {
-      "path": "catalog/products.v1.19.json.gz",
-      "bytes": 38812,
-      "checksum": "e6cdcfc3963dc45ab8e5ad657dc6b4071a342d7124eccbd2022c7741ff6f2db4"
+      "path": "catalog/products.v2.17.json.gz",
+      "bytes": 1710,
+      "checksum": "1b338e4bd8606f71a4734195b0d28eb54e43aa6267b0853dd8ed732dea851cdd"
     },
     {
-      "path": "catalog/products.v1.20.json.gz",
-      "bytes": 31296,
-      "checksum": "b9194d1a0839c083cb934228ffc210725ff32dce3240eed7edee1e11b3ffa2e8"
+      "path": "catalog/products.v2.18.json.gz",
+      "bytes": 1642,
+      "checksum": "4ad267db3ae2eef44ed0b5842183cf9e57b62410f978bae8c674832e60c8d2e5"
     },
     {
-      "path": "catalog/products.v1.21.json.gz",
-      "bytes": 24919,
-      "checksum": "5f84299e55b3233f39fdf4086204c79e9a6a261d9fca19258c9fdac02292b9e6"
+      "path": "catalog/products.v2.19.json.gz",
+      "bytes": 971,
+      "checksum": "3aea52ef435d205ce4152346e5a74a84b246c03be3cc136fb845c5d6ab1c089e"
     },
     {
-      "path": "catalog/products.v1.22.json.gz",
-      "bytes": 19660,
-      "checksum": "e05308aa6db2abbe38a43b27f354e6355582683b8be4bbf1e21db3a20fe1c5e1"
+      "path": "catalog/products.v2.20.json.gz",
+      "bytes": 913,
+      "checksum": "75aa961174b4133742153b6333405e96d433f8893adda7fb4952c99261733999"
     },
     {
-      "path": "catalog/products.v1.23.json.gz",
-      "bytes": 15491,
-      "checksum": "caf9b7e4c9ed7d4f16de2b46bd31fca2a37cba13631039a286af45e956aea9a0"
+      "path": "catalog/products.v2.21.json.gz",
+      "bytes": 775,
+      "checksum": "52f9bdaa0c3b44492607909b28aafe77c6963ca67096fb56d195e7e3b6cd5698"
     },
     {
-      "path": "catalog/products.v1.24.json.gz",
-      "bytes": 12284,
-      "checksum": "453005656d237090e4afe43a45d0003936867f732e698751c5f2f34c18da4cd9"
+      "path": "catalog/products.v2.22.json.gz",
+      "bytes": 543,
+      "checksum": "6f2ba24fc3c7e5aa48e7c1fa8f97a82778d8204bbb49f37c70cef24fb8a5029f"
     },
     {
-      "path": "catalog/products.v1.25.json.gz",
-      "bytes": 9680,
-      "checksum": "b9a6b1264ff4db8f46d02704cefece598d0fe710c7347f121c0951f283e51958"
+      "path": "catalog/products.v2.23.json.gz",
+      "bytes": 447,
+      "checksum": "83a205dd10a77b887308dc556cab8be89c3f0fb436f0bd8f86e9c0ea397c065e"
     },
     {
-      "path": "catalog/products.v1.26.json.gz",
-      "bytes": 7436,
-      "checksum": "477a01e0f195d1230a642a69e9f79a8cea5b06268678cf3a930112a51de5a0a4"
+      "path": "catalog/products.v2.24.json.gz",
+      "bytes": 445,
+      "checksum": "7d5a42f8539a8e5c493f2dea23a059b14e7b58df8ebb11153e3e7f713bb168c5"
     },
     {
-      "path": "catalog/products.v1.27.json.gz",
-      "bytes": 5865,
-      "checksum": "317012944a7eb46d597494c4ccc4929981618256ecaa144bd457908d8b233afb"
+      "path": "catalog/products.v2.25.json.gz",
+      "bytes": 379,
+      "checksum": "e50966c2e468bd3c02d1497064b3e795865330c11aaa2f99bb252a9463e00ffe"
     },
     {
-      "path": "catalog/products.v1.28.json.gz",
-      "bytes": 4912,
-      "checksum": "9c38a2ee6790c0558c835aeabacfa289ccd36f99ce80d8a85600b3ce15eb038a"
+      "path": "catalog/products.v2.26.json.gz",
+      "bytes": 293,
+      "checksum": "0ea23b604e84a2fddbb83aa67b8fdf445454afb60728c1a91d5636c27555b926"
     },
     {
-      "path": "catalog/products.v1.29.json.gz",
-      "bytes": 3974,
-      "checksum": "d68c5016e77faed9223f83a0813aa8d8f4072a07f29ea43f3f5a88ec37e339d5"
+      "path": "catalog/products.v2.27.json.gz",
+      "bytes": 263,
+      "checksum": "f1136ed5e2ff921632aad173757e5f7d05a78194bf7d9ae05e887d6c535edcac"
     },
     {
-      "path": "catalog/products.v1.30.json.gz",
-      "bytes": 3234,
-      "checksum": "cb0a721f161bfac8dec51b4a18b2306bb9e6bb70766a53d8b195c4255bc67869"
+      "path": "catalog/products.v2.28.json.gz",
+      "bytes": 206,
+      "checksum": "416ce97195a6f72f3ea44952c6ac4df342eecdc5253ebd4927eae72de23caf0d"
     },
     {
-      "path": "catalog/products.v1.31.json.gz",
-      "bytes": 2608,
-      "checksum": "cba92ff7746d7b7a68444df49a8008bd0cb47185b299afef1986759281635147"
+      "path": "catalog/products.v2.29.json.gz",
+      "bytes": 132,
+      "checksum": "617c52782f288713f925be848f36113ff0192078d1d306f379824c4ab0a3b9c0"
     },
     {
-      "path": "catalog/products.v1.32.json.gz",
-      "bytes": 2163,
-      "checksum": "215cb2836aea58421c9dc7d48a94973f48da8bb6d63ab1f0102926a79f6a6132"
+      "path": "catalog/products.v2.30.json.gz",
+      "bytes": 249,
+      "checksum": "a4fd513c2fd542b6536d0000129f28f7ee2be4d26a806cb1d287d780c176a8fb"
     },
     {
-      "path": "catalog/products.v1.33.json.gz",
-      "bytes": 1818,
-      "checksum": "3ab0a85fb35ed72ffac8b314a6864b5849144e459a7dc70ba7a38ab85acca585"
+      "path": "catalog/products.v2.31.json.gz",
+      "bytes": 22,
+      "checksum": "61663fde99b3394d71653f41c19fe91269442622a4a6695f8352a70fbf5ca4c1"
     },
     {
-      "path": "catalog/products.v1.34.json.gz",
-      "bytes": 1627,
-      "checksum": "577a601b3997f9063f77ee5ceab7e8ec9ac66b759517c0a65f7cf693af360f46"
+      "path": "catalog/products.v2.32.json.gz",
+      "bytes": 105,
+      "checksum": "583a8d8c9ea59b72f5462af2dae7481be0952615238e52b5262a2c4a74d7afca"
     },
     {
-      "path": "catalog/products.v1.35.json.gz",
-      "bytes": 1587,
-      "checksum": "5cc2943207ddf80f49fafaa1ca5aa59e70e47b61964b798ad3b8be29ca5c3f9b"
+      "path": "catalog/products.v2.33.json.gz",
+      "bytes": 22,
+      "checksum": "61663fde99b3394d71653f41c19fe91269442622a4a6695f8352a70fbf5ca4c1"
     },
     {
-      "path": "catalog/products.v1.36.json.gz",
-      "bytes": 2180,
-      "checksum": "72337ac24282f1ab4ee1a48c7894bc1bc491b03eca491329cc5f1b6b345e88a6"
+      "path": "catalog/products.v2.34.json.gz",
+      "bytes": 22,
+      "checksum": "61663fde99b3394d71653f41c19fe91269442622a4a6695f8352a70fbf5ca4c1"
     },
     {
-      "path": "catalog/products.v1.37.json.gz",
-      "bytes": 3882,
-      "checksum": "961af4e759598606a6de6b2928bcdad38ecbdc6f4e430a0482ae5a857fd3b665"
+      "path": "catalog/products.v2.35.json.gz",
+      "bytes": 22,
+      "checksum": "61663fde99b3394d71653f41c19fe91269442622a4a6695f8352a70fbf5ca4c1"
     },
     {
-      "path": "catalog/products.v1.38.json.gz",
-      "bytes": 6842,
-      "checksum": "139a83d4ca6b90957a5fc3819fc6b3415cf9d33310998a22d499c56bcfa103d3"
+      "path": "catalog/products.v2.36.json.gz",
+      "bytes": 117,
+      "checksum": "e2937371fc63cd6207437556896a1fdc808e3ab9b8cfbc2c4f8f4fc9767bd923"
     },
     {
-      "path": "catalog/products.v1.39.json.gz",
-      "bytes": 12119,
-      "checksum": "333f38e0c8490e6194abccf457f0da8e1f4240fa01ab8987396321dd17044006"
+      "path": "catalog/products.v2.37.json.gz",
+      "bytes": 97,
+      "checksum": "c6a05a2a2e110597a377bf8878e8377c5ddbe425616cfc662bda0bfbea2f140f"
     },
     {
-      "path": "catalog/products.v1.40.json.gz",
-      "bytes": 20353,
-      "checksum": "db99b0cc1d7bb5c1ded286bf51586b688d1b0156e002ed2f96d7a7498c89a326"
+      "path": "catalog/products.v2.38.json.gz",
+      "bytes": 22,
+      "checksum": "61663fde99b3394d71653f41c19fe91269442622a4a6695f8352a70fbf5ca4c1"
     },
     {
-      "path": "catalog/products.v1.41.json.gz",
-      "bytes": 31565,
-      "checksum": "f7190ece4ab504bfd415e2a0df735f122a26d46291d632563450d548e9492b97"
+      "path": "catalog/products.v2.39.json.gz",
+      "bytes": 123,
+      "checksum": "4058b5dc333449d4c416f591c13cc05265633aefb02cd5618cb749fb5034f7f6"
     },
     {
-      "path": "catalog/products.v1.42.json.gz",
-      "bytes": 47643,
-      "checksum": "03ff20df7a18c3f22471a6f27e7a4976108ed3342b0ea281ab1a2bc4523ce6c1"
+      "path": "catalog/products.v2.40.json.gz",
+      "bytes": 315,
+      "checksum": "9e4ff24126cf874d084fe07f9e30e7637776ebb81b84acb8ac7337e6e71e138e"
     },
     {
-      "path": "catalog/products.v1.43.json.gz",
-      "bytes": 70515,
-      "checksum": "250965b81305479e626d94f1aa3cf2c971064f32dd1fe0fea21d543013b3cbdf"
+      "path": "catalog/products.v2.41.json.gz",
+      "bytes": 453,
+      "checksum": "e993c4edf345fea9606de68b065f6eddc09f940962088a47b7ca79309fc75c53"
     },
     {
-      "path": "catalog/products.v1.44.json.gz",
-      "bytes": 100038,
-      "checksum": "b13afe34d6a38ef424f70e2fba5bf0b219a9e67dcc5b1a482df45b6f62e6d1b5"
+      "path": "catalog/products.v2.42.json.gz",
+      "bytes": 765,
+      "checksum": "17de2e73c6cfe5b3272fd29bab5bae3116be10e301e985ac375c80d2b13a6b66"
     },
     {
-      "path": "catalog/products.v1.45.json.gz",
-      "bytes": 137387,
-      "checksum": "a26d50c1afd7e25b0991e7a8e3d82ee133ebee7a00236e2fb7f6b577dd688373"
+      "path": "catalog/products.v2.43.json.gz",
+      "bytes": 972,
+      "checksum": "324f45ad98351f2c57b7b5db7c649e01434d9fff50b3fc1c3d45245223664d52"
     },
     {
-      "path": "catalog/products.v1.46.json.gz",
-      "bytes": 182236,
-      "checksum": "a200bbea78868e24e0df681e4ad30a3290ee94a1ec4913991adf1b01de03959a"
+      "path": "catalog/products.v2.44.json.gz",
+      "bytes": 1426,
+      "checksum": "b733bfef36094d4bc2da14bf8646b4d2dbf7754263a427f1deff320a95650b19"
     },
     {
-      "path": "catalog/products.v1.47.json.gz",
-      "bytes": 235053,
-      "checksum": "a08426677ddbdde5bd8d7d731a3862d7f137ce57b2349fd93c4e8bed05d67073"
+      "path": "catalog/products.v2.45.json.gz",
+      "bytes": 1564,
+      "checksum": "0a5d27cf1bf1d37f8fa0ec44fba329791bb481afc0ff6b4e73712405f5933455"
     },
     {
-      "path": "catalog/products.v1.48.json.gz",
-      "bytes": 298195,
-      "checksum": "16b0f12410406876a8f2c4a07bf1802e7b10aa1c648c8109f00c686ed096b8d9"
+      "path": "catalog/products.v2.46.json.gz",
+      "bytes": 2106,
+      "checksum": "655a4420d8353ff108ce72ed1569be39d6a53a0f6d403a30708ddeadfbaa2af5"
     },
     {
-      "path": "catalog/products.v1.49.json.gz",
-      "bytes": 365793,
-      "checksum": "a9eb2f198d5f30b6a8b2c7ccbec1ebf6e527d34ad07b39ca6b3d493700f77baf"
+      "path": "catalog/products.v2.47.json.gz",
+      "bytes": 2947,
+      "checksum": "647268a67fee4ff7082d08906e41c530a41100fe03d367d68928c460a3b250a2"
     },
     {
-      "path": "catalog/products.v1.50.json.gz",
-      "bytes": 438774,
-      "checksum": "88d538fc7b963fe7939891d1ec7762380c04cff53e2538fbe7e5342797d66b47"
+      "path": "catalog/products.v2.48.json.gz",
+      "bytes": 5150,
+      "checksum": "1eba12f551b020bb60579bf7ea68cdb413bef89998b1becce7c390ab7f74f503"
     },
     {
-      "path": "catalog/products.v1.51.json.gz",
-      "bytes": 514503,
-      "checksum": "a235ab0e90de7abc2f51f1817fbc5c0bb0d86c0b77a18d41154536ad24a15d7c"
+      "path": "catalog/products.v2.49.json.gz",
+      "bytes": 6072,
+      "checksum": "be9656c528a4b1e1c3862b17974844d5420aab4e93e32812ea2464e189f8b858"
     },
     {
-      "path": "catalog/products.v1.52.json.gz",
-      "bytes": 589627,
-      "checksum": "a4d3599dcd2ad91bdc3571391ee9f5dd76d2d6d2991006b341f9e5e8c41b35fd"
+      "path": "catalog/products.v2.50.json.gz",
+      "bytes": 7596,
+      "checksum": "a81d0356ff0776bcede3dc1591e12ceaa895366976c69601abe619fed07cdd66"
     },
     {
-      "path": "catalog/products.v1.53.json.gz",
-      "bytes": 662617,
-      "checksum": "87b0f2cbbb798234a5561e263c6c71f1e6d2538fcdab1ca3e2c602d61e9854f7"
+      "path": "catalog/products.v2.51.json.gz",
+      "bytes": 8732,
+      "checksum": "64fc9b771ed96dca7ed2ad5a8d9480a1a2c8a07f6025a11aa5d1813b05154183"
     },
     {
-      "path": "catalog/products.v1.54.json.gz",
-      "bytes": 729043,
-      "checksum": "6464f6a0814eeee5ff0d7fa8f8ac8b4d37c0b61d3b51868130af910a39c5bf20"
+      "path": "catalog/products.v2.52.json.gz",
+      "bytes": 10338,
+      "checksum": "cb46fab6d2deabd611501d93ab92bc0c3f4f784dbd810f9b0cc7ac26345523d4"
     },
     {
-      "path": "catalog/products.v1.55.json.gz",
-      "bytes": 787817,
-      "checksum": "42379b10c465ee3276caac41cfac315444d3020b1e60726f014b7ead11d71be8"
+      "path": "catalog/products.v2.53.json.gz",
+      "bytes": 11332,
+      "checksum": "238dd7fb839d29970565d669446a078fe62aa66be55065858bfdda8f97d235b3"
     },
     {
-      "path": "catalog/products.v1.56.json.gz",
-      "bytes": 830085,
-      "checksum": "c02528a0f469ff5c45036b9bc50d99def01a7fa6f1a602c8af1f9331aba821af"
+      "path": "catalog/products.v2.54.json.gz",
+      "bytes": 15381,
+      "checksum": "91ef5e35c84976f63b12827273b5d1dbbae488de8b5afb4e9cee77534ae1a34b"
     },
     {
-      "path": "catalog/products.v1.57.json.gz",
-      "bytes": 860105,
-      "checksum": "390185193d093ce916119e03e5ec8f2c63a15e230565cb08f3c98202a626767d"
+      "path": "catalog/products.v2.55.json.gz",
+      "bytes": 16394,
+      "checksum": "b013dbc113b18456d092b00c96d31fe9e4ab6dffc9991b677ef8e72e06fb5452"
     },
     {
-      "path": "catalog/products.v1.58.json.gz",
-      "bytes": 875677,
-      "checksum": "763863ff2eb06538d4a3313ce8bf08393b61a0ba135c31d92e42b873f1d937bf"
+      "path": "catalog/products.v2.56.json.gz",
+      "bytes": 18090,
+      "checksum": "9746aaed15c74a01aed2a207817d5c76bb1b047a3c3e9b050c100ba5ce43651a"
     },
     {
-      "path": "catalog/products.v1.59.json.gz",
-      "bytes": 873217,
-      "checksum": "4fb3c801013ac8a50b12fc52700ad2573c1b16c1c6a9a73ad8e9d49c6742268c"
+      "path": "catalog/products.v2.57.json.gz",
+      "bytes": 19684,
+      "checksum": "0f8510791b8fe0fbdfb309a78371e7a4d8def1bfa5bbaa5886b9dc6a1e12110d"
     },
     {
-      "path": "catalog/products.v1.60.json.gz",
-      "bytes": 858394,
-      "checksum": "699a0eb24e510c73f034a6664a9412c2b74a3ced6e614d88a4255953787ceb11"
+      "path": "catalog/products.v2.58.json.gz",
+      "bytes": 20773,
+      "checksum": "ab3cfeaae3784c172a006b2eb008a165f47201f2d1ea0c30fccf2b331868808c"
     },
     {
-      "path": "catalog/products.v1.61.json.gz",
-      "bytes": 828609,
-      "checksum": "db5bf884c9a46f4c5dc75b9efc1a8493022deea60099bb4c177d4a98d2d5c384"
+      "path": "catalog/products.v2.59.json.gz",
+      "bytes": 21785,
+      "checksum": "6167601864e25c20e4d8c9f0dbb599dd7c01841f3787aa4b6bdbd57bab30e116"
     },
     {
-      "path": "catalog/products.v1.62.json.gz",
-      "bytes": 786090,
-      "checksum": "fc9aaf08bda5c30eb0b0f637698d104586e9801a8c2e62a72429cd1d3061fc95"
+      "path": "catalog/products.v2.60.json.gz",
+      "bytes": 22090,
+      "checksum": "9b89bceb178bdadf7140aca7804791af3836b9d1d3ce532ac192091a5cb70791"
     },
     {
-      "path": "catalog/products.v1.63.json.gz",
-      "bytes": 736730,
-      "checksum": "1464a6a8c80684d5d75b2364b76bc24631998b3bd63f26631a2ccd9d2cffdf76"
+      "path": "catalog/products.v2.61.json.gz",
+      "bytes": 23903,
+      "checksum": "9cc7ad45322187dcaf6faa931769b65c30c50a9ae623a4e91cd20d27cd97ed20"
     },
     {
-      "path": "catalog/barcodes.v1.0.json.gz",
-      "bytes": 118372,
-      "checksum": "5f6ebbc03033cd0d7463f7d998c9c7f05652da02fd0df4f26b12c3090a8a26e0"
+      "path": "catalog/products.v2.62.json.gz",
+      "bytes": 22274,
+      "checksum": "562198e5b2df9fa3a9d3af8536893bf07f12ea7d80b4b97972233c86ef13031e"
     },
     {
-      "path": "catalog/barcodes.v1.1.json.gz",
-      "bytes": 1487162,
-      "checksum": "b8bb0ea43a27d8e0d24410fab4a132169bc4966eafc3925858559d322ac135b4"
+      "path": "catalog/products.v2.63.json.gz",
+      "bytes": 22129,
+      "checksum": "c95f7c449e34c2b500b7699befc63d027473906317c83ff2ed3694cac3740c0e"
     },
     {
-      "path": "catalog/barcodes.v1.2.json.gz",
-      "bytes": 118038,
-      "checksum": "18b521c93932a5feb440d3a74a971405cf8716c6c26a1a7696502fced33231c6"
+      "path": "catalog/barcodes.v2.0.json.gz",
+      "bytes": 6141,
+      "checksum": "8fde7aa403864eaa0d3f20fc568db4aa91fd9d78d7f1cb5604de7416a93e1395"
     },
     {
-      "path": "catalog/barcodes.v1.3.json.gz",
-      "bytes": 178811,
-      "checksum": "7d4f022b69d664dd9d7e6ec9bf232b192661eb6fdac390fc9fd2745b81dc2ae5"
+      "path": "catalog/barcodes.v2.1.json.gz",
+      "bytes": 40148,
+      "checksum": "0d10385d11f8d3fecbb37740b4326479b45baaf69d1176bc014a0c61460cbd3a"
     },
     {
-      "path": "catalog/barcodes.v1.4.json.gz",
-      "bytes": 76392,
-      "checksum": "ba38ca982a9960e4bbc0bb65db1a437f25371bc0a260b1e66270d4e0aff393f1"
+      "path": "catalog/barcodes.v2.2.json.gz",
+      "bytes": 7134,
+      "checksum": "3b3a92f6c17fb24a3f7b7656cf7ff12dea83444272762246e5e353df31f69ad6"
     },
     {
-      "path": "catalog/barcodes.v1.5.json.gz",
-      "bytes": 61174,
-      "checksum": "db52e3f689112538b3ee39538c42920124504be3cc33798cd0fb73177742291a"
+      "path": "catalog/barcodes.v2.3.json.gz",
+      "bytes": 5027,
+      "checksum": "8822517cad66e9d01b6ec4d6a7976d89a04bdaf65167e897c65f7f0924a814ee"
     },
     {
-      "path": "catalog/barcodes.v1.6.json.gz",
-      "bytes": 58547,
-      "checksum": "1534baae4be03b9d79aa44758760918b1a00eb9d82b09141e66b62a68e78d6cc"
+      "path": "catalog/barcodes.v2.4.json.gz",
+      "bytes": 4434,
+      "checksum": "cd4c09d7dfd75bb8e81f26ab9466c088fa90876965d4bf04409b9adc158e33fc"
     },
     {
-      "path": "catalog/barcodes.v1.7.json.gz",
-      "bytes": 41560,
-      "checksum": "8d5c5d86f337d0a69dfa1f635bfc5ef134d0e201d84c21e71239e9b519f5079f"
+      "path": "catalog/barcodes.v2.5.json.gz",
+      "bytes": 3871,
+      "checksum": "5fae28a7ce96b19d9a3a954667406816da32bf92c1b2d96eb5c62ea848ad5368"
     },
     {
-      "path": "catalog/barcodes.v1.8.json.gz",
-      "bytes": 42475,
-      "checksum": "8b480ab7b477a721bd629ae4da8337cbd2c9d864abc7cfd28cc7f86c2360d3ea"
+      "path": "catalog/barcodes.v2.6.json.gz",
+      "bytes": 3568,
+      "checksum": "bc38311780d791ef80bd017e2f979f11d68e964c7aa03e388291b0d317e14d34"
     },
     {
-      "path": "catalog/barcodes.v1.9.json.gz",
-      "bytes": 26263,
-      "checksum": "7e716c6ed9c66a1787fc8f1b9c59d2cc8d9959158bcdff8d67153abb5ab29a4a"
+      "path": "catalog/barcodes.v2.7.json.gz",
+      "bytes": 2790,
+      "checksum": "653665e51ea3f98577f1f2f0ba6db7b6171be3c89926dfb69214d607d1ed37a5"
     },
     {
-      "path": "catalog/barcodes.v1.10.json.gz",
-      "bytes": 30587,
-      "checksum": "9c5487cc43934ea25133184c0cbe173353f540f59d2e57fc225ce13f76a9fe11"
+      "path": "catalog/barcodes.v2.8.json.gz",
+      "bytes": 2260,
+      "checksum": "cb8092a9951b9f897e21ff03c825575c89c2b9b1671a40fa590dff06a81e5625"
     },
     {
-      "path": "catalog/barcodes.v1.11.json.gz",
-      "bytes": 15714,
-      "checksum": "9cf1bc4f4541c4366dabc82b333d83fae02a1cb91f7e93275985b32b9423bee1"
+      "path": "catalog/barcodes.v2.9.json.gz",
+      "bytes": 1819,
+      "checksum": "9be3ef95b98b14ae2f3bc3dfd85ebab0e6f6405cab14f23a6680b26e3d346305"
     },
     {
-      "path": "catalog/barcodes.v1.12.json.gz",
-      "bytes": 23983,
-      "checksum": "865ae50f356730550c87d4b70508a6ab41712cdcf0553404bb56c86eae13ae7d"
+      "path": "catalog/barcodes.v2.10.json.gz",
+      "bytes": 1516,
+      "checksum": "a694c51f68ee0397a34ab2524531bac96ce97098d8d36b7eee293434d83d06d7"
     },
     {
-      "path": "catalog/barcodes.v1.13.json.gz",
-      "bytes": 9268,
-      "checksum": "23450be2f3717b181713e6426b14e2f7df55eaf6777a89367a39572c96a17ad6"
+      "path": "catalog/barcodes.v2.11.json.gz",
+      "bytes": 1126,
+      "checksum": "391658dd780b25f42ca92c3e8971990536cb2bdac144e2ea5210f94415b93137"
     },
     {
-      "path": "catalog/barcodes.v1.14.json.gz",
-      "bytes": 20323,
-      "checksum": "f2ae750b85ff7a996537b939af6b4392fe778932db452947ec31a2c528f92d6a"
+      "path": "catalog/barcodes.v2.12.json.gz",
+      "bytes": 916,
+      "checksum": "2e5ca74785c143f98c0e86f41441546f7b2f05e30eab35900ab9ce52a8f7f8f4"
     },
     {
-      "path": "catalog/barcodes.v1.15.json.gz",
-      "bytes": 5312,
-      "checksum": "960429f1f90f137a56ae3b38e9fc33eb67f5170fd54444c9c3a5302a31b3c264"
+      "path": "catalog/barcodes.v2.13.json.gz",
+      "bytes": 578,
+      "checksum": "55a60960e7ee1bee6eebdf0026922049b57ab7daa448e25184ae0a879061ca70"
     },
     {
-      "path": "catalog/barcodes.v1.16.json.gz",
-      "bytes": 19467,
-      "checksum": "9663adaca889ac8051feebe2b263674bf9b1045ed76f3e0e49ff3ceab51491f0"
+      "path": "catalog/barcodes.v2.14.json.gz",
+      "bytes": 621,
+      "checksum": "a32d3e95f096dd505818c7a22af14e4dea8030e5c1a850c936971293e8dd0b6a"
     },
     {
-      "path": "catalog/barcodes.v1.17.json.gz",
-      "bytes": 3641,
-      "checksum": "6f723458935a1786a63a84de83d4f8540b925e7c8039562aece29a2cc38ba787"
+      "path": "catalog/barcodes.v2.15.json.gz",
+      "bytes": 417,
+      "checksum": "1a592b6338b83d603f455682a0fdd93a2a3283413510497a2fba1654159c3109"
     },
     {
-      "path": "catalog/barcodes.v1.18.json.gz",
-      "bytes": 19526,
-      "checksum": "4c2c79088d23ac2a98f1d5002946798b3a7b6f5cb6872fc99f8750a590c81ea4"
+      "path": "catalog/barcodes.v2.16.json.gz",
+      "bytes": 347,
+      "checksum": "951acb633a178d8ffe319bf1b2343b5144127d1931063f69359c542cc3ff5042"
     },
     {
-      "path": "catalog/barcodes.v1.19.json.gz",
-      "bytes": 3887,
-      "checksum": "d8d2ba4ba02751c7dcca4b6f3a4a61e0a6d81590ee809b3ccc539b8d811a507e"
+      "path": "catalog/barcodes.v2.17.json.gz",
+      "bytes": 261,
+      "checksum": "46228d88d65d4deb6bfa8f10ac55863c89f3e78e9f8351c5c20a40025c2e43a7"
     },
     {
-      "path": "catalog/barcodes.v1.20.json.gz",
-      "bytes": 21754,
-      "checksum": "f060e0d893d4fc08721db3467bb7f2776d61294aa87ed601ab289af3ef3b1afe"
+      "path": "catalog/barcodes.v2.18.json.gz",
+      "bytes": 248,
+      "checksum": "6a2e60cf0cb13729290ef76842929294f2e9449ccce7a9e73b55b723cc342b05"
     },
     {
-      "path": "catalog/barcodes.v1.21.json.gz",
-      "bytes": 6122,
-      "checksum": "6a25231dbe3270545d467d0dfbf6d56b43279eb2dd879a8ccfaa27d8e946168b"
+      "path": "catalog/barcodes.v2.19.json.gz",
+      "bytes": 156,
+      "checksum": "270d528cd9cd1dbcece4a1e5baad7fe021c6234bff93c1813c774e0bc2a831ac"
     },
     {
-      "path": "catalog/barcodes.v1.22.json.gz",
-      "bytes": 25293,
-      "checksum": "3c413a1081a83e08adc2554b1ec18c0774f744e6a352f20218fd20da3eb21a56"
+      "path": "catalog/barcodes.v2.20.json.gz",
+      "bytes": 300,
+      "checksum": "9437f061f755ff0fb2de8b5364d1ebf42a2ad2e773881d9e3dc523bfa4a0e4ef"
     },
     {
-      "path": "catalog/barcodes.v1.23.json.gz",
-      "bytes": 11251,
-      "checksum": "dbe6a4dfae3f08462693cbd5cdbab387465a45cedd7f7b5abde27a4a99c57708"
+      "path": "catalog/barcodes.v2.21.json.gz",
+      "bytes": 256,
+      "checksum": "7cb5f82248e442f2513c4d99eef2c1d68037140bfaac465b8e207034fe5c9306"
     },
     {
-      "path": "catalog/barcodes.v1.24.json.gz",
-      "bytes": 219115,
-      "checksum": "e1b7d1344e791d86e475bddb00563a8c33b37666fcb0c9e5b132af3140efd779"
+      "path": "catalog/barcodes.v2.22.json.gz",
+      "bytes": 300,
+      "checksum": "48f6196b81027e1520d2802a445ba545867997823bb60a002c000385de611440"
     },
     {
-      "path": "catalog/barcodes.v1.25.json.gz",
-      "bytes": 19144,
-      "checksum": "9401eb8508e6918b79daefc640d83a76c140ae1bc0b7b10f68f97fa2998a8504"
+      "path": "catalog/barcodes.v2.23.json.gz",
+      "bytes": 249,
+      "checksum": "3f001e3ead87e28ca7b23976ed66e8e013a07ced9fdb6a257e1ac39d640b7708"
     },
     {
-      "path": "catalog/barcodes.v1.26.json.gz",
-      "bytes": 43216,
-      "checksum": "49e835d1f50a806c0b264d2e1bd5fc83a4eb43bc57654901bb566c88c3228960"
+      "path": "catalog/barcodes.v2.24.json.gz",
+      "bytes": 9282,
+      "checksum": "c95c23c4febed3fdffe382fcbfebc2ffb2018b49867b1cff90796a496092e343"
     },
     {
-      "path": "catalog/barcodes.v1.27.json.gz",
-      "bytes": 31083,
-      "checksum": "a76180f8533b75566fbb48a5b174a7af199548bbc3fea3fe71721afb932c0da8"
+      "path": "catalog/barcodes.v2.25.json.gz",
+      "bytes": 604,
+      "checksum": "8c44028a7309558e85a30471ffd04da91ffc4720c69cb891e0a7ec790a8cd865"
     },
     {
-      "path": "catalog/barcodes.v1.28.json.gz",
-      "bytes": 56514,
-      "checksum": "5a396c54e9e395d79ba398ffaed024d24e9453f3fdd968a03e266884b9fa06d0"
+      "path": "catalog/barcodes.v2.26.json.gz",
+      "bytes": 796,
+      "checksum": "e1947d852070c60038e821d9e4e5d0a274ffbc4908d3e2c55498147c0b43088f"
     },
     {
-      "path": "catalog/barcodes.v1.29.json.gz",
-      "bytes": 48927,
-      "checksum": "669a53eddf14e4241ed57b3cceeaf2aa06091b5fade7b18c03be05a367af1cca"
+      "path": "catalog/barcodes.v2.27.json.gz",
+      "bytes": 694,
+      "checksum": "8dea4abba927a6fc2601823a0c744f73f2e713c75a29d4949a6b829a5206dfb0"
     },
     {
-      "path": "catalog/barcodes.v1.30.json.gz",
-      "bytes": 76815,
-      "checksum": "87819d582d1230ffbf882eff2aa11f9e6bf417ea4067c3de995ae74430aa099a"
+      "path": "catalog/barcodes.v2.28.json.gz",
+      "bytes": 1031,
+      "checksum": "d39b014408730ccf51c384f466301d2cf29fbd63a26c34594e0a118a4d4a72a9"
     },
     {
-      "path": "catalog/barcodes.v1.31.json.gz",
-      "bytes": 70752,
-      "checksum": "f38e6ed42bf5b661973d743102428e774bdae85250db62d5a8ba55ecd255304e"
+      "path": "catalog/barcodes.v2.29.json.gz",
+      "bytes": 1159,
+      "checksum": "5374a7bb717c0752df59fb00b3d732852997f2fb905c1ee25cc93fa739a89df1"
     },
     {
-      "path": "catalog/barcodes.v1.32.json.gz",
-      "bytes": 101942,
-      "checksum": "0ea55bedd159623de0912705b07b83622de323e6664b44d06c6227bf51851cfb"
+      "path": "catalog/barcodes.v2.30.json.gz",
+      "bytes": 1693,
+      "checksum": "d469ec12c9783a297ef7b8383c6d63a902b8403c4ff4e801ac7fe3bc98f04b92"
     },
     {
-      "path": "catalog/barcodes.v1.33.json.gz",
-      "bytes": 97104,
-      "checksum": "a4e26133f3e4b8b96dec0e889fbb54b4d02aae7a16876776d8db424ddea0ed10"
+      "path": "catalog/barcodes.v2.31.json.gz",
+      "bytes": 1502,
+      "checksum": "ad2bffad07a6077d8ff2ee9314b854540086e831b50eaf9ba49fe9708a520963"
     },
     {
-      "path": "catalog/barcodes.v1.34.json.gz",
-      "bytes": 124845,
-      "checksum": "b833d9b544e489f37079946ca3dc935aaea889e25ff095527abd71b05c67c4a0"
+      "path": "catalog/barcodes.v2.32.json.gz",
+      "bytes": 2201,
+      "checksum": "456080aa46bb8dd653cb991ff19a04fe9fbea2696f527289bae68d8a642b9a15"
     },
     {
-      "path": "catalog/barcodes.v1.35.json.gz",
-      "bytes": 120661,
-      "checksum": "3b4e8a68f459b780eab1449d89dd5c7fc5c014f0455b58146cc7ac1185a8f808"
+      "path": "catalog/barcodes.v2.33.json.gz",
+      "bytes": 2167,
+      "checksum": "a1b4dcd09f9a50c11748a92a8abc95f6ec53b188ab175a97bed9d53d27506585"
     },
     {
-      "path": "catalog/barcodes.v1.36.json.gz",
-      "bytes": 148029,
-      "checksum": "33e37e04271e732062f45d283c44815d3e686c5dab4207349c09360a2a79b21e"
+      "path": "catalog/barcodes.v2.34.json.gz",
+      "bytes": 2535,
+      "checksum": "42ff0f1a97f622e37e91698dab1447e05bbb1e9eb168cb0d7c202312ca8090a1"
     },
     {
-      "path": "catalog/barcodes.v1.37.json.gz",
-      "bytes": 145279,
-      "checksum": "10a3cf6253e34ecc9beadb6915796d93cb456800f4916879365a73420036399e"
+      "path": "catalog/barcodes.v2.35.json.gz",
+      "bytes": 2609,
+      "checksum": "d6dbd3826213c89c8159e0688c57a7730b4355d8bc5a38e9a707472048899f4b"
     },
     {
-      "path": "catalog/barcodes.v1.38.json.gz",
-      "bytes": 169207,
-      "checksum": "4431ed0cd4374dd2096f8b4dead39d208fbb99baeb1f2903f9226602e9c503ef"
+      "path": "catalog/barcodes.v2.36.json.gz",
+      "bytes": 3047,
+      "checksum": "96f5b8a966bab577c2ecc0a855d2d48d2d6448ae560855ebab898e22f3600ef7"
     },
     {
-      "path": "catalog/barcodes.v1.39.json.gz",
-      "bytes": 166042,
-      "checksum": "debfdca6fc5d96486ccc473cb4d5511a5d8e908cd36a60b38ad2ed23ceb64aad"
+      "path": "catalog/barcodes.v2.37.json.gz",
+      "bytes": 3211,
+      "checksum": "cb61582b096aed7c427b33ec5f7ce2869c50d24f3d65fef4feba7582917d7d3e"
     },
     {
-      "path": "catalog/barcodes.v1.40.json.gz",
-      "bytes": 181585,
-      "checksum": "a9d8bb0f635261aff0c53c2f5af79c195b271357c117136c3eede1656c3aca08"
+      "path": "catalog/barcodes.v2.38.json.gz",
+      "bytes": 3643,
+      "checksum": "e5f18e16901825ca9ff3ee50f9c1240375da8d515ed74a3cf98e8f9e860ddc5e"
     },
     {
-      "path": "catalog/barcodes.v1.41.json.gz",
-      "bytes": 175934,
-      "checksum": "6ee95e15c349b39706d1ef4000a2465b37e85dbbee7b87acb8e8641515e443de"
+      "path": "catalog/barcodes.v2.39.json.gz",
+      "bytes": 3888,
+      "checksum": "3d64643b03a190c9a3f66a0eb9efdf3314abf3775ddb2070e194edd9206cdb7d"
     },
     {
-      "path": "catalog/barcodes.v1.42.json.gz",
-      "bytes": 189880,
-      "checksum": "78fd004bc0dc5b5308d8cd462af4de774fba4a54901460d827d2d2695fbb2a53"
+      "path": "catalog/barcodes.v2.40.json.gz",
+      "bytes": 4150,
+      "checksum": "f8ff582b508c89e033f592614d5ed9710d2a660d0e5b4d4a8c7e7b8e4b4e8ce1"
     },
     {
-      "path": "catalog/barcodes.v1.43.json.gz",
-      "bytes": 182624,
-      "checksum": "170d643b6684efca0cd193bebf27282674f63331c698b6a96b3a13c342f1c4ee"
+      "path": "catalog/barcodes.v2.41.json.gz",
+      "bytes": 3946,
+      "checksum": "b5d9649a2d494c3e6e01fb7083bb4c30280addbd867b386727bbc67a4df98a38"
     },
     {
-      "path": "catalog/barcodes.v1.44.json.gz",
-      "bytes": 189680,
-      "checksum": "02efd82c0af2789dd9e7e0f2694ac2f2a92942f170d2ca52815abc02439f239b"
+      "path": "catalog/barcodes.v2.42.json.gz",
+      "bytes": 4763,
+      "checksum": "00a960ea87f1f9df6008dfee89b21d7057468b24db7e62593902b36a52cc8f59"
     },
     {
-      "path": "catalog/barcodes.v1.45.json.gz",
-      "bytes": 181048,
-      "checksum": "cf6c65bcdb57a05357b7c33f8d0f0c1f204236e60a38ff5b8c1a10ae7bf8056f"
+      "path": "catalog/barcodes.v2.43.json.gz",
+      "bytes": 4114,
+      "checksum": "e7bce7612e2faa5d25610217a142832a57645e398fbe9fbb39b22cabddb5a151"
     },
     {
-      "path": "catalog/barcodes.v1.46.json.gz",
-      "bytes": 184789,
-      "checksum": "7512745fd3ffc0e94aa98bc2b156a55951a91212eb999777006b7021709d4d3d"
+      "path": "catalog/barcodes.v2.44.json.gz",
+      "bytes": 4727,
+      "checksum": "e0cf8a993807cda96efa9756841fe8ae035ac21ce935b4ba312680e4a2ecdc67"
     },
     {
-      "path": "catalog/barcodes.v1.47.json.gz",
-      "bytes": 176577,
-      "checksum": "5fd98fca9e1418f659e3232719755cc394a09aa1dd14978634e4fa3cadf04183"
+      "path": "catalog/barcodes.v2.45.json.gz",
+      "bytes": 5030,
+      "checksum": "c35a884b507c91cf7788380a166e01b60582722edfac2f17dac207909827afc5"
     },
     {
-      "path": "catalog/barcodes.v1.48.json.gz",
-      "bytes": 177297,
-      "checksum": "19e55cca25e593cdb16eb9170ab7a16cec7142df189f605c464180957af821f8"
+      "path": "catalog/barcodes.v2.46.json.gz",
+      "bytes": 5018,
+      "checksum": "ec94108168d4251ba2ead764c3be5e51e6d8f3e88833c79c5c6b8399713d5b7a"
     },
     {
-      "path": "catalog/barcodes.v1.49.json.gz",
-      "bytes": 169834,
-      "checksum": "33a8121b601a387ae47325182f34c887f770a498a79aa64aee171a4dbfb2f06e"
+      "path": "catalog/barcodes.v2.47.json.gz",
+      "bytes": 4562,
+      "checksum": "07bf8e36878d248fde9a9ce8843e72cbbbc9dc3d4ca9284c7bb1c3b62b96a4b5"
     },
     {
-      "path": "catalog/barcodes.v1.50.json.gz",
-      "bytes": 169527,
-      "checksum": "b3e16081917eb100b919e64de0f185a8220925bd9c993adee13c04a53f9c5446"
+      "path": "catalog/barcodes.v2.48.json.gz",
+      "bytes": 4769,
+      "checksum": "6adca1893ebbc87a79c4236d857513f4f5c40e29376a6f0bc95670f7845b49d0"
     },
     {
-      "path": "catalog/barcodes.v1.51.json.gz",
-      "bytes": 162737,
-      "checksum": "3ee1ebfd7b8e88f772aba4d1084610605a924b1d1ff7c374c69ef9eb19f6db85"
+      "path": "catalog/barcodes.v2.49.json.gz",
+      "bytes": 4665,
+      "checksum": "62d84e10f6cbc0f443e4cb198d64364a7cc27985e37786d4f3c90a5242c7c500"
     },
     {
-      "path": "catalog/barcodes.v1.52.json.gz",
-      "bytes": 164178,
-      "checksum": "556d016f0afbb86bf6d228a28e2c79e1c70b84d73251272aa8ec9ed246e29131"
+      "path": "catalog/barcodes.v2.50.json.gz",
+      "bytes": 5291,
+      "checksum": "6057e832971df6b6300ebc324b8f2dfd3b49047476a8beaf2aa683c76dd36a3d"
     },
     {
-      "path": "catalog/barcodes.v1.53.json.gz",
-      "bytes": 157727,
-      "checksum": "c661c0245b0c6338b949414af25c46db2d70668edb6fb07278f0ddb63667164d"
+      "path": "catalog/barcodes.v2.51.json.gz",
+      "bytes": 4806,
+      "checksum": "d6d8c1680f58317d29f2ee55529654428bec3c6987e7432a43c14b415d7d10f2"
     },
     {
-      "path": "catalog/barcodes.v1.54.json.gz",
-      "bytes": 161969,
-      "checksum": "45886fdc9d2b6574cb2169ab9c436e31cc3850a8648c4a08b9d07b15e8d37895"
+      "path": "catalog/barcodes.v2.52.json.gz",
+      "bytes": 5008,
+      "checksum": "8708cce72a80088711912f2a9b1431354d4a69f778834108edcd98890ecbad9a"
     },
     {
-      "path": "catalog/barcodes.v1.55.json.gz",
-      "bytes": 155735,
-      "checksum": "d12b54adfc234fae1dd4211124500c81cc4390c2182da90b4c87cdb8d87df3f4"
+      "path": "catalog/barcodes.v2.53.json.gz",
+      "bytes": 5033,
+      "checksum": "82f4b7e2cd4918b8048d35d15bf9f222fc8e80709b3c2f4e3149bf0cb1860ccc"
     },
     {
-      "path": "catalog/barcodes.v1.56.json.gz",
-      "bytes": 158170,
-      "checksum": "b007a1f436b9a37f27817f22ddebc0d40d51ba4dbdee41bd05e17dc2ce6ee79c"
+      "path": "catalog/barcodes.v2.54.json.gz",
+      "bytes": 5832,
+      "checksum": "5d72b5a0b7e720964f56dfd2321c876b5f1eec8a7948e673ac4b89276e3ec533"
     },
     {
-      "path": "catalog/barcodes.v1.57.json.gz",
-      "bytes": 154878,
-      "checksum": "bb72806353369794ecaa108a59ef7bb5314460671f3547693ce6dc9a9b724ba8"
+      "path": "catalog/barcodes.v2.55.json.gz",
+      "bytes": 5398,
+      "checksum": "599927875f07f94956b86ff23a57728fe370bc53da84fc6b4fd66d2919ca70a7"
     },
     {
-      "path": "catalog/barcodes.v1.58.json.gz",
-      "bytes": 155091,
-      "checksum": "253900497f2d45de65cf637c464d9f398f77c1f8d1b5e169eb2cc8944872ab16"
+      "path": "catalog/barcodes.v2.56.json.gz",
+      "bytes": 6242,
+      "checksum": "38df9b5a85a957f9bc3c93dd7dbd472071bc49141eaadbfe05c20ac39e12a408"
     },
     {
-      "path": "catalog/barcodes.v1.59.json.gz",
-      "bytes": 147143,
-      "checksum": "81aa7a06c0853a8196ad2a9a0e76608554949464b3387c71f1abee8b93373bbf"
+      "path": "catalog/barcodes.v2.57.json.gz",
+      "bytes": 6154,
+      "checksum": "9c2c6f083a42b917606404848acd0142a4c37555fe2bc97b32347debcf5b645b"
     },
     {
-      "path": "catalog/barcodes.v1.60.json.gz",
-      "bytes": 146875,
-      "checksum": "53c4d42ad3164d5db882d531a032c83f41f882eb2dc0d6658e2cf3752d24f964"
+      "path": "catalog/barcodes.v2.58.json.gz",
+      "bytes": 6724,
+      "checksum": "cce4c6c43f9588946b74ed83baf4cd9f88f68f339e416c82fcb459ee14c6b5a5"
     },
     {
-      "path": "catalog/barcodes.v1.61.json.gz",
-      "bytes": 137504,
-      "checksum": "cc7fc0754ed88d408259eac260fce97aadb64249393ed33cd4c38cb5e2b9d116"
+      "path": "catalog/barcodes.v2.59.json.gz",
+      "bytes": 6614,
+      "checksum": "824ffe5899d41e91ff877a312510d06262ed51e2c91767bace06e92c4c0f5af6"
     },
     {
-      "path": "catalog/barcodes.v1.62.json.gz",
-      "bytes": 135314,
-      "checksum": "5afa843de540b86f19b9e3c0f8cbcf6394b28d21608b3a2570f32a22dd268c5f"
+      "path": "catalog/barcodes.v2.60.json.gz",
+      "bytes": 6569,
+      "checksum": "827becd82cb4df4c697e9b11b98bde76a7b001e54ba911ddcd99b496666d12b8"
     },
     {
-      "path": "catalog/barcodes.v1.63.json.gz",
-      "bytes": 123452,
-      "checksum": "c3c8953fb53b8681ffaac76270d25762eb436c12ff095fca87829302567ebc16"
+      "path": "catalog/barcodes.v2.61.json.gz",
+      "bytes": 6597,
+      "checksum": "3d0182e8df1c15fc9ad2a427fd1273066bf016c788adbae093cf94c9c8df1f58"
     },
     {
-      "path": "catalog/starter.v1.json.gz",
-      "bytes": 3331,
-      "checksum": "ab5b2c7a68e422416cc54b2efacf0f44b74abca5bee2f3e54378252dc40eb09b"
+      "path": "catalog/barcodes.v2.62.json.gz",
+      "bytes": 7054,
+      "checksum": "879c5abe8adff242f964f1a182a3101cd54f0e2955b647f76a17547cc0441593"
+    },
+    {
+      "path": "catalog/barcodes.v2.63.json.gz",
+      "bytes": 6226,
+      "checksum": "a825abf8d9ed8d5d3611cc7ff170ff655e930dc7a483da99db6399d7ebd7ce29"
     }
   ],
   "counts": {
@@ -3342,16 +3353,19 @@
     "status_A": 256400,
     "status_N": 165360,
     "emptyRows": 155,
-    "productsWithoutBarcode": 8340,
+    "productsWithoutBarcode": 50,
     "ambiguousBarcodes": 4,
-    "internalOrOtherCodes": 3429,
-    "checkDigitWarnings": 703819,
-    "uniqueProducts": 672040,
-    "uniqueBarcodes": 821829,
+    "internalOrOtherCodes": 285,
+    "checkDigitWarnings": 20473,
+    "masterUniqueProducts": 672040,
+    "uniqueProducts": 14076,
+    "uniqueBarcodes": 23426,
     "repeatedSkuRows": 158123,
-    "missingPrice": 672040
+    "missingPrice": 0
   },
   "priceWarning": "Prices may not always be accurate. Estimate only. Final prices are confirmed at the cashier.",
-  "sourceChecksum": "6158fed2e87cddf3dd8ae974a172b06710ae4a3b4639da4a7e9e89a40b73d7c8",
-  "starterPath": "catalog/starter.v1.json.gz"
+  "assortmentSourceName": "list of inventory and price list.xlsx",
+  "assortmentChecksum": "b7bb51bcdb491cd103db86ba859e18df8e0a9fc4bc4fb9e1f3624505e5222c8c",
+  "masterMatchedCount": 14026,
+  "unmappedItemCount": 50
 }

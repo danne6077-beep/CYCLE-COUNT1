@@ -1,4 +1,4 @@
-const {createHash}=require('node:crypto');const {getProduct,shard,bucket,fail,body,headers,sendError,verify}=require('../server/shopper.cjs');
+const {createHash}=require('node:crypto');const catalogVersion=require('../shopper/catalog/catalog-meta.json').version;const {getProduct,shard,bucket,fail,body,headers,sendError,verify}=require('../server/shopper.cjs');
 module.exports=async function handler(req,res){headers(res);if(req.method!=='POST'){res.setHeader('Allow','POST');res.status(405).json({error:'POST required.'});return;}
  try{
   await verify(req,true);
@@ -8,7 +8,7 @@ module.exports=async function handler(req,res){headers(res);if(req.method!=='POS
   if(!Array.isArray(data.rows)||data.rows.length>5000)throw fail(400,'Supply up to 5,000 enrichment rows.');
   const known=new Set(data.rows.map(r=>String(r.PRODUCT_CODE||'')).filter(sku=>getProduct(sku)));
   const validation=data.rollbackVersion!=null?{errors:[],warnings:[],products:[]}:validateEnrichment(data.rows,known);
-  for(const p of validation.products){if(p.priceAsOf>today())validation.errors.push({sku:p.sku,message:'Price effective dates cannot be in the future.'});for(const code of getProduct(p.sku)?.barcodes||[]){if((shard(`barcodes.v1.${bucket(code)}.json.gz`)[code]||[]).length>1)validation.errors.push({sku:p.sku,message:'Source barcode '+code+' maps to multiple products. Resolve the reference catalog before publishing this item.'});}}
+  for(const p of validation.products){if(p.priceAsOf>today())validation.errors.push({sku:p.sku,message:'Price effective dates cannot be in the future.'});for(const code of getProduct(p.sku)?.barcodes||[]){if((shard(`barcodes.v${catalogVersion}.${bucket(code)}.json.gz`)[code]||[]).length>1)validation.errors.push({sku:p.sku,message:'Source barcode '+code+' maps to multiple products. Resolve the reference catalog before publishing this item.'});}}
   if(validation.errors.length){res.status(422).json({errors:validation.errors,warnings:validation.warnings});return;}
   async function github(route,method='GET',payload){const r=await fetch('https://api.github.com/repos/'+repo+route,{method,headers:{Authorization:'Bearer '+token,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28','Content-Type':'application/json'},...(payload?{body:JSON.stringify(payload)}:{}),signal:AbortSignal.timeout(12000)});const result=await r.json();if(!r.ok)throw fail(r.status===422?409:503,'Publication could not complete. Another update may have occurred; refresh version history and retry.');return result;}
   const head=await github('/git/ref/heads/'+encodeURIComponent(branch)),commit=await github('/git/commits/'+head.object.sha);
