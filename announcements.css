@@ -10,6 +10,7 @@
 .announcement-list{display:grid;gap:0;border-top:1px solid var(--notice-line)}
 .announcement-entry{display:grid;grid-template-columns:120px minmax(0,1fr);gap:20px;padding:22px 8px;border-bottom:1px solid var(--notice-line);animation:announcement-arrive .25s ease both}
 .announcement-date{color:#69766e;font-size:10px;font-weight:700}
+.announcement-updated{display:block;margin-top:7px;color:#969e98;font-size:9px;font-weight:600}
 .announcement-date span{display:block;margin-top:4px;color:#9aa39c;font-size:9px;font-weight:500}
 .announcement-content h3{margin:0;color:var(--notice-ink);font-family:'Space Grotesk',sans-serif;font-size:17px;letter-spacing:0}
 .announcement-author{margin-top:5px;color:#08785b;font-size:10px;font-weight:700}

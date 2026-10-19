@@ -1,0 +1,15 @@
+@media print {
+  @page { margin: .45in; }
+  html, body { min-height: 0 !important; background: #fff !important; color: #000 !important; }
+  .skip-link, .scroll-progress, .topbar, .cookie-banner, .floating-contact, .back-to-top,
+  .toast, .print-toast, .about-nav, .site-faq, .newsletter-card,
+  button, input, select, textarea, .screen-only { display: none !important; }
+  .page-shell { max-width: none !important; margin: 0 !important; padding: 0 !important; }
+  .about-page, .home-dashboard, .panel, .count-sheet-page, .reference-sheet { box-shadow: none !important; }
+  a { color: inherit !important; text-decoration: none !important; }
+  h1, h2, h3 { break-after: avoid; }
+  article, section, table { break-inside: avoid; }
+  table { width: 100% !important; border-collapse: collapse !important; }
+  th, td { border: 1px solid #777 !important; print-color-adjust: exact; }
+  * { text-shadow: none !important; }
+}

@@ -358,7 +358,7 @@ let inventorySearchTimer;
 $('searchInput').addEventListener('input',()=>{clearTimeout(inventorySearchTimer);inventoryPage=1;inventorySearchTimer=setTimeout(()=>renderItems(),120)});
 $('sortSelect').onchange=()=>{inventoryPage=1;renderItems()};$('reuploadBtn').onclick=()=>$('fileInput').click();$('backImport').onclick=()=>showStep(1);$('countSheetBtn').onclick=()=>showStep(3);$('backCountData').onclick=()=>showStep(2);$('printSheetBtn').onclick=()=>{toast('Print dialog opened');window.print()};$('exportSheetBtn').onclick=()=>toast('Count sheet PDF export is ready');$('goCountSheet').onclick=()=>showCountSheetWorkspace();$('generateBtn').onclick=()=>showStep(3);$('backData').onclick=()=>showStep(2);$('goGenerate').onclick=()=>{renderGenerated();showStep(4);$('generatedSummary').textContent=`${items.length} physical count tags prepared for printing.`};$('backConfigure').onclick=()=>showStep(3);$('printBtn').onclick=()=>{toast('Print dialog opened');window.print()};$('pdfBtn').onclick=()=>toast('PDF export is ready to download');
  $('addItemBtn').onclick=()=>{const locator=prompt('Locator (e.g. A-01-01)');if(!locator)return;const sku=prompt('SKU');const description=prompt('Description');const newItem={locator,sku:sku||'NEW',barcode:'',description:description||'New inventory item'};countSheetUsesMasterlist=false;items.push(newItem);inventoryTouchedThisSession=true;inventoryViewCache={key:'',indexes:[]};renderItems();persistLocalCycleData('Item added',`SKU ${newItem.sku} · ${newItem.description} · ${newItem.locator}`);toast('Inventory item added')};
-document.addEventListener('click',event=>{
+document.addEventListener('click',async event=>{
   const edit=event.target.closest('.edit-item');
   const remove=event.target.closest('.delete-item');
   if(edit){
@@ -369,6 +369,7 @@ document.addEventListener('click',event=>{
   }
   if(remove){
     const item=items[Number(remove.dataset.index)];
+    if(!await (window.fujiConfirm?.(`Delete ${item?.description||'this item'} from the current inventory?`,'Delete inventory item') ?? Promise.resolve(window.confirm('Delete this item from the current inventory?'))))return;
     const removedDetails=item?`SKU ${item.sku||'—'} · ${item.description||''} · ${item.locator||''}`:'Unknown item';
     countSheetUsesMasterlist=false;
     items.splice(Number(remove.dataset.index),1);
@@ -421,7 +422,7 @@ $('countSheetSortOrder').addEventListener('change',()=>{
 });
 document.querySelectorAll('.step').forEach(el=>el.onclick=()=>{const step=Number(el.dataset.step);if(step===1||items.length)showStep(step);else toast('Import inventory before continuing')});document.querySelectorAll('.module').forEach(el=>el.onclick=()=>{document.querySelectorAll('.module').forEach(button=>button.classList.remove('active'));el.classList.add('active');toast(`${el.textContent.split(' ')[0]} module selected`)});
 $('settingsBtn').onclick=()=>{$('modalBackdrop').hidden=false};$('closeModal').onclick=()=>{$('modalBackdrop').hidden=true};$('modalBackdrop').onclick=e=>{if(e.target===$('modalBackdrop'))$('modalBackdrop').hidden=true};$('saveSettings').onclick=()=>{$('modalBackdrop').hidden=true;document.documentElement.dataset.accent=$('accentSelect').value;const colors={emerald:'#047857',sapphire:'#1d4ed8',amber:'#b45309'};document.documentElement.style.setProperty('--accent',colors[$('accentSelect').value]);toast('Settings saved')};
-$('resetBtn').onclick=()=>{const removedCount=items.length;countSheetUsesMasterlist=false;items=[];if(typeof resetCombinedPrintStatus==='function')resetCombinedPrintStatus();inventoryTouchedThisSession=true;inventoryViewCache={key:'',indexes:[]};$('fileInput').value='';$('resetBtn').hidden=true;renderItems();persistLocalCycleData('Inventory cleared',`${removedCount} rows removed`);showStep(1);toast('Session reset')};
+$('resetBtn').onclick=async()=>{if(!await (window.fujiConfirm?.('Clear the current inventory from this browser? Download a backup first if you may need these items later.','Clear current inventory') ?? Promise.resolve(window.confirm('Clear the current inventory from this browser?'))))return;const removedCount=items.length;countSheetUsesMasterlist=false;items=[];if(typeof resetCombinedPrintStatus==='function')resetCombinedPrintStatus();inventoryTouchedThisSession=true;inventoryViewCache={key:'',indexes:[]};$('fileInput').value='';$('resetBtn').hidden=true;renderItems();persistLocalCycleData('Inventory cleared',`${removedCount} rows removed`);showStep(1);toast('Session reset')};
 $('storeField').value=restoredLocalCycleData.store||'';
 $('dateField').value=restoredLocalCycleData.date||new Date().toISOString().slice(0,10);
 if(items.length){
@@ -497,8 +498,8 @@ function createLocalHistoryPanel(){
   button.onclick=()=>{renderLocalHistory();backdrop.hidden=false};
   $('closeLocalHistory').onclick=()=>{backdrop.hidden=true};
   backdrop.onclick=event=>{if(event.target===backdrop)backdrop.hidden=true};
-  $('clearLocalHistory').onclick=()=>{
-    if(window.confirm('Clear the saved activity history? Inventory will remain saved.')){
+  $('clearLocalHistory').onclick=async()=>{
+    if(await (window.fujiConfirm?.('Clear the saved activity history? Inventory will remain saved.','Clear activity history') ?? Promise.resolve(window.confirm('Clear the saved activity history? Inventory will remain saved.')))){
       localStorage.removeItem(localCycleHistoryKey);
       renderLocalHistory();
     }
@@ -673,8 +674,8 @@ $('restoreBackupInput').addEventListener('change',async event=>{
     toast('Backup restored');
   }catch(error){toast(error.message||'Could not restore this backup');event.target.value=''}
 });
-$('resetSettingsBtn').addEventListener('click',()=>{
-  if(!confirm('Reset system name, editor, store, logo, and color settings? Inventory will be kept.'))return;
+$('resetSettingsBtn').addEventListener('click',async()=>{
+  if(!await (window.fujiConfirm?.('Reset system name, editor, store, logo, and color settings? Inventory will be kept.','Reset workspace settings') ?? Promise.resolve(window.confirm('Reset system name, editor, store, logo, and color settings? Inventory will be kept.'))))return;
   workspaceSettings={...defaultWorkspaceSettings};
   currentLogoData='';
   systemNameField.value=defaultWorkspaceSettings.systemName;
@@ -689,7 +690,8 @@ $('resetSettingsBtn').addEventListener('click',()=>{
   toast('System settings reset');
 });
 $('clearInventoryBtn').addEventListener('click',()=>{
-  if(confirm('Clear the inventory saved in this browser? This cannot be undone unless you have a backup.'))$('resetBtn').click();
+  $('resetBtn').hidden=false;
+  $('resetBtn').click();
 });
 
 function applyLayout(showToast=true){

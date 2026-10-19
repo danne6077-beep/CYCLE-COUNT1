@@ -20,6 +20,8 @@
   <link rel="stylesheet" href="masterlist.css">
   <link rel="stylesheet" href="auth.css">
   <link rel="stylesheet" href="about-us.css">
+  <link rel="stylesheet" href="site-extras.css">
+  <link rel="stylesheet" href="print.css" media="print">
   <style>
     .rows-control{display:flex;align-items:center;gap:7px}.rows-control input{margin-top:5px}.rows-presets{display:flex;gap:4px;margin-top:6px}.rows-presets button{background:#fff;border:1px solid #d4ddd7;border-radius:5px;color:#536158;padding:3px 7px;font-size:10px}.rows-presets button:hover{border-color:var(--accent);color:var(--accent)}.supplier-filter{color:#647069;font-size:11px;text-align:left}.supplier-filter select{min-width:165px;margin-top:3px;padding:7px 9px;font-size:11px}
     @media screen {
@@ -170,6 +172,8 @@
   <link rel="stylesheet" href="redesign.css">
 </head>
 <body class="auth-logged-out">
+  <a class="skip-link" href="#loginTitle">Skip to content</a>
+  <div class="scroll-progress" id="scrollProgress" role="progressbar" aria-label="Page scroll progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span></span></div>
   <main class="login-page" id="loginPage">
     <section class="login-card" aria-labelledby="loginTitle">
       <div class="login-visual">
@@ -178,7 +182,7 @@
       </div>
       <div class="login-content">
         <a class="login-brand" href="#" aria-label="Fuji Cycle Count System"><span class="login-brand-mark">F</span><span>FUJI CYCLE COUNT SYSTEM</span></a>
-        <div class="login-heading"><p class="login-eyebrow">OPERATIONS DESK</p><h1 id="loginTitle">Welcome back</h1><p>Sign in to continue to your inventory workspace.</p></div>
+        <div class="login-heading"><p class="login-eyebrow">OPERATIONS DESK</p><h1 id="loginTitle" tabindex="-1">Welcome back</h1><p>Sign in to continue to your inventory workspace.</p></div>
         <div class="login-mode-switch" role="tablist" aria-label="Login mode">
           <button class="login-mode-option is-active" type="button" role="tab" id="localLoginTab" data-login-mode="local" aria-selected="true">Local Machine Login</button>
           <button class="login-mode-option" type="button" role="tab" id="onlineLoginTab" data-login-mode="online" aria-selected="false">Online Cloud Login</button>
@@ -188,7 +192,7 @@
           <label id="loginUsernameLabel" for="loginUsername">Username</label>
           <input id="loginUsername" name="username" type="text" autocomplete="username" placeholder="Enter username" required>
           <label for="loginPassword">Password</label>
-          <input id="loginPassword" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" required>
+          <div class="password-field"><input id="loginPassword" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" required><button class="password-toggle" type="button" data-password-toggle="loginPassword" aria-label="Show password" aria-pressed="false">Show</button></div>
           <p class="login-error" id="loginError" role="alert" aria-live="polite"></p>
           <button class="login-submit" id="loginSubmit" type="submit"><span id="loginSubmitLabel">Sign In Locally</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button>
         </form>
@@ -205,7 +209,8 @@
           <div class="brand-subtitle">CYCLE COUNT SYSTEM</div>
       </div>
     </div>
-    <nav class="primary-nav" aria-label="Primary navigation">
+    <button class="mobile-menu-toggle" id="mobileMenuToggle" type="button" aria-expanded="false" aria-controls="primaryNavigation utilityNavigation" aria-label="Open navigation"><span></span><span></span><span></span></button>
+    <nav class="primary-nav" id="primaryNavigation" aria-label="Primary navigation">
       <button class="nav-button" id="homeNav" type="button" title="Open Home dashboard" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg><span>Home</span></button>
       <button class="nav-button" id="countSheetNav" type="button" title="Open Count Sheet"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h3m2 0h3m-8 4h3m2 0h3m-8 3h3m2 0h3"/></svg><span>Count Sheet</span></button>
       <button class="nav-button" id="cigarsNav" type="button" title="Open cigarette monitoring"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13h17a1 1 0 0 1 1 1v3H3a2 2 0 0 1-2-2v-1a1 1 0 0 1 1-1Zm4 0v4m8-4v4M4 10c2-1 2-3 1-5m5 5c2-1 2-3 1-5"/></svg><span>Cigarette Monitor</span></button>
@@ -213,7 +218,9 @@
       <button class="nav-button" id="productLookupNav" type="button" title="Search the master product catalog"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg><span>Product Lookup</span></button>
       <button class="nav-button" id="masterlistNav" type="button" title="Browse uploaded master data"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4zM4 9h16M9 9v11m6-11v11"/></svg><span>Masterlist</span></button>
     </nav>
-    <nav class="utility-actions" aria-label="Tools and account">
+    <nav class="utility-actions" id="utilityNavigation" aria-label="Tools and account">
+      <button class="nav-button site-search-trigger" id="siteSearchTrigger" type="button" aria-label="Search the whole site" title="Search the whole site"><span aria-hidden="true">⌕</span><span>Search</span></button>
+      <button class="nav-button theme-toggle" id="themeToggle" type="button" aria-label="Switch to dark mode" aria-pressed="false"><span aria-hidden="true">◐</span><span>Theme</span></button>
       <button class="nav-button" id="announcementsNav" type="button" title="Read announcements and updates"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11a8 8 0 0 1 16 0v5l2 2H2l2-2zM9 21h6"/></svg><span>Updates</span></button>
       <div hidden><button id="hotlistNav" type="button">Hotlist</button></div>
       <button class="nav-button" id="settingsBtn" type="button" title="Open settings"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19 13.5a7 7 0 0 0 0-3l2-1.5-2-3.5-2.4 1a7 7 0 0 0-2.6-1.5L13.5 2h-3L10 5a7 7 0 0 0-2.6 1.5L5 5.5l-2 3.5 2 1.5a7 7 0 0 0 0 3L3 15l2 3.5 2.4-1A7 7 0 0 0 10 19l.5 3h3l.5-3a7 7 0 0 0 2.6-1.5l2.4 1 2-3.5z" transform="translate(-1 -1)"/></svg><span>Settings</span></button>
@@ -224,7 +231,7 @@
     </nav>
   </header>
 
-  <main class="page-shell">
+  <main class="page-shell" id="mainContent" tabindex="-1">
     <section id="homePanel" class="home-dashboard" hidden aria-labelledby="homeHeading">
       <header class="home-hero">
         <div><p class="home-eyebrow">FUJI INVENTORY WORKSPACE · OPERATIONS DESK</p><h1 id="homeHeading">Inventory, at a glance.</h1><p>Prepare accurate counts, create shelf-ready price tags, and look up product details from one place.</p></div>
@@ -354,9 +361,9 @@
           <p>Practical reminders for more confident inventory work.</p>
         </div>
         <div class="about-insight-grid">
-          <article><span>01 · PREPARE</span><h3>A good count starts before the first item.</h3><p>Confirm the right list, clarify the area, and make sure everyone knows what they are counting.</p></article>
-          <article><span>02 · VERIFY</span><h3>Keep product and location together.</h3><p>SKU, barcode, description, and locator all help the team check they are counting the right item.</p></article>
-          <article><span>03 · CLOSE THE LOOP</span><h3>Make the next step visible.</h3><p>Clear print status and simple handoffs help teams know what is complete and what still needs attention.</p></article>
+          <article><span>01 · PREPARE</span><h3>A good count starts before the first item.</h3><p>Confirm the right list, clarify the area, and make sure everyone knows what they are counting.</p><time class="about-post-updated" datetime="2026-10-19">Last updated October 19, 2026</time></article>
+          <article><span>02 · VERIFY</span><h3>Keep product and location together.</h3><p>SKU, barcode, description, and locator all help the team check they are counting the right item.</p><time class="about-post-updated" datetime="2026-10-19">Last updated October 19, 2026</time></article>
+          <article><span>03 · CLOSE THE LOOP</span><h3>Make the next step visible.</h3><p>Clear print status and simple handoffs help teams know what is complete and what still needs attention.</p><time class="about-post-updated" datetime="2026-10-19">Last updated October 19, 2026</time></article>
         </div>
       </section>
 
@@ -390,6 +397,16 @@
         <button class="about-footer-button" id="aboutUpdatesLink" type="button">Open workspace updates <span aria-hidden="true">↗</span></button>
         <div class="about-footer-bottom"><span>FUJI CYCLE COUNT SYSTEM</span><button type="button" data-about-home>Back to workspace <span aria-hidden="true">↑</span></button></div>
       </footer>
+      <section class="site-faq" aria-labelledby="siteFaqHeading">
+        <p class="about-eyebrow">HELP CENTER</p><h2 id="siteFaqHeading">Frequently asked questions</h2>
+        <details><summary>Where is inventory data stored?</summary><p>Inventory files and day-to-day changes stay in this browser unless you explicitly download a backup or publish an announcement online.</p></details>
+        <details><summary>Can I use this on a phone?</summary><p>Yes. Navigation and workspace panels adapt to smaller screens. Spreadsheet importing and printing work best on a desktop browser.</p></details>
+        <details><summary>How do I publish an update?</summary><p>Administrators can use the Updates workspace after signing in. Website code changes are published from the main branch.</p></details>
+      </section>
+      <section class="newsletter-card" aria-labelledby="newsletterHeading">
+        <div><p class="about-eyebrow">PRODUCT NOTES</p><h2 id="newsletterHeading">Get occasional workflow updates</h2><p>Save your interest on this device. This static site does not send email or share your address.</p></div>
+        <form id="newsletterForm"><label for="newsletterEmail">Email address</label><div class="newsletter-form-row"><input id="newsletterEmail" type="email" autocomplete="email" placeholder="you@example.com" required><button class="primary-button" type="submit">Sign up</button></div><p id="newsletterStatus" role="status" aria-live="polite"></p></form>
+      </section>
     </section>
     <section id="cigarsPanel" class="cigars-workspace" hidden aria-labelledby="cigarsHeading">
       <header class="cigars-heading">
@@ -746,6 +763,17 @@
   </main>
   </div>
 
+  <dialog class="site-search-dialog" id="siteSearchDialog" aria-labelledby="siteSearchHeading">
+    <form method="dialog"><button class="dialog-close" aria-label="Close search">×</button></form>
+    <p class="section-kicker">FUJI WORKSPACE</p><h2 id="siteSearchHeading">Search the whole site</h2>
+    <label class="sr-only" for="siteSearchInput">Search pages and tools</label><input id="siteSearchInput" type="search" placeholder="Search tools, pages, help…" autocomplete="off">
+    <div id="siteSearchResults" class="site-search-results" role="listbox" aria-label="Search results"></div>
+  </dialog>
+  <dialog class="confirm-dialog" id="confirmDialog" aria-labelledby="confirmHeading"><p class="section-kicker">PLEASE CONFIRM</p><h2 id="confirmHeading">Are you sure?</h2><p id="confirmMessage"></p><div class="confirm-actions"><button class="secondary-button" id="confirmCancel" type="button">Cancel</button><button class="danger-button" id="confirmAccept" type="button">Continue</button></div></dialog>
+  <a class="floating-contact" id="floatingContact" href="#about-contact" aria-label="Contact the workspace team">✉ <span>Contact</span></a>
+  <button class="back-to-top" id="backToTop" type="button" aria-label="Back to top" title="Back to top">↑</button>
+  <div class="cookie-banner" id="cookieBanner" role="region" aria-label="Cookie preferences" hidden><div><strong>Your browser, your choice</strong><p>This site uses essential local storage for sign-in, preferences, and saved inventory.</p></div><div class="cookie-actions"><button class="secondary-button" id="cookieEssential" type="button">Essential only</button><button class="primary-button" id="cookieAccept" type="button">Accept</button></div></div>
+
   <div class="auth-backdrop" id="authModal" hidden>
     <section class="auth-dialog" role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
       <button class="auth-dialog-close" id="authModalClose" type="button" aria-label="Close account management">×</button>
@@ -841,5 +869,6 @@
   <script src="announcements.js"></script>
   <script src="firebase-config.js"></script>
   <script src="firebase-auth.js"></script>
+  <script src="site-extras.js"></script>
 </body>
 </html>

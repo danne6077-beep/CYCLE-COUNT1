@@ -16,7 +16,12 @@ function createAnnouncement(item){
   date.className='announcement-date';
   const createdAt=item.createdAt||item.created_at;
   date.dateTime=createdAt?.toDate?.()?.toISOString()||String(createdAt||'');
-  date.textContent=formatAnnouncementDate(createdAt);
+  date.textContent=`Published ${formatAnnouncementDate(createdAt)}`;
+  const updatedAt=item.updatedAt||item.updated_at||createdAt;
+  const updated=document.createElement('time');
+  updated.className='announcement-updated';
+  updated.dateTime=updatedAt?.toDate?.()?.toISOString()||String(updatedAt||'');
+  updated.textContent=`Last updated ${formatAnnouncementDate(updatedAt)}`;
   const content=document.createElement('div');
   content.className='announcement-content';
   const title=document.createElement('h3');
@@ -26,7 +31,7 @@ function createAnnouncement(item){
   author.textContent=String(item.authorName||item.author||'FUJI Administrator');
   const message=document.createElement('p');
   message.textContent=String(item.message||'');
-  content.append(title,author,message);
+  content.append(title,author,message,updated);
   article.append(date,content);
   return article;
 }
