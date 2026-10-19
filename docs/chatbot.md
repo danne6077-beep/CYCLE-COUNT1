@@ -54,6 +54,20 @@ The chat unit suite checks 160 intent utterances, 42 labeled language examples (
 
 ## Known limitations
 
+## Performance (emulated, not physical)
+
+Command: `node scripts/shopper-perf-check.cjs`, against the production build at localhost:4184, 220 golden planner fixtures per run. CDP page CPU throttling is requested; equal worker slowdown is **not independently confirmed**. This is not a physical Android benchmark.
+
+| Requested CPU rate | Cold start ms | Warm start ms | p50 ms | p95 ms |
+| --- | --- | --- | --- | --- |
+| 1 | 813.5 | 183.1 | 0.3 | 1.4 |
+| 4 | 1012.1 | 197.6 | 0.3 | 1.6 |
+| 6 | 1153.7 | 191.1 | 0.3 | 1.5 |
+
+The requested 4x run reports p95 below 150ms. Heap is **not measured** because performance.memory is unavailable in the worker. Postings are persisted by snapshot version and reused, with rebuild on cache failure. Main-thread long tasks are checked in the final UI harness. Playbooks total 14,282 gzip bytes at this phase, below 60 KiB.
+
+Physical Android steps (**not performed**; no physical phone connected): record model, OS, browser and battery state; load once on Wi-Fi; clear only the chat-postings key for a cold run; use Chrome remote debugging to collect worker startup and the 220 fixture latencies without CPU emulation; repeat warm, then airplane mode and offline reload; inspect keyboard/input, memory, thermal behavior and battery over a 15-minute session. Export JSON traces and label them with the device. Do not infer physical performance from desktop emulation.
+
 - This is a deterministic Hypermart shopping assistant, not a general-purpose language model. Unusual phrasing may need a shorter name, SKU or a suggested question. Voice and the optional large on-device model are omitted to keep all question processing offline and lightweight.
 - Source prices have no effective date and may be inaccurate. The visible warning asks shoppers to confirm shelf/cashier prices. Source anomalies such as SKU 2028 at ₱0.21 are retained, not “corrected” by guesses.
 - Live inventory, aisle locations, current promotions, dietary labels and verified brand/net-size metadata are absent. A listed record does not establish stock. No current promo or aisle is invented.

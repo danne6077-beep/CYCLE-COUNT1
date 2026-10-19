@@ -1,5 +1,6 @@
 {
-  "shellVersion": "75a5e92aad12",
+  "playbookGzipBytes": 14282,
+  "shellVersion": "ba61fcb3e43e",
   "priceAnomalies": {
     "flagged": 1611,
     "nonpositiveOrMissing": 0,
@@ -7,10 +8,10 @@
     "categoryPrice": 1001,
     "unitPrice": 693
   },
-  "initialJavaScriptGzipBytes": 45168,
-  "chatWorkerGzipBytes": 14446,
-  "chatSnapshotGzipBytes": 505097,
-  "chatVersion": "76ab29cde25c980329f8",
+  "initialJavaScriptGzipBytes": 45911,
+  "chatWorkerGzipBytes": 19401,
+  "chatSnapshotGzipBytes": 505129,
+  "chatVersion": "c321c263705279dfb989",
   "scannerLazyGzipBytes": 116532,
   "catalogFiles": 136,
   "itemCount": 14076

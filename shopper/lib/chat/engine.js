@@ -41,10 +41,12 @@ export class ChatEngine{
   this.aliases=aliases;this.config=config;this.focus={};this.turns=[];
   this.rules=Object.entries(aliases).flatMap(([key,values])=>values.map(value=>({key,phrase:fold(value)}))).sort((a,b)=>b.phrase.length-a.phrase.length);
   this.products=products.map(normalizeProduct);this.byId=new Map(this.products.map(p=>[p.id,p]));this.postings=new Map();
-  for(const p of this.products){let extra=[];for(const rule of this.rules)if((' '+p.searchText+' ').includes(' '+rule.phrase+' '))extra.push(rule.key);p.tokens=[...new Set((p.searchText+' '+extra.join(' ')).split(' ').map(stem))];for(const token of p.tokens){if(!this.postings.has(token))this.postings.set(token,[]);this.postings.get(token).push(p.id);}}
+  if(config.prebuilt){this.postings=new Map(config.prebuilt.postings);for(const [id,tokens] of config.prebuilt.tokens){const p=this.byId.get(id);if(p)p.tokens=tokens;}}
+  else for(const p of this.products){let extra=[];for(const rule of this.rules)if((' '+p.searchText+' ').includes(' '+rule.phrase+' '))extra.push(rule.key);p.tokens=[...new Set((p.searchText+' '+extra.join(' ')).split(' ').map(stem))];for(const token of p.tokens){if(!this.postings.has(token))this.postings.set(token,[]);this.postings.get(token).push(p.id);}}
   this.planner=new Planner(this,config.playbooks||[]);
-  this.vocabulary=[...new Set([...Object.values(aliases).flat().map(fold),...this.postings.keys()])].filter(t=>t.length>=4&&!t.includes(' '));
+  this.vocabulary=config.prebuilt?.vocabulary||[...new Set([...Object.values(aliases).flat().map(fold),...this.postings.keys()])].filter(t=>t.length>=4&&!t.includes(' '));
  }
+ exportIndex(){return {postings:[...this.postings],tokens:this.products.map(p=>[p.id,p.tokens]),vocabulary:this.vocabulary};}
  canonical(text){let n=' '+fold(text)+' ';for(const {phrase,key} of this.rules)n=n.replace(new RegExp('(^| )'+escapeRE(phrase)+'(?= |$)','g'),'$1'+key+' ');return n.trim().replace(/\s+/g,' ');}
  terms(text){const numeric=/^\d+$/.test(fold(text))||/\b(sku|barcode|code)\b/.test(text);return this.canonical(text).split(' ').filter(t=>!stop.has(t)&&(!/^\d+(?:\.\d+)?(?:kg|kilo|g|ml|l|pcs?|s)?$/.test(t)||numeric&&/^\d+$/.test(t))&&!/^₱/.test(t)&&!['sino','who','new','ngayon'].includes(t)).map(stem);}
  search(text,{lastQuery=false}={}){
