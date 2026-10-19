@@ -211,7 +211,7 @@
   }
   ['click','change','input','submit','beforeinput'].forEach(type=>document.addEventListener(type,guardAdminAction,true));
   const adminOnlySelectors=[
-    '#settingsBtn','#resetBtn','#chooseFile','#fileInput','#sampleBtn','#reuploadBtn','#addItemBtn','.edit-item','.delete-item',
+    '#settingsBtn','#resetBtn','#chooseFile','#fileInput','#sampleBtn','#reuploadBtn','#addItemBtn','#startPhysicalCount','#startAnotherCount','#countEntryRows input','#countEntryRows select','#countEntryRows button','#countTolerance','#completeCountSession','.edit-item','.delete-item',
     '#configurePanel input','#configurePanel select','#masterlistDropzone','#masterlistFile','#shelfAddRow','#shelfFileInput',
     '.shelf-upload','#shelfSelectAll','#shelfSelectNone','#shelfBulkPromo','#shelfApplyBulkPromo','.shelf-edit-input','.shelf-qty-input',
     '[data-shelf-select]','#masterfileUpload','#branchLocatorUpload','#clearBranchLocatorOverrides','#hotlistResults input','#saveShiftData','#downloadBackupBtn','#restoreBackupInput',

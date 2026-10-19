@@ -1,12 +1,12 @@
 const CACHE = 'fuji-shell-v1';
 const SHELL = [
   '/', '/index.html', '/404.html', '/manifest.webmanifest', '/logo.jpg', '/tokens.css',
-  '/styles.css', '/app-shell.css', '/count-sheet.css', '/count-sheet-reference.css',
+  '/styles.css', '/app-shell.css', '/count-entry.css', '/count-sheet.css', '/count-sheet-reference.css',
   '/print.css', '/print-tags.css', '/shelftag.css', '/home-dashboard.css', '/auth.css',
   '/settings-hub.css', '/cigars.css', '/announcements.css', '/masterlist.css', '/site-extras.css', '/about-us.css', '/redesign.css',
-  '/safe-text-utils.js', '/count-session-utils.js', '/count-sheet-import-utils.js',
+  '/safe-text-utils.js', '/count-session-utils.js', '/count-entry-utils.js', '/count-sheet-import-utils.js',
   '/count-sheet-filter-utils.js', '/cigar-monitor-utils.js', '/cigar-expiry-utils.js',
-  '/app.js', '/firebase-config.js', '/firebase-auth.js', '/app-shell.js', '/site-extras.js',
+  '/app.js', '/count-entry.js', '/firebase-config.js', '/firebase-auth.js', '/app-shell.js', '/site-extras.js',
   '/print-controller.js', '/product-lookup.js', '/shelftag.js', '/cigar-monitor.js',
   '/cigar-expiry.js', '/masterlist.js', '/announcements.js', '/layout-persistence.js'
 ];

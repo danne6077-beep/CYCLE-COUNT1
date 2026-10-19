@@ -21,8 +21,11 @@ function openLocalCycleDatabase(){
   if(!('indexedDB' in window))return Promise.reject(new Error('IndexedDB is unavailable'));
   if(!localCycleDatabasePromise){
     localCycleDatabasePromise=new Promise((resolve,reject)=>{
-      const request=indexedDB.open(localCycleDatabaseName,1);
-      request.onupgradeneeded=()=>{if(!request.result.objectStoreNames.contains('state'))request.result.createObjectStore('state')};
+      const request=indexedDB.open(localCycleDatabaseName,2);
+      request.onupgradeneeded=()=>{
+        if(!request.result.objectStoreNames.contains('state'))request.result.createObjectStore('state');
+        if(!request.result.objectStoreNames.contains('countSessions'))request.result.createObjectStore('countSessions',{keyPath:'id'});
+      };
       request.onsuccess=()=>resolve(request.result);
       request.onerror=()=>reject(request.error||new Error('Could not open local database'));
       request.onblocked=()=>reject(new Error('Local database upgrade is blocked'));
@@ -46,6 +49,26 @@ function readIndexedLocalInventory(){
     request.onerror=()=>reject(request.error||new Error('Could not read saved inventory'));
   }));
 }
+function readIndexedCountSessions(){
+  return openLocalCycleDatabase().then(database=>new Promise((resolve,reject)=>{
+    const store=database.transaction('countSessions','readonly').objectStore('countSessions');
+    const request=store.getAll();request.onsuccess=()=>resolve(request.result||[]);request.onerror=()=>reject(request.error||new Error('Could not read count sessions'));
+  }));
+}
+function writeIndexedCountSession(session){
+  return openLocalCycleDatabase().then(database=>new Promise((resolve,reject)=>{
+    const transaction=database.transaction('countSessions','readwrite');transaction.objectStore('countSessions').put(session);
+    transaction.oncomplete=()=>resolve(session);transaction.onerror=()=>reject(transaction.error||new Error('Could not save count session'));transaction.onabort=()=>reject(transaction.error||new Error('Count session save was interrupted'));
+  }));
+}
+function replaceIndexedCountSessions(sessions){
+  if(!Array.isArray(sessions))return Promise.reject(new Error('Count session backup is invalid.'));
+  return openLocalCycleDatabase().then(database=>new Promise((resolve,reject)=>{
+    const transaction=database.transaction('countSessions','readwrite'),store=transaction.objectStore('countSessions');store.clear();sessions.forEach(session=>{if(session&&typeof session.id==='string'&&Array.isArray(session.entries))store.put(session)});
+    transaction.oncomplete=()=>resolve();transaction.onerror=()=>reject(transaction.error||new Error('Could not restore count sessions'));transaction.onabort=()=>reject(transaction.error||new Error('Count session restore was interrupted'));
+  }));
+}
+window.fujiCountStorage={readAll:readIndexedCountSessions,write:writeIndexedCountSession,replaceAll:replaceIndexedCountSessions};
 function readLocalCycleHistory(){try{const history=JSON.parse(localStorage.getItem(localCycleHistoryKey)||'[]');return Array.isArray(history)?history:[]}catch(error){return []}}
 function recordLocalHistory(action,details=''){
   const history=readLocalCycleHistory();
@@ -70,7 +93,7 @@ function persistLocalCycleData(action,details=''){
 }
 const panels={1:$('importPanel'),2:$('dataPanel'),3:$('configurePanel')};
 function toast(message){const el=$('toast');el.textContent=message;el.classList.add('show');clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>el.classList.remove('show'),2600)}
-function showStep(step){currentStep=step;Object.entries(panels).forEach(([key,panel])=>{panel.hidden=Number(key)!==step});$('countSheetPanel').hidden=true;document.querySelectorAll('.step').forEach(el=>{const n=Number(el.dataset.step);el.classList.toggle('active',n===step);el.classList.toggle('done',n<step)});if(step===3&&typeof refreshLayoutPreview==='function')refreshLayoutPreview();window.scrollTo({top:0,behavior:'smooth'})}
+function showStep(step){currentStep=step;Object.entries(panels).forEach(([key,panel])=>{panel.hidden=Number(key)!==step});$('countSheetPanel').hidden=true;if($('countEntryPanel'))$('countEntryPanel').hidden=true;document.querySelectorAll('.step').forEach(el=>{const n=Number(el.dataset.step);el.classList.toggle('active',n===step);el.classList.toggle('done',n<step)});if(step===3&&typeof refreshLayoutPreview==='function')refreshLayoutPreview();window.scrollTo({top:0,behavior:'smooth'})}
 const inventoryPageSize=100;
 let inventoryPage=1;
 let inventoryViewCache={key:'',indexes:[]};
@@ -294,6 +317,7 @@ async function parseInventorySheet(worksheet,sheetName,sheetIndex){
       sku:readField('sku'),
       barcode:readField('barcode'),
       description:readField('description'),
+      expectedQty:readField('expectedQty'),
       _sourceRow:row+1,
       _sourceHeaders:sourceHeaders,
       _sourceValues:Array.from({length:range.e.c-range.s.c+1},(_,index)=>readWorksheetCell(worksheet,row,range.s.c+index))
@@ -308,7 +332,7 @@ async function parseInventorySheet(worksheet,sheetName,sheetIndex){
 }
 
 let importInProgress=false;
-const importFieldAliases={supplier:['supplier','supplier name','vendor','vendor name','brand','principal'],locator:['locator','locator code','location','bin','bin location','selling locator'],sku:['sku','sku no','sku number','item code','item no','item number','product code'],barcode:['upc','upc code','barcode','barcode number','ean','gtin'],description:['description','item description','product description','product name','item name','name']};
+const importFieldAliases={supplier:['supplier','supplier name','vendor','vendor name','brand','principal'],locator:['locator','locator code','location','bin','bin location','selling locator'],sku:['sku','sku no','sku number','item code','item no','item number','product code'],barcode:['upc','upc code','barcode','barcode number','ean','gtin'],description:['description','item description','product description','product name','item name','name'],expectedQty:['expected qty','expected quantity','on hand','on hand qty','quantity','qty','stock on hand','book stock']};
 function showColumnMapping(rows,filename){
   return new Promise(resolve=>{
     let dialog=document.getElementById('importMappingDialog');
@@ -318,7 +342,7 @@ function showColumnMapping(rows,filename){
       document.body.append(dialog);
     }
     const headers=[...new Set(rows.flatMap(row=>row._sourceHeaders||[]))];
-    const fields=[['supplier','Supplier'],['locator','Locator'],['sku','SKU'],['barcode','UPC / Barcode'],['description','Description']];
+    const fields=[['supplier','Supplier'],['locator','Locator'],['sku','SKU'],['barcode','UPC / Barcode'],['description','Description'],['expectedQty','Expected quantity · optional']];
     const container=dialog.querySelector('.import-mapping-fields');container.replaceChildren();
     fields.forEach(([field,label])=>{
       const wrapper=document.createElement('label');wrapper.textContent=label;
@@ -338,7 +362,7 @@ function showColumnMapping(rows,filename){
       const mapping=Object.fromEntries([...container.querySelectorAll('select')].map(select=>[select.dataset.importField,select.value]));
       const mapped=rows.map(row=>{
         const read=field=>{const header=mapping[field];if(!header)return row[field]||'';const index=(row._sourceHeaders||[]).indexOf(header);return index<0?'':String(row._sourceValues?.[index]??'').trim()};
-        return {...row,supplier:read('supplier')||'Unassigned Supplier',locator:read('locator'),sku:read('sku'),barcode:read('barcode'),description:read('description')};
+        return {...row,supplier:read('supplier')||'Unassigned Supplier',locator:read('locator'),sku:read('sku'),barcode:read('barcode'),description:read('description'),expectedQty:read('expectedQty')};
       });
       dialog.returnValue='continue';dialog.close();cleanup();resolve(mapped);
     };
@@ -512,12 +536,14 @@ function renderLocalHistory(){
 async function exportLocalBackup(){
   let inventory={...readLocalCycleData(),items};
   try{inventory=await readIndexedLocalInventory()||inventory}catch(error){console.warn('Could not read inventory for backup:',error)}
+  let countSessions=[];try{countSessions=await readIndexedCountSessions()}catch(error){console.warn('Could not read count sessions for backup:',error)}
   const backup={
     version:1,
     exportedAt:new Date().toISOString(),
     inventory,
     activity:readLocalCycleHistory(),
-    layout:(()=>{try{return JSON.parse(localStorage.getItem('danne-lozana-count-layout')||'{}')}catch(error){return {}}})()
+    layout:(()=>{try{return JSON.parse(localStorage.getItem('danne-lozana-count-layout')||'{}')}catch(error){return {}}})(),
+    countSessions
   };
   const url=URL.createObjectURL(new Blob([JSON.stringify(backup,null,2)],{type:'application/json'}));
   const link=document.createElement('a');
@@ -701,8 +727,9 @@ $('modalBackdrop').onclick=event=>{if(event.target===$('modalBackdrop'))$('modal
 $('saveSettings').onclick=saveWorkspaceSettings;
 applyWorkspaceAppearance();
 
-$('downloadBackupBtn').addEventListener('click',()=>{
-  const backup={schemaVersion:1,createdAt:new Date().toISOString(),inventory:{items,store:$('storeField').value,date:$('dateField').value},settings:workspaceSettings};
+$('downloadBackupBtn').addEventListener('click',async()=>{
+  let countSessions=[];try{countSessions=await readIndexedCountSessions()}catch(error){toast('Could not include count sessions in the backup.');return}
+  const backup={schemaVersion:2,createdAt:new Date().toISOString(),inventory:{items,store:$('storeField').value,date:$('dateField').value},settings:workspaceSettings,countSessions};
   const url=URL.createObjectURL(new Blob([JSON.stringify(backup,null,2)],{type:'application/json'}));
   const link=document.createElement('a');
   link.href=url;
@@ -717,6 +744,8 @@ $('restoreBackupInput').addEventListener('change',async event=>{
     const backup=JSON.parse(await file.text());
     const inventory=backup.inventory||backup;
     if(!Array.isArray(inventory.items))throw new Error('This file does not contain a valid inventory backup.');
+    if((items.length||await readIndexedCountSessions().then(sessions=>sessions.some(session=>session.status==='open')).catch(()=>false))&&!await (window.fujiConfirm?.('Restoring this backup replaces the current inventory. Save a backup first if you may need these data.','Replace local workspace data')??Promise.resolve(window.confirm('Restoring this backup replaces the current inventory. Continue?'))))return;
+    if(Array.isArray(backup.countSessions))await replaceIndexedCountSessions(backup.countSessions);
     $('storeField').value=inventory.store||'';
     $('dateField').value=inventory.date||$('dateField').value;
     if(backup.settings&&typeof backup.settings==='object'){
@@ -733,6 +762,7 @@ $('restoreBackupInput').addEventListener('change',async event=>{
       applyWorkspaceAppearance();
     }
     loadItems(inventory.items,file.name);
+    document.dispatchEvent(new CustomEvent('count-sessions-updated'));
     event.target.value='';
     $('modalBackdrop').hidden=true;
     toast('Backup restored');

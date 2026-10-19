@@ -72,13 +72,12 @@
     try { localStorage.setItem(stateKey(), isCollapsed ? '1' : '0'); } catch {}
   });
   const setDrawer = open => { shell.classList.toggle('sidebar-open', open); backdrop.hidden = !open; };
-  let settingsReturnPanel = null;
+  let settingsReturnPanels = [];
   sidebar.querySelectorAll('button').forEach(button => button.addEventListener('click', () => {
     if (settingsPage && !settingsPage.hidden && button !== settings) {
       settingsPage.hidden = true;
-      const moduleNavigation = ['homeNav','countSheetNav','cigarsNav','shelfTagNav','productLookupNav','masterlistNav','announcementsNav','hotlistNav','creditsBtn'].includes(button.id);
-      if (!moduleNavigation && settingsReturnPanel) settingsReturnPanel.hidden = false;
-      settingsReturnPanel = null;
+      settingsReturnPanels.forEach(panel=>panel.hidden=false);
+      settingsReturnPanels=[];
     }
     if (matchMedia('(max-width: 899px)').matches && button !== collapse) setDrawer(false);
     setTimeout(() => updateHeading(), 0);
@@ -95,8 +94,8 @@
     main.prepend(settingsPage); settingsPage.append(settingsHub);
     settingsHub.classList.add('settings-page-layout'); settingsHub.setAttribute('role', 'region'); settingsHub.removeAttribute('aria-modal');
   }
-  function closeSettingsPage() { if (settingsPage) settingsPage.hidden = true; if (settingsReturnPanel) settingsReturnPanel.hidden = false; settingsReturnPanel = null; updateHeading(); }
-  settings?.addEventListener('click', event => { event.preventDefault(); $('modalBackdrop').hidden = true; settingsReturnPanel = [...main.children].find(section => section.matches?.('section') && !section.hidden) || null; if (settingsReturnPanel) settingsReturnPanel.hidden = true; settingsPage.hidden = false; document.querySelector('.settings-tab.active')?.focus(); updateHeading(); });
+  function closeSettingsPage() { if (settingsPage) settingsPage.hidden = true; settingsReturnPanels.forEach(panel=>panel.hidden=false); settingsReturnPanels=[]; updateHeading(); }
+  settings?.addEventListener('click', event => { event.preventDefault(); $('modalBackdrop').hidden = true; settingsReturnPanels = [...main.children].filter(section => section.matches?.('section') && !section.hidden); settingsReturnPanels.forEach(panel=>panel.hidden=true); settingsPage.hidden = false; document.querySelector('.settings-tab.active')?.focus(); updateHeading(); });
   $('closeModal')?.addEventListener('click', closeSettingsPage);
   $('saveSettings')?.addEventListener('click', closeSettingsPage);
   document.addEventListener('keydown', event => { if (event.key === 'Escape' && settingsPage && !settingsPage.hidden) { closeSettingsPage(); settings?.focus(); } });
@@ -124,12 +123,16 @@
     const pending = $('homePendingPrint'); const pendingDetail = $('homePendingPrintDetail');
     if (pending) pending.textContent = rows ? `Count sheet · ${rows.toLocaleString()} rows` : 'No count sheet prepared';
     if (pendingDetail) pendingDetail.textContent = rows ? ($('printSheetBtn')?.disabled ? 'Inventory loaded; continue through validation and layout.' : 'Ready for print preview and supplier review.') : 'Import an inventory file to start a count workflow.';
+    const countSummary=window.fujiGetCountSummary?.();
+    if($('homeCountProgress'))$('homeCountProgress').textContent=countSummary?`${countSummary.counted.toLocaleString()} / ${countSummary.total.toLocaleString()} counted`:rows?'Inventory ready':'No active session';
     const imports = Array.isArray(history) ? history.filter(item => item.action === 'Inventory imported') : [];
     if ($('homeRecentImports')) $('homeRecentImports').textContent = imports.length ? imports[0].details?.split(' · ')[0] || 'Recent workbook' : 'No recent imports';
     if ($('homeRecentImportsDetail')) $('homeRecentImportsDetail').textContent = imports.length ? `${imports.length} saved import${imports.length === 1 ? '' : 's'} · ${new Date(imports[0].time).toLocaleDateString()}` : 'Imports saved in this browser will appear here.';
     const storeName = $('storeField')?.value?.trim();
     if ($('homeOpenSessions')) $('homeOpenSessions').textContent = rows ? (storeName || 'Count session open') : (storeName ? storeName : 'No active session');
     if ($('homeOpenSessionsDetail')) $('homeOpenSessionsDetail').textContent = rows ? `${$('dateField')?.value || 'Date not set'} · ${rows.toLocaleString()} rows in this browser` : 'Store and date details are kept in this browser.';
+    if(countSummary&&$('homeOpenSessions'))$('homeOpenSessions').textContent=countSummary.recount?`${countSummary.recount} variance${countSummary.recount===1?'':'s'} need review`:countSummary.counted===countSummary.total?'Count ready to complete':`${countSummary.counted} of ${countSummary.total} counted`;
+    if(countSummary&&$('homeOpenSessionsDetail'))$('homeOpenSessionsDetail').textContent=`${storeName||'Unassigned store'} · ${$('dateField')?.value||'No date'} · saved on this device`;
     if (announcements && $('homeAnnouncements')) {
       $('homeAnnouncements').textContent = announcements.length ? `${announcements.length} update${announcements.length === 1 ? '' : 's'}` : 'No new announcements';
       $('homeAnnouncementsDetail').textContent = announcements.length ? `Latest: ${announcements[0].title || 'Workspace update'}` : 'Workspace notices from your administrator.';
@@ -139,6 +142,7 @@
   renderHomeOperations();
   document.addEventListener('announcements-updated', event => renderHomeOperations(event.detail?.announcements || []));
   document.addEventListener('authchange', () => renderHomeOperations());
+  document.addEventListener('count-session-updated', () => renderHomeOperations());
   document.querySelectorAll('#primaryNavigation button,[data-home-open="countSheetNav"]').forEach(button => button.addEventListener('click', () => setTimeout(renderHomeOperations, 50)));
   $('storeField')?.addEventListener('change', () => renderHomeOperations());
 
@@ -208,6 +212,7 @@
   const commands = [
     { title: 'Go to Home', terms: 'home dashboard navigate', run: () => $('homeNav')?.click() },
     { title: 'Go to Count Sheet', terms: 'count sheet navigate inventory', run: () => $('countSheetNav')?.click() },
+    { title: 'Start or resume physical count', terms: 'count entry variance expected counted session recount', run: () => { $('countSheetNav')?.click(); setTimeout(() => window.fujiOpenCountEntry?.(), 80); } },
     { title: 'Go to Shelf Tag', terms: 'shelf tag navigate price label', run: () => $('shelfTagNav')?.click() },
     { title: 'Go to Product Lookup', terms: 'product lookup navigate search sku', run: () => $('productLookupNav')?.click() },
     { title: 'Go to Masterlist', terms: 'masterlist navigate workbook', run: () => $('masterlistNav')?.click() },

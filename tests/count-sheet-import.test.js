@@ -56,12 +56,14 @@ test('imported rows safely default missing supplier, locator, barcode, and descr
 });
 
 test('column suggestions support alternate headings and explicit remapping', () => {
-  const rows=rowsFromMatrix([['Vendor','Bin','Product #','EAN code'],['Acme','SA-01','0007','4006381333931']]);
+  const rows=rowsFromMatrix([['Vendor','Bin','Product #','EAN code','On Hand Qty'],['Acme','SA-01','0007','4006381333931','12']]);
   const mapping=Import.suggestColumnMapping(rows);
   assert.equal(mapping.supplier,'Vendor');
   assert.equal(mapping.sku,'Product #');
+  assert.equal(mapping.expectedQty,'On Hand Qty');
   const mapped=Import.mapRowsWithColumns(rows,{...mapping,sku:'Product #'});
   assert.equal(mapped[0].sku,'0007');
+  assert.equal(mapped[0].expectedQty,'12');
   assert.equal(mapped[0]._sourceRow,2);
 });
 

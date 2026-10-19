@@ -4,6 +4,8 @@
 
 Choose an Excel (`.xlsx`, `.xls`) or CSV inventory file. The recommended columns are `SUPPLIER`, `LOCATOR`, `SKU`, `UPC`, and `DESCRIPTION`; common aliases such as Vendor, Bin, Product Code, Barcode, and Item Name are accepted. Keep SKU and UPC values as text so leading zeroes remain. Locators beginning with `SA-`, `BA-`, and `WH-` identify their corresponding stock areas. Review missing values, duplicate identifiers, and check-digit warnings before configuring the layout. The app keeps data in this browser unless you explicitly move it to another workflow.
 
+An optional `ON HAND`, `EXPECTED QTY`, or `QUANTITY` column becomes the expected quantity. After validation, choose **Start physical count**. Enter missing expected quantities and counted quantities as non-negative whole numbers. Press Enter in a counted field to move to the next item. Counts save in this browser's IndexedDB. Set the absolute unit tolerance for the session; the default is zero. Every edit records who changed the value and when. Give a variance a reason before approving it, or flag it for recount. Complete the session after every row has an expected and counted quantity and each out-of-tolerance variance is approved or recounted. Export a CSV or print the variance report from the session screen.
+
 ## Generate and print
 
 Choose supplier, department, or category groupings, then set paper size, orientation, margins, rows per page, and optional columns. Preview the sheet before printing. Browser print preview always uses light paper colors. The yellow PP shelf tag stock is 85 × 38 mm; white shelf tags use the regular price and barcode-first layout. Print a small sample first to confirm printer scaling.
@@ -18,7 +20,7 @@ Import the current cigarette inventory and daily monitoring counts. Expiry check
 
 ## Backup and restore
 
-Download a backup from Settings before clearing data or changing devices. Restore the JSON backup through the same Settings area. Restore replaces the matching workspace state in this browser; keep a separate copy of the backup file.
+Download a backup from Settings before clearing data or changing devices. Backups include the inventory, workspace preferences, and saved count sessions. Restore the JSON backup through the same Settings area. Restore replaces the matching workspace state in this browser; keep a separate copy of the backup file.
 
 ## Troubleshooting
 

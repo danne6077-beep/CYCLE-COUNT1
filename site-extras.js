@@ -58,7 +58,7 @@
     ['hotlistNav', 'Hotlist', 'milk liquor cigarettes shift inventory'],
     ['creditsBtn', 'About Fuji', 'about values team contact workflow notes careers']
   ];
-  const panelNavigation = { homePanel: 'homeNav', aboutPanel: 'creditsBtn', countSheetPanel: 'countSheetNav', cigarsPanel: 'cigarsNav', shelfTagPanel: 'shelfTagNav', productLookupPanel: 'productLookupNav', masterlistPanel: 'masterlistNav', announcementsPanel: 'announcementsNav', hotlistPanel: 'hotlistNav' };
+  const panelNavigation = { homePanel: 'homeNav', aboutPanel: 'creditsBtn', countSheetPanel: 'countSheetNav', countEntryPanel: 'countSheetNav', cigarsPanel: 'cigarsNav', shelfTagPanel: 'shelfTagNav', productLookupPanel: 'productLookupNav', masterlistPanel: 'masterlistNav', announcementsPanel: 'announcementsNav', hotlistPanel: 'hotlistNav' };
   const staticEntries = [...document.querySelectorAll('#mainContent h1,#mainContent h2,#mainContent h3,#mainContent h4,#mainContent summary')].map(node => {
     let panel = node; while (panel.parentElement && panel.parentElement !== $('mainContent')) panel = panel.parentElement;
     const navId = panelNavigation[panel?.id] || 'creditsBtn';

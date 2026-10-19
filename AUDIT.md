@@ -168,3 +168,15 @@ This branch implements the feasible local application work from Phases 2–7 and
 
 Do not describe the application as cross-device synchronized: inventory and activity remain local browser data. The static Vercel app can deploy independently, while Firebase and Ask FUJI online features need external environment setup.
 
+## Count-session follow-up (2026-10-19)
+
+The status table above is the earlier Phase 2–7 implementation checkpoint. Since then, the physical count workflow has been connected to imported inventory and local persistence:
+
+- CSV/XLSX import mapping recognizes optional expected quantity columns (including `ON HAND` and `QTY`). Count Entry snapshots imported rows and expected quantities into a separate IndexedDB session store, preserving the existing inventory store.
+- Operators can record counted quantities, variance reasons and notes, approve/recount variances, inspect an audit trail, export a formula-safe CSV, print a report, resume saved sessions, and complete only after required variances have been resolved.
+- Local backup export/restore includes count sessions. Sessions remain local to the browser; no cloud sync is claimed.
+- Regression evidence: JavaScript syntax check passed for 38 files; unit suite passed 34/34; static build passed; browser count flow passed real CSV import and expected-quantity mapping, variance review, audit, CSV export, completion, reload persistence, six responsive/theme screenshots, and zero page errors. Expanded visual regression passed 384 cases with no failures. Screenshots are under `qa/phase10/after/`.
+- Failure handling: a new count session reports local persistence errors before opening a session that was not saved.
+
+Remaining requirements are still open: Firebase emulator and live claim/rules verification; configured Vercel environment and hosted preview access; cloud inventory synchronization (not implemented); real-world AI provider verification; full accessibility/Lighthouse and keyboard-only signoff; physical print/PDF parity; barcode scanner validation; and large-device performance/virtualization. The Vercel preview is access-protected for the connected account, so the Ready deployment status does not constitute hosted visual verification. Production has not been changed.
+

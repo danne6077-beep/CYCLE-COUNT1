@@ -20,6 +20,8 @@ Offline device workspace has no password and stores inventory, preferences, and 
 
 The PWA caches the shell, local assets, and pinned public UI libraries. It does not cache authenticated API calls. Online Firebase sign-in and Ask FUJI require a network connection. Cloud inventory synchronization is not enabled; data remains device-local.
 
+Physical counts are saved as separate sessions in IndexedDB. Import inventory, choose **Start physical count**, then enter counted quantities and review variances. Expected quantities are optional import columns (for example `ON HAND` or `QTY`). Each count edit, variance decision, and completion is recorded in the session audit trail. Export a count CSV or include sessions in the Settings data backup before changing devices; sessions are not synced to Firebase.
+
 ## Vercel deployment
 
 `vercel.json` builds the static site into `dist/`, exposes `/api/chat`, and applies CSP, MIME, framing, and referrer headers. Vercel Preview deployments are created when the linked repository receives a non-production branch push. Production deploys from the project’s configured production branch; this repo cannot verify or change the Vercel project’s branch, plan, or environment configuration.

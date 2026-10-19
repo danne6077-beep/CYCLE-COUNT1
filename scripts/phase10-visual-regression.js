@@ -90,6 +90,12 @@ async function inspect(page, label, width, scale, theme) {
       const pageErrors = [];
       page.on('pageerror', error => pageErrors.push(error.message));
       await signIn(page,width,scale);
+      const visualSessionId=`visual-count-${width}-${String(scale).replace('.','p')}`;
+      await page.evaluate(async id=>{
+        const session=CountEntryUtils.createSession([{supplier:'Visual Supply',locator:'SA-A1',sku:'0012',barcode:'012345678905',description:'Count entry preview item',expectedQty:10}],{store:'Visual QA',date:'2026-10-19'},{id});
+        await fujiCountStorage.write(session);document.dispatchEvent(new CustomEvent('count-sessions-updated'));
+      },visualSessionId);
+      await page.waitForFunction(id=>[...document.querySelector('#countSessionSelect').options].some(option=>option.value===id),visualSessionId);
       for (const theme of ['light','dark']) {
         await page.evaluate(themeValue => {
           localStorage.setItem('fuji-color-theme-v1', themeValue);
@@ -108,6 +114,15 @@ async function inspect(page, label, width, scale, theme) {
             }
           }
         }
+        await page.evaluate(id=>window.fujiOpenCountEntry(id),visualSessionId);
+        await page.waitForFunction(()=>!document.querySelector('#countEntryPanel').hidden);
+        await page.waitForTimeout(40);
+        await inspect(page,'count-entry',width,scale,theme);
+        if ([360,768,1280,1366,1440,1920].includes(width)) {
+          const key=`${theme}-count-entry-${width}-${String(scale).replace('.','p')}`;
+          await page.screenshot({path:path.join(screenshotDir,`${key}.png`),fullPage:true});screenshotDone.add(key);
+        }
+        await page.locator('#backCountEntry').click();
         await navigate(page,'#settingsBtn',width);
         const settingsState = await page.evaluate(() => ({ visible:!document.querySelector('#settingsPage').hidden, backdrop:!document.querySelector('#modalBackdrop').hidden, visiblePanels:[...document.querySelectorAll('#mainContent > section:not([hidden])')].map(panel=>panel.id), columns:getComputedStyle(document.querySelector('.settings-hub')).gridTemplateColumns }));
         if (!settingsState.visible || settingsState.backdrop || settingsState.visiblePanels.length) fail(`settings ${width}px @${scale} ${theme}: page/backdrop state ${JSON.stringify(settingsState)}`);

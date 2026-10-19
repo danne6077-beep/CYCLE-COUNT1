@@ -53,7 +53,8 @@
     ccdNo:['ccd','ccd no','ccd number','ccdno'],
     departmentCode:['department code','dept code','department number','dept no'],
     department:['department','department name','dept name'],
-    category:['category','subdepartment','subdept name','classification']
+    category:['category','subdepartment','subdept name','classification'],
+    expectedQty:['expected qty','expected quantity','on hand','on hand qty','quantity','qty','stock on hand','book stock']
   };
 
   function normalizeHeader(value){
@@ -79,11 +80,12 @@
       ccdNo:read(row,'ccdNo'),
       departmentCode:read(row,'departmentCode'),
       department:read(row,'department'),
-      category:read(row,'category')||'Imported Items'
+      category:read(row,'category')||'Imported Items',
+      expectedQty:read(row,'expectedQty')
     }));
   }
 
-  const importFields=['supplier','locator','sku','barcode','description','category','department','departmentCode','ccdNo'];
+  const importFields=['supplier','locator','sku','barcode','description','category','department','departmentCode','ccdNo','expectedQty'];
   function suggestColumnMapping(rows){
     if(!Array.isArray(rows)||!rows.length)throw new Error('Import rows are required to suggest columns.');
     const headers=Object.keys(rows[0]);
@@ -119,6 +121,8 @@
     return rows.flatMap((row,index)=>{
       const issues=[];
       if(!String(row.sku||'').trim())issues.push({severity:'error',field:'sku',message:'SKU is missing.'});
+      const expected=String(row.expectedQty??'').trim();
+      if(expected&&(!Number.isSafeInteger(Number(expected))||Number(expected)<0))issues.push({severity:'error',field:'expectedQty',message:'Expected quantity must be a non-negative whole number.'});
       const check=upcCheckDigitValid(row.barcode);
       if(check===false)issues.push({severity:'warning',field:'barcode',message:'UPC/EAN check digit is invalid.'});
       if((skuRows.get(String(row.sku||'').trim().toLowerCase())||[]).length>1)issues.push({severity:'warning',field:'sku',message:'SKU appears more than once in this file.'});
