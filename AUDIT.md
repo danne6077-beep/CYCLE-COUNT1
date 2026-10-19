@@ -144,7 +144,18 @@ Format: **ID | Severity | File:line | Problem | Impact | Exact fix | Status / Fi
 
 ## Implementation progress (2026-10-19)
 
-This branch implements the feasible local application work from Phases 2–7 and the Phase 10 shell/design brief. Repository work is in progress; results are not production-verified until a Vercel preview is available.
+This branch implements the feasible local application work from Phases 2–7 and the Phase 10 shell/design brief. The Vercel Preview deployment reports Ready, but access protection prevented visual verification of the hosted URL from the connected account.
+
+| Checkpoint | Commit / result |
+|---|---|
+| Phase 0–1 audit baseline | `3381e51` |
+| Application and visual QA implementation | `96b41c1` |
+| Syntax check | Passed: 34 JavaScript files |
+| Unit tests | Passed: 29/29 |
+| Build | Passed: static `dist/` output and valid web manifest |
+| Browser layout regression | Passed: 336 cases; 300 after screenshots, zero failures; screenshots at `qa/phase10/before/` and `qa/phase10/after/` |
+| Vercel Preview | Deployment check reported Ready; branch preview at `https://fujisupersystem-git-upgrade-audit-ui-auth-ai-fuji-92d1.vercel.app/` is protected by team access |
+| Pull request | [#1](https://github.com/danne6077-beep/CYCLE-COUNT1/pull/1) |
 
 | Phase / area | Current result | Remaining verification |
 |---|---|---|
