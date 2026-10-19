@@ -9,6 +9,8 @@ qa/phase10/screenshots/
 .task/
 shopper/dist/
 shopper/vendor/
+shopper/chat-data/catalog.json
+shopper/chat-data/config.json
 qa/shopper/
 shopper/.npmrc
 .toolchains/

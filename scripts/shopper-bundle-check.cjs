@@ -13,7 +13,7 @@ let browser,page;
   assert.equal(response.status(),200);
   assert.match(await page.title(),/FUJI.*Grocery Tracker/,'Expected the shopper app; a protected preview may require Vercel sign-in.');
   await page.getByRole('heading',{name:'Welcome to a better basket.'}).waitFor({timeout:60000});
-  assert.ok(await page.getByText('Prices may not always be accurate. Estimate only. Final prices are confirmed at the cashier.',{exact:true}).isVisible());
+  assert.ok(await page.locator('#sheet').getByText('Prices may not always be accurate. Estimate only. Final prices are confirmed at the cashier.',{exact:true}).isVisible());
   const roundtrip=await page.evaluate(async()=>{
     const [{toDataURL},{BrowserMultiFormatReader}]=await Promise.all([import('./vendor/qr.js'),import('./vendor/scanner.js')]);
     const expected='FUJI-BUNDLE-CHECK-12345';
