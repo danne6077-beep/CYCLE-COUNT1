@@ -2,6 +2,10 @@
 
 A mobile-first, device-local Hypermart shopping companion at `/shopper/`, alongside the existing FUJI Cycle Count System. It uses only the supplied workbook's **HYPERMART** sheet. GOMART and SET are excluded.
 
+The separate Vercel project **fuji-grocery-tracker** builds the `shopper/` directory and serves this app at its own web root. The Cycle Count Generator keeps its existing project. The two projects share this repository and master-data exports; the grocery deployment excludes the generator's pages. `shopper/vercel.json`, relative manifest paths and service-worker scope support the standalone origin. The older `/shopper/` preview remains a development compatibility route.
+
+The visual direction uses the supplied Scrnshts reference: dark-first editorial layout, free self-hosted Inter, rounded illustrated category cards and room around search/filter controls. Illustrations are original and are labeled as category artwork. Mobile and desktop have matching light and dark themes.
+
 **Prices may not always be accurate. Estimate only. Final prices are confirmed at the cashier.**
 
 ## What the data really contains

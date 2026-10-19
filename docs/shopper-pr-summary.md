@@ -9,3 +9,9 @@ Android uses Compose Material 3, MVVM/Repository, Hilt, Room, DataStore, Navigat
 Web validation includes repository tests, syntax/type checks, production build, mobile shopping flow, offline lookup, scanner/QR round-trip, fixture-only savings and Firestore emulator isolation checks. Android validation and downloadable artifacts are produced by `.github/workflows/android.yml`; see `shopper-validation.md` for the final actual results.
 
 The [Vercel website](https://fujisupersystem-git-codex-fuji-shopper-hypermart-fuji-92d1.vercel.app/shopper/) remains the **protected review preview selected by the user**, linked to [PR #2](https://github.com/danne6077-beep/CYCLE-COUNT1/pull/2). No production merge or paid hosting upgrade is performed.
+
+The user subsequently requested a separate grocery website. Vercel project **fuji-grocery-tracker** now uses root directory `shopper`, sharing this repository's master files while excluding the Cycle Count Generator from its deployed pages. The redesign uses the supplied Scrnshts visual reference, original illustrated cards and self-hosted Inter.
+
+![FUJI gallery design](images/shopper-desktop-gallery.png)
+![FUJI mobile light](images/shopper-mobile-light.png)
+![FUJI mobile dark](images/shopper-mobile-dark.png)
