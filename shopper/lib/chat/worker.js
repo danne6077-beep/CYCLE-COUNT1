@@ -16,6 +16,6 @@ async function initialize(){
 }
 self.onmessage=async event=>{
  const {id,type,...payload}=event.data;
- try{const bot=await initialize();if(type==='init'){if(payload.context)bot.restore(payload.context);self.postMessage({id,ready:true,count:bot.products.length});}else if(type==='query'){const started=performance.now(),response=bot.respond(payload.question,payload.options);self.postMessage({id,response,elapsedMs:performance.now()-started});}}
+ try{const bot=await initialize();if(type==='init'){if(payload.context)bot.restore(payload.context);self.postMessage({id,ready:true,count:bot.products.length,enableJulian:bot.config.enableJulian!==false});}else if(type==='query'){const started=performance.now(),response=bot.respond(payload.question,payload.options);self.postMessage({id,response,elapsedMs:performance.now()-started});}}
  catch(error){self.postMessage({id,error:error.message||'Offline assistant could not start.'});}
 };

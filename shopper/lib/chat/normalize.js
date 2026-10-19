@@ -24,7 +24,7 @@ const units={kg:['g',1000],kilo:['g',1000],kilos:['g',1000],kilogram:['g',1000],
 export function parseSize(raw,{fromName=false}={}){
  const text=String(raw??'').toLowerCase().replace(/½/g,'1/2').replace(/×/g,'x').trim();if(!text)return null;
  if(/\bdozen\b|\bdosena\b/.test(text))return {value:12,unit:'pc',baseValue:12,baseUnit:'pc',label:'12 pc',source:'name',comparable:true};
- const matches=[...text.matchAll(/(\d+(?:\.\d+)?(?:\/\d+)?)\s*(kilograms?|kilos?|kg|grams?|g|milliliters?|liters?|litres?|ml|l|pieces?|pcs?|s)\b/g)];
+ const matches=[...text.matchAll(/(\d+(?:\.\d+)?(?:\/\d+)?)\s*(kilograms?|kilos?|kg|grams?|g|milliliters?|liters?|litres?|ml|l|pieces?|pcs?|s)(?=x\d|\b)/g)];
  if(matches.length!==1){const count=text.match(/(?:pack of\s*|^x\s*)(\d+)\b/);return count?{value:+count[1],unit:'pc',baseValue:+count[1],baseUnit:'pc',label:count[1]+' pc',source:'name',comparable:true}:null;}
  const match=matches[0],fraction=match[1].split('/').map(Number);let value=fraction.length===2?fraction[0]/fraction[1]:fraction[0];const unit=units[match[2]],before=text.slice(0,match.index),after=text.slice(match.index+match[0].length);
  const multiplier=before.match(/(\d+)\s*x\s*$/),suffix=after.match(/^\s*x\s*(\d+)/);let ambiguous=false;
@@ -43,5 +43,5 @@ export const pesos=cents=>new Intl.NumberFormat('en-PH',{style:'currency',curren
 export function normalizeProduct(raw){
  const explicit=Number.isFinite(raw.size)&&raw.unit?parseSize(raw.size+' '+raw.unit):null,parsed=explicit||parseSize(raw.name,{fromName:true});
  const centavos=Number.isSafeInteger(raw.priceCentavos)&&raw.priceCentavos>=0?raw.priceCentavos:null;
- return {...raw,id:String(raw.sku),sku:String(raw.sku),priceCentavos:centavos,brand:raw.brand||null,aisle:raw.aisle||null,inStock:typeof raw.inStock==='boolean'?raw.inStock:null,parsedSize:parsed,sizeSource:explicit?'verified':parsed?'product name':'not listed',unitPrice:unitCost(centavos,parsed),searchText:fold([raw.sku,raw.name,raw.brand,raw.category,raw.subcategory].filter(Boolean).join(' '))};
+ return {...raw,id:String(raw.sku),sku:String(raw.sku),priceCentavos:centavos,brand:raw.brand||null,aisle:raw.aisle||null,inStock:typeof raw.inStock==='boolean'?raw.inStock:null,parsedSize:parsed,sizeSource:explicit?'verified':parsed?'product name':'not listed',unitPrice:unitCost(centavos,parsed),searchText:fold([raw.sku,raw.name,raw.brand,raw.category,raw.subcategory,...(raw.barcodes||[])].filter(Boolean).join(' '))};
 }
