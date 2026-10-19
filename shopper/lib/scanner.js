@@ -108,4 +108,4 @@ export async function decodePhoto(file){
     catch{throw new Error('No readable barcode found. Take a sharp, close photo with the whole barcode visible, or type the code below.');}
   }finally{URL.revokeObjectURL(url);}
 }
-export function feedback(){navigator.vibrate?.(60);try{const context=new (window.AudioContext||window.webkitAudioContext)(),oscillator=context.createOscillator(),gain=context.createGain();gain.gain.value=.035;oscillator.frequency.value=880;oscillator.connect(gain);gain.connect(context.destination);oscillator.start();oscillator.stop(context.currentTime+.08);oscillator.onended=()=>context.close();}catch{}}
+export function feedback({haptics=false,sound=false}={}){if(haptics)navigator.vibrate?.(60);if(!sound)return;try{const context=new (window.AudioContext||window.webkitAudioContext)(),oscillator=context.createOscillator(),gain=context.createGain();gain.gain.value=.035;oscillator.frequency.value=880;oscillator.connect(gain);gain.connect(context.destination);oscillator.start();oscillator.stop(context.currentTime+.08);oscillator.onended=()=>context.close();}catch{}}

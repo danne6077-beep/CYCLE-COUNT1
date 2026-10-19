@@ -110,5 +110,5 @@ export function createAssistant(hooks){
   if(button.hasAttribute('data-chat-clear')&&window.confirm('Clear chat history, saved plans, preferences, game scores, streaks and local feedback on this device? / Burahin ang usapan, plano, settings, laro at feedback?')){messages=[];context={};games?.reset();options={language:'auto',seasonal:false,effects:false,sound:false,haptics:false,tourDone:true};applyOptions();for(const key of ['chat-games','chat-feedback','chat-saved-plans','chat-unanswered'])await write(key,undefined);restoreHistory();if(worker){worker.terminate();worker=null;ready=false;}await persist();prepare().catch(()=>{});}
   if(button.hasAttribute('data-chat-retry')){if(worker){worker.terminate();worker=null;}ready=false;prepare().catch(()=>{});}
  });
- return {open,send,prepare,destroy(){worker?.terminate();worker=null;for(const job of pending.values())job.reject(new Error('Assistant closed.'));pending.clear();ready=false;}};
+ return {open,send,prepare,preferences:()=>({...options}),destroy(){worker?.terminate();worker=null;for(const job of pending.values())job.reject(new Error('Assistant closed.'));pending.clear();ready=false;}};
 }
