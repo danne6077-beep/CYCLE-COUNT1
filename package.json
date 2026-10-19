@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "test": "node --test",
-    "build:pages": "node scripts/build_pages.js"
+    "build:pages": "node scripts/build_pages.js",
+    "test:visual": "npm run build:pages && node scripts/phase10-visual-regression.js"
   },
   "repository": {
     "type": "git",

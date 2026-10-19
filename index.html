@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FUJI CYCLE COUNT SHEET GENERATOR</title>
   <meta name="description" content="FUJI CYCLE COUNT SHEET GENERATOR">
+  <link rel="icon" href="logo.jpg" type="image/jpeg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
@@ -21,6 +22,7 @@
   <link rel="stylesheet" href="auth.css">
   <link rel="stylesheet" href="about-us.css">
   <link rel="stylesheet" href="site-extras.css">
+  <link rel="stylesheet" href="app-shell.css">
   <link rel="stylesheet" href="print.css" media="print">
   <style>
     .rows-control{display:flex;align-items:center;gap:7px}.rows-control input{margin-top:5px}.rows-presets{display:flex;gap:4px;margin-top:6px}.rows-presets button{background:#fff;border:1px solid #d4ddd7;border-radius:5px;color:#536158;padding:3px 7px;font-size:10px}.rows-presets button:hover{border-color:var(--accent);color:var(--accent)}.supplier-filter{color:#647069;font-size:11px;text-align:left}.supplier-filter select{min-width:165px;margin-top:3px;padding:7px 9px;font-size:11px}
@@ -181,7 +183,7 @@
         <div class="login-visual-caption"><span>FUJI CYCLE COUNT SYSTEM</span><strong>Operations, counted on.</strong></div>
       </div>
       <div class="login-content">
-        <a class="login-brand" href="#" aria-label="Fuji Cycle Count System"><span class="login-brand-mark">F</span><span>FUJI CYCLE COUNT SYSTEM</span></a>
+        <a class="login-brand" href="#" aria-label="Fuji Cycle Count System"><img src="logo.jpg" alt="" width="40" height="40"><span>FUJI CYCLE COUNT SYSTEM</span></a>
         <div class="login-heading"><p class="login-eyebrow">OPERATIONS DESK</p><h1 id="loginTitle" tabindex="-1">Welcome back</h1><p>Sign in to continue to your inventory workspace.</p></div>
         <div class="login-mode-switch" role="tablist" aria-label="Login mode">
           <button class="login-mode-option is-active" type="button" role="tab" id="localLoginTab" data-login-mode="local" aria-selected="true">Local Machine Login</button>
@@ -220,7 +222,7 @@
     </nav>
     <nav class="utility-actions" id="utilityNavigation" aria-label="Tools and account">
       <button class="nav-button site-search-trigger" id="siteSearchTrigger" type="button" aria-label="Search the whole site" title="Search the whole site"><span aria-hidden="true">⌕</span><span>Search</span></button>
-      <button class="nav-button theme-toggle" id="themeToggle" type="button" aria-label="Switch to dark mode" aria-pressed="false"><span aria-hidden="true">◐</span><span>Theme</span></button>
+      <button class="nav-button theme-toggle" id="themeToggle" type="button" aria-label="Switch to dark mode" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v18a9 9 0 0 0 0-18Z"/></svg><span>Theme</span></button>
       <button class="nav-button" id="announcementsNav" type="button" title="Read announcements and updates"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11a8 8 0 0 1 16 0v5l2 2H2l2-2zM9 21h6"/></svg><span>Updates</span></button>
       <div hidden><button id="hotlistNav" type="button">Hotlist</button></div>
       <button class="nav-button" id="settingsBtn" type="button" title="Open settings"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19 13.5a7 7 0 0 0 0-3l2-1.5-2-3.5-2.4 1a7 7 0 0 0-2.6-1.5L13.5 2h-3L10 5a7 7 0 0 0-2.6 1.5L5 5.5l-2 3.5 2 1.5a7 7 0 0 0 0 3L3 15l2 3.5 2.4-1A7 7 0 0 0 10 19l.5 3h3l.5-3a7 7 0 0 0 2.6-1.5l2.4 1 2-3.5z" transform="translate(-1 -1)"/></svg><span>Settings</span></button>
@@ -242,6 +244,12 @@
         <div class="home-stat"><span class="home-stat-icon home-stat-icon-yellow" aria-hidden="true">▤</span><div><small>Count workflows</small><strong>Cycle count + shelf tags</strong></div></div>
         <div class="home-stat"><span class="home-stat-icon home-stat-icon-blue" aria-hidden="true">◷</span><div><small>Workspace updated</small><strong id="homeLastUpdated">Checking date</strong></div></div>
       </div>
+      <section class="home-operations-grid" aria-label="Inventory activity overview">
+        <article class="home-operation-card"><span class="home-operation-label">CURRENT COUNT</span><strong id="homePendingPrint">No count sheet prepared</strong><p id="homePendingPrintDetail">Import an inventory file to start a count workflow.</p><button type="button" data-home-open="countSheetNav">Open count sheet</button></article>
+        <article class="home-operation-card"><span class="home-operation-label">RECENT IMPORTS</span><strong id="homeRecentImports">No recent imports</strong><p id="homeRecentImportsDetail">Imports saved in this browser will appear here.</p></article>
+        <article class="home-operation-card"><span class="home-operation-label">OPEN SESSION</span><strong id="homeOpenSessions">No active session</strong><p id="homeOpenSessionsDetail">Store and date details are kept in this browser.</p></article>
+        <article class="home-operation-card"><span class="home-operation-label">ANNOUNCEMENTS</span><strong id="homeAnnouncements">Checking updates…</strong><p id="homeAnnouncementsDetail">Workspace notices from your administrator.</p><button type="button" data-home-open="announcementsNav">View updates</button></article>
+      </section>
       <div class="home-section-heading"><div><p class="home-eyebrow">QUICK ACCESS</p><h2>Choose a workflow</h2></div><span>01 / 07</span></div>
       <div class="home-feature-grid">
         <article class="home-feature home-feature-count"><div class="home-feature-top"><span class="home-feature-icon" aria-hidden="true">▦</span><span class="home-feature-index">01</span></div><h3>Count Sheet</h3><p>Import inventory, review SKU records, organize suppliers, and prepare physical count sheets.</p><button type="button" data-home-open="countSheetNav">Open count sheet <span aria-hidden="true">→</span></button></article>
@@ -870,5 +878,6 @@
   <script src="firebase-config.js"></script>
   <script src="firebase-auth.js"></script>
   <script src="site-extras.js"></script>
+  <script src="app-shell.js"></script>
 </body>
 </html>

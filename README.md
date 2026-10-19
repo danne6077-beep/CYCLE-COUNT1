@@ -45,3 +45,9 @@ Open Masterlist from the top navigation and upload a Pcount monitoring workbook.
 ## Cigarette Monitoring
 
 Open **Cigarette Monitor** and import the local monitoring workbook. Daily Monitoring and Expiry Lookup are separate tabs. Daily Monitoring reads the `SELLING` sheet in the browser, imports the product list and available daily entries, and lets you save or edit daily `BEG`, `W`, `SALES`, `JDA_S`, `ENDING`, `TRANS#`, `CS1`, `CS2`, `BAG`, and `FMCG` values. After saving a day, review its summary and use **Enter new day** to start the next date with beginning counts carried forward from the saved ending counts. Download the log as CSV for a portable backup. The workbook is not uploaded; products and monitoring entries are saved only in that browser profile.
+
+## Workspace shell and help
+
+The app uses a collapsible left sidebar with a mobile drawer below 900px, a compact page header, and light/dark themes. Sidebar collapse and theme preference are saved locally. Printing uses a light paper palette. Use the sidebar Help control for local, offline FAQ search; it does not call an AI provider or include inventory data. Feedback is saved as a draft in the current browser because this static deployment has no shared feedback service. The internal component sample is available at `/design/`.
+
+Run unit tests with `npm test`. Run the browser visual check with `npm run test:visual` after installing the Playwright package and a Chromium browser; it checks navigation, settings, local help, theme, responsive widths, and print visibility. The script can write review screenshots to `qa/phase10/screenshots/`, which the static-site build excludes.
