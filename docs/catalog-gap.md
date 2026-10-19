@@ -1,10 +1,14 @@
-# Hypermart catalog discovery
+# HYPERMART master and supplied item-list mapping
 
 Source: `ITEM MASTER AS OF 09-02-2026 1.xlsx`, **HYPERMART only**. GOMART and SET are excluded. Inspected 19 October 2026. The filename is a source label; its date order and price effective date are not confirmed.
 
 ## Critical finding
 
-**There is no selling-price column in this sheet.** No price, promotional price, or price-effective date can be truthfully published. The shopper catalog must represent prices as `null`, show **Price unavailable**, and allow shoppers to enter an observed shelf price that remains on their device. Unpriced lines must never silently count as zero. Price-based savings are disabled until staff supply validated selling prices and explicit net sizes/units.
+The master HYPERMART sheet has no selling-price column. The later user-supplied workbook, **list of inventory and price list.xlsx**, contains `Sku`, `Description`, `PRICE` in Sheet1, rows 1–14077. It defines the app's visible assortment and supplies its prices.
+
+An exact SKU lookup retains **14,026 master matches** and **50 source-only items**, for **14,076 visible products**. The unmatched rows keep their supplied descriptions/prices without invented classifications or barcodes. The original master contains 672,040 unique products; unlisted products are excluded from the shopper export.
+
+No effective price date is supplied. Preserve that unknown value, distinguish import time from price validity, and let shoppers record private shelf-price corrections. One fractional-centavo amount (SKU 2028, 0.209 pesos) rounds half up to 0.21 pesos and is recorded in `assortment-import-report.json`. Verified net sizes, comparison groups and current stock are still missing, so the app does not claim unit-price savings from this data.
 
 Always display: **Prices may not always be accurate. Estimate only. Final prices are confirmed at the cashier.**
 
@@ -23,7 +27,7 @@ Always display: **Prices may not always be accurate. Estimate only. Final prices
 | Category | PROD_LEVEL2_DESC (department: PROD_LEVEL1_DESC) | Preserve source classification. |
 | Subcategory | PROD_LEVEL4_DESC (group: PROD_LEVEL3_DESC) | Preserve source classification. |
 | Size + unit | No explicit net size; BUYING_UOM / SELLING_UOM are transaction units | A PCS sales unit does not establish net weight or pieces inside a pack. Add NET_SIZE, NET_UNIT, PIECES_PER_PACK. Description parsing is a review aid only. |
-| Selling price | Missing | Add SELLING_PRICE_PHP and PRICE_EFFECTIVE_DATE; exact decimal to integer centavos. |
+| Selling price | PRICE from the supplied item list | Join by exact SKU; decimal half-up rounding to integer centavos. Effective date remains unknown. |
 | Promo price / dates | Missing | Add PROMO_PRICE_PHP, PROMO_START, PROMO_END. Require complete valid range. |
 | House brand | Missing | Add HOUSE_BRAND; unknown is not false. |
 | Stock status | STATUS exists, semantics not verified | Preserve source status; do not equate A/I with live inventory. Add IN_STOCK as a verified boolean. |
@@ -39,7 +43,7 @@ Keep the shopper app under `/shopper` in the existing repository so the existing
 
 ## Minimal enrichment template
 
-Download `/shopper/templates/price-enrichment.csv`. Required for priced publication: PRODUCT_CODE, SELLING_PRICE_PHP, PRICE_EFFECTIVE_DATE. Required for savings: NET_SIZE, NET_UNIT, BRAND, COMPARISON_GROUP, IN_STOCK. Optional promotions and HOUSE_BRAND have explicit columns. Rows with invalid money, duplicate SKU overrides, incompatible units, invalid dates or ambiguous barcodes block priced publication. Missing enrichments remain visibly unknown in the reference catalog. The reference-only import is not a validated price publication.
+Download `/shopper/templates/price-enrichment.csv`. Required for priced publication: PRODUCT_CODE, SELLING_PRICE_PHP, PRICE_EFFECTIVE_DATE. Required for savings: NET_SIZE, NET_UNIT, BRAND, COMPARISON_GROUP, IN_STOCK. Optional promotions and HOUSE_BRAND have explicit columns. Rows with invalid money, duplicate SKU overrides, incompatible units, invalid dates or ambiguous barcodes block priced publication. Missing enrichments remain visibly unknown in the reference catalog. The supplied undated prices are estimates, not a validated current-price publication.
 
 ## Scale and provenance
 

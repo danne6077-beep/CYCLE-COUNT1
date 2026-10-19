@@ -15,6 +15,7 @@ let browser;
  await page.locator('#budget-input').fill('400');await page.getByRole('button',{name:'Let’s make a good shop'}).click();
  await page.locator('.product').first().waitFor();assert.equal(await page.locator('.product-price.unknown').count(),0);assert.match(await page.locator('.product').first().innerText(),/₱/);
  assert.equal(catalogRequests.some(url=>/\/search\.v\d+\./.test(url)),false,'The first usable screen must not wait for the full department search catalog.');
+ assert.equal(catalogRequests.some(url=>url.endsWith('/catalog-prices.json')),false,'The first screen must not wait for the full price overlay.');
  await page.locator('#toast .toast-inner').waitFor({state:'detached',timeout:7000});
  await page.screenshot({path:path.join(output,'mobile-light.png'),fullPage:false});
  await page.locator('#product-search').fill('rice');await page.locator('#result-count').filter({hasText:'matching products'}).waitFor({timeout:60000});

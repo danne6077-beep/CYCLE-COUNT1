@@ -14,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -33,7 +34,7 @@ import ph.fuji.grocery.R
             contentPadding = PaddingValues(16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
             item(span = { GridItemSpan(maxLineSpan) }) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    if (favoriteOnly) SectionHeading(R.string.favorites) else {
+                    if (favoriteOnly) SectionHeading(R.string.favorites) else if (filter.query.isBlank()) {
                         Text(stringResource(R.string.browse_heading), style = MaterialTheme.typography.headlineLarge)
                         Text(stringResource(R.string.browse_intro), style = MaterialTheme.typography.bodyMedium)
                     }
@@ -53,7 +54,7 @@ import ph.fuji.grocery.R
                         items(categories) { category -> FilterChip(selected = filter.category == category,
                             onClick = { vm.category(if (filter.category == category) "" else category) }, label = { Text(category) }, modifier = Modifier.heightIn(min = 48.dp)) }
                     }
-                    Text(stringResource(R.string.catalog_count, count), style = MaterialTheme.typography.labelLarge)
+                    Text(pluralStringResource(R.plurals.catalog_count, count, count), style = MaterialTheme.typography.labelLarge)
                     Text(stringResource(R.string.price_date), style = MaterialTheme.typography.bodySmall)
                     OutlinedButton(manual) { Icon(Icons.Rounded.Dialpad, null); Spacer(Modifier.width(8.dp)); Text(stringResource(R.string.manual_lookup)) }
                 }

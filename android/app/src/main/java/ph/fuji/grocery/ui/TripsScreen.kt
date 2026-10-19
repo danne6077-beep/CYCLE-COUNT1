@@ -10,6 +10,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.json.JSONArray
@@ -31,7 +32,7 @@ import java.time.format.DateTimeFormatter
                 Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(DateTimeFormatter.ofPattern("d MMM yyyy · h:mm a").withZone(ZoneId.systemDefault()).format(Instant.parse(trip.date)), style = MaterialTheme.typography.titleMedium)
                     Text(Money.format(trip.total), style = MaterialTheme.typography.headlineMedium)
-                    Text(stringResource(R.string.items_count, trip.count))
+                    Text(pluralStringResource(R.plurals.items_count, trip.count, trip.count))
                     val lines = remember(trip.linesJson) { JSONArray(trip.linesJson) }
                     for (index in 0 until lines.length()) {
                         val line = lines.getJSONObject(index)

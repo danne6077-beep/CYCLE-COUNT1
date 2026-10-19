@@ -1,0 +1,6 @@
+<lint>
+    <!-- Dependency upgrades are reviewed separately from correctness checks. Keep them visible as information; the tested toolchain is pinned for reproducibility. -->
+    <issue id="AndroidGradlePluginVersion" severity="informational" />
+    <issue id="GradleDependency" severity="informational" />
+    <issue id="NewerVersionAvailable" severity="informational" />
+</lint>

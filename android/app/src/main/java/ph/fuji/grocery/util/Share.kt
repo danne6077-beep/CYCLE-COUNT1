@@ -9,7 +9,7 @@ import ph.fuji.grocery.data.Trip
 import java.io.File
 
 fun shareText(context: Context, text: String) {
-    context.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).apply {
+    launchShare(context, Intent.createChooser(Intent(Intent.ACTION_SEND).apply {
         type = "text/plain"; putExtra(Intent.EXTRA_TEXT, text)
     }, context.getString(R.string.share)))
 }
@@ -38,8 +38,12 @@ fun shareTrip(context: Context, trip: Trip) {
 }
 fun shareFile(context: Context, file: File, mime: String) {
     val uri = FileProvider.getUriForFile(context, "${context.packageName}.files", file)
-    context.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).apply {
+    launchShare(context, Intent.createChooser(Intent(Intent.ACTION_SEND).apply {
         type = mime; putExtra(Intent.EXTRA_STREAM, uri); addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         clipData = android.content.ClipData.newRawUri(context.getString(R.string.share), uri)
     }, context.getString(R.string.share)))
+}
+private fun launchShare(context: Context, intent: Intent) {
+    try { context.startActivity(intent) }
+    catch (_: android.content.ActivityNotFoundException) { android.widget.Toast.makeText(context, R.string.share_error, android.widget.Toast.LENGTH_LONG).show() }
 }

@@ -2,6 +2,8 @@ package ph.fuji.grocery
 
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Rule
 import org.junit.Test
@@ -17,10 +19,12 @@ class ShopperFlowTest {
             rule.onNodeWithText("Next").performClick(); rule.waitForIdle()
             rule.onNodeWithText("Start shopping").performClick()
         }
+        rule.waitUntil(15000) { rule.onAllNodesWithText("Search product, SKU or category").fetchSemanticsNodes().isNotEmpty() }
         rule.onNodeWithText("Search product, SKU or category").performTextInput("486522")
         rule.waitUntil(15000) { rule.onAllNodesWithText("₱14.05").fetchSemanticsNodes().isNotEmpty() }
-        rule.onNodeWithText("₱14.05").assertIsDisplayed()
-        rule.onNodeWithText("Add", substring = false).performClick()
+        rule.onNodeWithText("₱14.05").performScrollTo().assertIsDisplayed()
+        screenshot("catalog-dark.png")
+        rule.onNodeWithText("Add", substring = false).performScrollTo().performClick()
         rule.onNodeWithText("Basket", substring = false).performClick()
         rule.onNodeWithText("Set a trip budget").performClick()
         rule.onNodeWithText("Amount in pesos").performTextInput("20")
@@ -31,11 +35,26 @@ class ShopperFlowTest {
         rule.onNodeWithText("Amount in pesos").performTextReplacement("15.01")
         rule.onNodeWithText("Save", substring = false).performClick()
         rule.onAllNodesWithText("₱30.02").onFirst().assertIsDisplayed()
+        screenshot("basket-dark.png")
         rule.onNodeWithText("Save finished trip").performScrollTo().performClick()
-        rule.onNodeWithText("Save finished trip").performClick()
+        rule.onAllNodesWithText("Save finished trip").onLast().performClick()
         rule.waitUntil(10000) { rule.onAllNodesWithText("Your next good shop starts here.").fetchSemanticsNodes().isNotEmpty() }
         rule.onNodeWithContentDescription("Past trips").performClick()
         rule.onNodeWithText("₱30.02", substring = false).assertIsDisplayed()
-        rule.onNodeWithText(rule.activity.getString(R.string.price_warning)).assertIsDisplayed()
+        rule.onAllNodesWithText(rule.activity.getString(R.string.price_warning)).onFirst().assertIsDisplayed()
+        screenshot("trip-dark.png")
+        rule.onNodeWithText("More", substring = false).performClick()
+        rule.onNodeWithText("Light", substring = false).performClick()
+        rule.onNodeWithText("Shop", substring = false).performClick()
+        rule.onNodeWithText("₱14.05").performScrollTo().assertIsDisplayed()
+        screenshot("catalog-light.png")
+    }
+    private fun screenshot(name: String) {
+        rule.waitForIdle()
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val directory = java.io.File(context.getExternalFilesDir(null), "qa").apply { mkdirs() }
+        java.io.File(directory, name).outputStream().use { output ->
+            rule.onRoot().captureToImage().asAndroidBitmap().compress(android.graphics.Bitmap.CompressFormat.PNG, 100, output)
+        }
     }
 }

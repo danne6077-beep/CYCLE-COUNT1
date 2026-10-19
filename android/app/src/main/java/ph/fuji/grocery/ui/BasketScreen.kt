@@ -10,6 +10,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ph.fuji.grocery.R
@@ -33,7 +36,8 @@ import ph.fuji.grocery.domain.Money
                 Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(stringResource(R.string.subtotal), style = MaterialTheme.typography.labelLarge)
                     Text(Money.format(total), style = MaterialTheme.typography.headlineLarge)
-                    Text(stringResource(R.string.items_count, lines.sumOf { it.quantity }))
+                    val count = lines.sumOf { it.quantity }
+                    Text(pluralStringResource(R.plurals.items_count, count, count))
                     if (budget > 0) {
                         LinearProgressIndicator(progress = { (total.toDouble() / budget).toFloat().coerceIn(0f, 1f) }, Modifier.fillMaxWidth(), color = if (state == 3) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary)
                         Text(stringResource(when (state) { 3 -> R.string.over_budget; 2 -> R.string.near_budget; else -> R.string.within_budget }))
@@ -53,7 +57,8 @@ import ph.fuji.grocery.domain.Money
                         Text(Money.format(line.price * line.quantity), style = MaterialTheme.typography.titleLarge)
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             IconButton({ vm.action { vm.repository.quantity(line, -1) } }) { Icon(Icons.Rounded.Remove, stringResource(R.string.decrease)) }
-                            Text(line.quantity.toString(), Modifier.widthIn(min = 24.dp))
+                            val quantityLabel = stringResource(R.string.quantity, line.quantity)
+                            Text(line.quantity.toString(), Modifier.widthIn(min = 24.dp).semantics { contentDescription = quantityLabel })
                             IconButton({ vm.action { vm.repository.quantity(line, 1) } }, enabled = line.quantity < 9999) { Icon(Icons.Rounded.Add, stringResource(R.string.increase)) }
                         }
                     }

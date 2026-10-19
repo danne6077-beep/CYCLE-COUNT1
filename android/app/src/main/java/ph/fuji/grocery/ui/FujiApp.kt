@@ -5,6 +5,8 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ListAlt
 import androidx.compose.material.icons.rounded.*
@@ -120,7 +122,7 @@ private val destinations = listOf(Destination("shop", R.string.shop, Icons.Round
     Column(Modifier.fillMaxSize().safeDrawingPadding().padding(24.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
         Text(stringResource(R.string.app_name), style = MaterialTheme.typography.titleLarge)
         HorizontalPager(pager, Modifier.weight(1f)) { page ->
-            Column(verticalArrangement = Arrangement.spacedBy(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 CategoryArt(listOf("STAPLE", "BEVERAGE", "FRESH")[page], Modifier.fillMaxWidth().height(230.dp))
                 Text(stringResource(titles[page]), style = MaterialTheme.typography.headlineLarge)
                 Text(stringResource(bodies[page]), style = MaterialTheme.typography.bodyLarge)

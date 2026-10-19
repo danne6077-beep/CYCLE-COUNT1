@@ -1,7 +1,7 @@
 package ph.fuji.grocery.ui
 
 import android.content.Intent
-import android.net.Uri
+import androidx.core.net.toUri
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
@@ -10,6 +10,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ph.fuji.grocery.BuildConfig
@@ -27,14 +29,16 @@ const val WEBSITE = "https://fujisupersystem-git-codex-fuji-shopper-hypermart-fu
             Card { Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(stringResource(R.string.appearance), style = MaterialTheme.typography.titleLarge)
                 listOf("system" to R.string.theme_system, "light" to R.string.theme_light, "dark" to R.string.theme_dark).forEach { (value, label) ->
+                    val themeLabel = stringResource(label)
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        RadioButton(preferences?.theme == value, { vm.action { vm.settings.theme(value) } })
+                        RadioButton(preferences?.theme == value, { vm.action { vm.settings.theme(value) } }, Modifier.semantics { contentDescription = themeLabel })
                         TextButton({ vm.action { vm.settings.theme(value) } }) { Text(stringResource(label)) }
                     }
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f)) { Text(stringResource(R.string.dynamic_color)); Text(stringResource(R.string.dynamic_hint), style = MaterialTheme.typography.bodySmall) }
-                    Switch(preferences?.dynamicColor == true, { vm.action { vm.settings.dynamic(it) } })
+                    val dynamicLabel = stringResource(R.string.dynamic_color)
+                    Switch(preferences?.dynamicColor == true, { vm.action { vm.settings.dynamic(it) } }, Modifier.semantics { contentDescription = dynamicLabel })
                 }
             } }
         }
@@ -48,7 +52,7 @@ const val WEBSITE = "https://fujisupersystem-git-codex-fuji-shopper-hypermart-fu
         }
         item { InfoCard(R.string.credits, R.string.credits_body) }
         item {
-            OutlinedButton({ runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(WEBSITE))) } }, Modifier.fillMaxWidth()) { Text(stringResource(R.string.website)) }
+            OutlinedButton({ runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, WEBSITE.toUri())) } }, Modifier.fillMaxWidth()) { Text(stringResource(R.string.website)) }
             Text(stringResource(R.string.website_note), style = MaterialTheme.typography.bodySmall)
         }
         item { Text(stringResource(R.string.version, BuildConfig.VERSION_NAME), style = MaterialTheme.typography.bodySmall) }

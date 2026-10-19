@@ -1,7 +1,6 @@
 <resources>
     <string name="app_name">FUJI Grocery Tracker</string>
     <string name="brand">FUJI</string>
-    <string name="tagline">Every peso, well spent.</string>
     <string name="offline_ready">Offline · on your device</string>
     <string name="price_warning">Prices may not always be accurate. Estimate only. Final prices are confirmed at the cashier.</string>
     <string name="price_date">Supplied price list · Price date unavailable</string>
@@ -20,10 +19,9 @@
     <string name="search">Search product, SKU or category</string>
     <string name="clear_search">Clear search</string>
     <string name="all">All</string>
-    <string name="categories">Categories</string>
     <string name="recent_searches">Recent searches</string>
     <string name="clear_recent">Clear recent searches</string>
-    <string name="catalog_count">%1$d items from your supplied list</string>
+    <plurals name="catalog_count"><item quantity="one">%1$d item from your supplied list</item><item quantity="other">%1$d items from your supplied list</item></plurals>
     <string name="catalog_note">Matched by SKU to HYPERMART. Live stock and verified pack sizes are unavailable.</string>
     <string name="browse_heading">A little planning.\nA better basket.</string>
     <string name="browse_intro">Find your essentials. Know your spend. Bring home a little peace of mind.</string>
@@ -87,7 +85,7 @@
     <string name="over_budget">Over budget</string>
     <string name="remaining">%1$s left</string>
     <string name="over_by">%1$s over budget</string>
-    <string name="items_count">%1$d items</string>
+    <plurals name="items_count"><item quantity="one">%1$d item</item><item quantity="other">%1$d items</item></plurals>
     <string name="quantity">Quantity %1$d</string>
     <string name="increase">Increase quantity</string>
     <string name="decrease">Decrease quantity or remove item</string>

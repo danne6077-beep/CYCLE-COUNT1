@@ -6,9 +6,11 @@ A mobile-first, device-local Hypermart shopping companion at `/shopper/`, alongs
 
 ## What the data really contains
 
-Read [the discovery report](../docs/catalog-gap.md) first. The source has **no selling prices**, no price-effective dates and no explicit net-size fields. Import output contains 672,040 unique products, 821,829 distinct barcode/internal-code strings and four ambiguous barcode strings. All catalog prices start as `null`. Vendor fields and other internal purchasing details are excluded from the shopper export. Source A/I/N status is preserved for reference and is not interpreted as current stock.
+The visible catalog contains **14,076 items and supplied prices** from `list of inventory and price list.xlsx`, joined by exact SKU to the master workbook's **HYPERMART** sheet. **14,026 matched**; **50 unmatched** items keep the supplied description/price and have no assumed barcode. Unlisted master products are excluded from browsing and barcode lookup. GOMART and SET are excluded. See [the import report](../docs/assortment-import-report.json).
 
-Shoppers can enter observed shelf prices privately. Unpriced lines are counted separately from the known subtotal. Published-price savings remain unavailable until staff supply valid prices, sizes, comparison groups and confirmed stock. Test fixture prices are confined to automated tests and are never included in the shipped catalog.
+The new price list has **no effective price date**. One amount, SKU 2028 at 0.209 pesos, rounds half up to **0.21 pesos**. All calculations use integer centavos. Live stock, explicit net sizes, verified comparison groups and brand classification remain unknown; description text is not treated as a verified size. Unit-price savings remain unavailable until the necessary data is supplied. Private shelf-price overrides never rewrite the shared catalog. Source A/I/N status is not live inventory.
+
+The native Android app uses the exact same catalog. Build and installation details are in [android/README.md](../android/README.md). Its Room/DataStore data and the website's IndexedDB shopping data remain separately on each device. No live cross-device personal-data sync is provisioned.
 
 ## Run and check
 
@@ -43,12 +45,15 @@ Set `TEST_BROWSER_CHANNEL=chrome` to use an installed Chrome, or `SHOPPER_TEST_U
 ## Importing the reference workbook
 
 ```sh
-python scripts/import-hypermart.py "/path/to/ITEM MASTER AS OF 09-02-2026 1.xlsx"
+python scripts/import-hypermart.py "/path/to/ITEM MASTER AS OF 09-02-2026 1.xlsx" "/path/to/list of inventory and price list.xlsx"
+node scripts/build-android-catalog.mjs
 ```
 
 The standard-library importer streams only HYPERMART, merges repeated SKU rows and keeps all source barcode aliases as strings. Existing numeric-cell leading zeros cannot be reconstructed; correct these in the source file rather than guessing. Import reports list missing fields, invalid check digits, duplicate UPC ownership, row counts and checksums. Some internal labels do not follow GS1 and are warnings. Ambiguous lookups require shopper selection.
 
-The compressed reference files total about 33 MB. Startup uses 216 exact source records across grocery categories in a 3.3 KB starter file. Search, category selection and further browsing load the full department index when needed, with a visible loading state. Barcode lookup uses 64 barcode and product partitions and does not need the entire search index. Settings → Download full catalog stores compressed files without expanding every partition into RAM. IndexedDB stores the catalog and shopping data; scans make zero Firestore reads. After download, the same lookups work offline. Source checksum and transformed-catalog checksum are separate so importer changes invalidate stale caches correctly.
+The filtered catalog has **136 compressed files totaling 965,395 bytes**. Startup uses 368 source records in an 8,253-byte starter plus a small price overlay for the first 48 records. The first 24 visible cards are priced immediately; the full price overlay and department indexes load when searching, filtering, looking up a code or downloading offline data. The build regenerates the starter prices from the current full overlay so staff updates cannot leave startup prices stale.
+
+Barcode lookup uses 64 barcode and product partitions. Settings → Download full catalog caches compressed files and the full price overlay. IndexedDB stores catalog and private shopping data; scans make zero Firestore reads. Cached partitions remain compressed until needed, and the parsed partition cache is bounded. Checksums invalidate stale transformed catalog caches.
 
 ## Staff price and promo publication
 

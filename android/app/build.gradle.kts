@@ -26,7 +26,7 @@ android {
     }
     packaging { resources.excludes += "/META-INF/{AL2.0,LGPL2.1}" }
     testOptions { unitTests.isReturnDefaultValues = true }
-    lint { abortOnError = true; checkReleaseBuilds = true }
+    lint { abortOnError = true; checkReleaseBuilds = true; lintConfig = file("../lint.xml") }
 }
 kotlin { jvmToolchain(17) }
 ksp { arg("room.schemaLocation", "$projectDir/schemas") }

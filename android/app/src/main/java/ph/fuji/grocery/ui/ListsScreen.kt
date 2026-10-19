@@ -9,6 +9,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ph.fuji.grocery.R
@@ -35,7 +37,8 @@ import ph.fuji.grocery.data.Board
                         if (saved.isEmpty()) Text(stringResource(R.string.list_empty), style = MaterialTheme.typography.bodyMedium)
                         saved.forEach { item ->
                             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                                Checkbox(item.checked, { vm.action { vm.repository.listItem(item.copy(checked = it)) } })
+                                val checkLabel = stringResource(R.string.list_checked) + ": " + item.name
+                                Checkbox(item.checked, { vm.action { vm.repository.listItem(item.copy(checked = it)) } }, Modifier.semantics { contentDescription = checkLabel })
                                 TextButton({ open(item.sku) }, Modifier.weight(1f)) { Text(item.name) }
                                 IconButton({ vm.action { vm.repository.product(item.sku)?.let { vm.repository.add(it) } } }) { Icon(Icons.Rounded.AddShoppingCart, stringResource(R.string.add)) }
                                 IconButton({ vm.action { vm.repository.removeListItem(item) } }) { Icon(Icons.Rounded.Close, stringResource(R.string.remove)) }
