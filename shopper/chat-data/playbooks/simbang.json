@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "id": "simbang",
+  "names": {
+    "en": "Simbang Gabi snacks",
+    "tl": "Meryenda sa Simbang Gabi",
+    "taglish": "Simbang Gabi snacks"
+  },
+  "triggers": [
+    "simbang gabi",
+    "misa de gallo",
+    "simbang"
+  ],
+  "season": {
+    "months": [
+      12
+    ]
+  },
+  "defaults": {
+    "people": 4,
+    "days": 1
+  },
+  "groups": [
+    {
+      "id": "essentials",
+      "name": {
+        "en": "Essentials",
+        "tl": "Pangunahing items",
+        "taglish": "Essentials"
+      }
+    },
+    {
+      "id": "extras",
+      "name": {
+        "en": "Nice to have",
+        "tl": "Maaaring idagdag",
+        "taglish": "Extras"
+      }
+    }
+  ],
+  "tradition": null,
+  "items": [
+    {
+      "id": "bread",
+      "group": "essentials",
+      "concept": "bread",
+      "terms": [
+        "bread",
+        "tinapay"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.125
+      },
+      "priority": "essential",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "coffee",
+      "group": "essentials",
+      "concept": "coffee",
+      "terms": [
+        "coffee",
+        "kape"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.125
+      },
+      "priority": "essential",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "milk",
+      "group": "essentials",
+      "concept": "milk",
+      "terms": [
+        "milk",
+        "gatas"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.125
+      },
+      "priority": "essential",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "biscuit",
+      "group": "extras",
+      "concept": "biscuit",
+      "terms": [
+        "biscuit",
+        "biskwit"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.125
+      },
+      "priority": "nice",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    }
+  ]
+}

@@ -1,0 +1,215 @@
+{
+  "schemaVersion": 1,
+  "id": "newhome",
+  "names": {
+    "en": "New-home pantry starter",
+    "tl": "Panimulang pantry sa bagong bahay",
+    "taglish": "New-home pantry starter"
+  },
+  "triggers": [
+    "new home",
+    "new house",
+    "pantry starter",
+    "bagong bahay",
+    "pantry"
+  ],
+  "season": null,
+  "defaults": {
+    "people": 4,
+    "days": 3
+  },
+  "groups": [
+    {
+      "id": "essentials",
+      "name": {
+        "en": "Essentials",
+        "tl": "Pangunahing items",
+        "taglish": "Essentials"
+      }
+    },
+    {
+      "id": "extras",
+      "name": {
+        "en": "Nice to have",
+        "tl": "Maaaring idagdag",
+        "taglish": "Extras"
+      }
+    }
+  ],
+  "tradition": null,
+  "items": [
+    {
+      "id": "rice",
+      "group": "essentials",
+      "concept": "rice",
+      "terms": [
+        "rice",
+        "bigas"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 150,
+        "unit": "g",
+        "approxUnits": 0.15
+      },
+      "priority": "essential",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "oil",
+      "group": "essentials",
+      "concept": "oil",
+      "terms": [
+        "oil",
+        "mantika"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.125
+      },
+      "priority": "essential",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "salt",
+      "group": "essentials",
+      "concept": "salt",
+      "terms": [
+        "salt",
+        "asin"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.125
+      },
+      "priority": "essential",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "sugar",
+      "group": "essentials",
+      "concept": "sugar",
+      "terms": [
+        "sugar",
+        "asukal"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.125
+      },
+      "priority": "essential",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "soy",
+      "group": "essentials",
+      "concept": "soy",
+      "terms": [
+        "soy sauce",
+        "toyo"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.125
+      },
+      "priority": "essential",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "vinegar",
+      "group": "essentials",
+      "concept": "vinegar",
+      "terms": [
+        "vinegar",
+        "suka"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.125
+      },
+      "priority": "essential",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "coffee",
+      "group": "extras",
+      "concept": "coffee",
+      "terms": [
+        "coffee",
+        "kape"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.125
+      },
+      "priority": "nice",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "cleaner",
+      "group": "extras",
+      "concept": "cleaner",
+      "terms": [
+        "dishwashing"
+      ],
+      "quantityRule": {
+        "basis": "person",
+        "quantity": 0.1,
+        "unit": null,
+        "approxUnits": 0.1
+      },
+      "priority": "nice",
+      "substitutes": [],
+      "tags": [
+        "nonfood"
+      ],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "towel",
+      "group": "extras",
+      "concept": "towel",
+      "terms": [
+        "towel"
+      ],
+      "quantityRule": {
+        "basis": "person",
+        "quantity": 0.1,
+        "unit": null,
+        "approxUnits": 0.1
+      },
+      "priority": "nice",
+      "substitutes": [],
+      "tags": [
+        "nonfood"
+      ],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    }
+  ]
+}

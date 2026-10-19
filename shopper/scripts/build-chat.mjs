@@ -3,9 +3,11 @@ import {findAnomalies} from './price-anomalies.mjs';
 export function buildChat(root){
  const meta=JSON.parse(fs.readFileSync(path.join(root,'catalog/catalog-meta.json'))),prices=JSON.parse(fs.readFileSync(path.join(root,'catalog/catalog-prices.json'))),details=new Map();
  for(const file of meta.files.filter(f=>/products\.v/.test(f.path)))for(const row of JSON.parse(gunzipSync(fs.readFileSync(path.join(root,file.path)))))details.set(row[0],row[5]);
+ const playbookDir=path.join(root,'chat-data/playbooks'),playbookFiles=fs.readdirSync(playbookDir).filter(n=>n.endsWith('.json')&&n!=='index.json').sort(),playbookBodies=playbookFiles.map(n=>JSON.parse(fs.readFileSync(path.join(playbookDir,n))));
+ const playbookVersion=createHash('sha256').update(JSON.stringify(playbookBodies)).digest('hex').slice(0,20);fs.writeFileSync(path.join(playbookDir,'index.json'),JSON.stringify({version:playbookVersion,files:playbookFiles}));
  const anomalies=findAnomalies(prices.items);
  const rows=prices.items.map(p=>[p.sku,p.name,p.category,p.subcategory,p.department,p.priceCentavos,p.brand||null,p.size??null,p.unit??null,p.aisle??null,p.inStock??null,details.get(p.sku)||[],p.promoCentavos??null,p.promoStart??null,p.promoEnd??null,anomalies.flags.get(p.sku)]);
- const version=createHash('sha256').update(JSON.stringify(rows)).update(JSON.stringify(JSON.parse(fs.readFileSync(path.join(root,'chat-data/aliases.json'))))).digest('hex').slice(0,20),snapshot={schema:1,version,priceAsOf:prices.effectiveDate||null,source:'Supplied HYPERMART assortment',sourceLabel:'Supplied HYPERMART assortment',builtAt:new Date().toISOString(),effectiveDate:prices.effectiveDate||null,anomalyCounts:anomalies.counts,rows};
+ const version=createHash('sha256').update(JSON.stringify(rows)).update(JSON.stringify(JSON.parse(fs.readFileSync(path.join(root,'chat-data/aliases.json'))))).update(JSON.stringify([prices.effectiveDate||null,playbookVersion])).digest('hex').slice(0,20),snapshot={schema:1,version,priceAsOf:prices.effectiveDate||null,source:'Supplied HYPERMART assortment',playbookVersion,sourceLabel:'Supplied HYPERMART assortment',builtAt:new Date().toISOString(),effectiveDate:prices.effectiveDate||null,anomalyCounts:anomalies.counts,rows};
  fs.mkdirSync(path.join(root,'chat-data'),{recursive:true});fs.writeFileSync(path.join(root,'chat-data/catalog.json'),JSON.stringify(snapshot));
  fs.rmSync(path.join(root,'chat-data/config.json'),{force:true});
  return {version,anomalies:anomalies.counts,count:rows.length,bytes:fs.statSync(path.join(root,'chat-data/catalog.json')).size};

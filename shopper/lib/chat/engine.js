@@ -1,5 +1,6 @@
 import {fold,normalizeNumbers,detectLanguage,distance,normalizeProduct,parseSize,pesos} from './normalize.js';
 import {provenance,priceCaveat} from './trust.js';
+import {Planner,wantsPlan} from './planner.js';
 import {opening} from './templates.js';
 const stop=new Set(('what whats is are the a an of here there can could would you me my please show list all items item products product cheapest cheap lowest most expensive highest price prices how much cost costs available have do does we they compare versus vs best value per under below less than above over between and to at maximum max minimum min php pesos peso p for with in stock where aisle location find suggest recommend alternatives alternative cheaper more than any anything else about kg kilo kilos g ml l pcs pack size top first second third fourth fifth ang mga ano anong ba po yung iyong iyong mga kay para sa si ni nang ng na meron mayroon kayong kayo magkano presyo halaga pinakamura pinakamurang mura murang mas pinakamahal mahal alin dito doon paki pakita ipakita mabibili bibilhin mabili may ako ko mo naman lang sana lahat wala isang dalawang tatlong weekly week linggo pang bakit today ngayon').split(/\s+/));
 const escapeRE=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
@@ -41,6 +42,7 @@ export class ChatEngine{
   this.rules=Object.entries(aliases).flatMap(([key,values])=>values.map(value=>({key,phrase:fold(value)}))).sort((a,b)=>b.phrase.length-a.phrase.length);
   this.products=products.map(normalizeProduct);this.byId=new Map(this.products.map(p=>[p.id,p]));this.postings=new Map();
   for(const p of this.products){let extra=[];for(const rule of this.rules)if((' '+p.searchText+' ').includes(' '+rule.phrase+' '))extra.push(rule.key);p.tokens=[...new Set((p.searchText+' '+extra.join(' ')).split(' ').map(stem))];for(const token of p.tokens){if(!this.postings.has(token))this.postings.set(token,[]);this.postings.get(token).push(p.id);}}
+  this.planner=new Planner(this,config.playbooks||[]);
   this.vocabulary=[...new Set([...Object.values(aliases).flat().map(fold),...this.postings.keys()])].filter(t=>t.length>=4&&!t.includes(' '));
  }
  canonical(text){let n=' '+fold(text)+' ';for(const {phrase,key} of this.rules)n=n.replace(new RegExp('(^| )'+escapeRE(phrase)+'(?= |$)','g'),'$1'+key+' ');return n.trim().replace(/\s+/g,' ');}
@@ -63,6 +65,7 @@ export class ChatEngine{
  restore(focus){if(focus&&Array.isArray(focus.ids))this.focus={...focus,ids:focus.ids.filter(id=>this.byId.has(id))};}
  respond(raw,{language='auto',basket=[],budget=null,day='2026-10-19'}={}){
   raw=String(raw??'').slice(0,500).trim();const lang=language==='auto'?detectLanguage(raw):language;
+  if(wantsPlan(raw,this.focus.planContext)&&this.planner.books.length){const planned=this.planner.plan(raw,{language,day,budget},this.focus.planContext);if(planned){if(/cheapest rice.*(?:and|at)/i.test(raw)){const simple=this.respond('cheapest rice',{language,basket,budget,day});planned.parts=[simple.text,planned.text];planned.text=simple.text+'\n\n'+planned.text;}this.focus={...planned.context};return planned;}}
   const q=classify(raw,this.focus),reply={text:'',lang,cards:[],table:null,actions:[],quickReplies:initial,confidence:1,intent:q.intent,followUpHint:'',context:null};
   const say=(en,tl,mixed)=>choose(lang,en,tl,mixed),source=say('Based on the saved Hypermart catalog. Price date unavailable.','Batay sa na-save na Hypermart catalog. Walang petsa ng presyo.','Saved Hypermart catalog ito; walang price date.');
   let found=this.search(q.text),rows=found.rows,hasFocus=(this.focus.ids||[]).length>0;
