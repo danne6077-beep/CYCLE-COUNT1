@@ -17,11 +17,12 @@ let browser;
  assert.equal(catalogRequests.some(url=>/\/search\.v\d+\./.test(url)),false,'The first usable screen must not wait for the full department search catalog.');
  assert.equal(catalogRequests.some(url=>url.endsWith('/catalog-prices.json')),false,'The first screen must not wait for the full price overlay.');
  await page.locator('#toast .toast-inner').waitFor({state:'detached',timeout:7000});
+ await page.locator('.topbar [data-tab=settings]').click();await page.locator('#theme-select').selectOption('light');await page.locator('.mobile-nav [data-tab=shop]').click();
  await page.screenshot({path:path.join(output,'mobile-light.png'),fullPage:false});
  await page.locator('#product-search').fill('rice');await page.locator('#result-count').filter({hasText:'matching products'}).waitFor({timeout:60000});
  const skus=await page.locator('[data-add]').evaluateAll(elements=>elements.slice(0,5).map(el=>el.dataset.add));assert.equal(skus.length,5);
  await page.locator('[data-plan]').first().click();
- await page.locator('[data-action=scan]').first().click();
+ await page.locator('[data-action=scan]:visible').first().click();
  await page.locator('[data-action=camera-start]').click();await page.getByText('Keep the barcode inside the frame. Tap video to refocus.').waitFor();
  await page.evaluate(sku=>window.__fujiTestBarcodes.push(sku),skus[0]);await page.getByText('ADDED TO YOUR BASKET',{exact:true}).waitFor();
  for(const sku of skus.slice(1)){await page.locator('#barcode-input').fill(sku);await page.locator('#barcode-form button').click();await page.getByText('ADDED TO YOUR BASKET',{exact:true}).waitFor();await page.waitForTimeout(100);}
