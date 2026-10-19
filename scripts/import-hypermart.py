@@ -98,12 +98,19 @@ def run(source):
     counts['repeatedSkuRows'] = counts['sourceRows'] - len(products)
     counts['missingPrice'] = len(products)
     files = [save_gzip(output/f'search.v1.{d}.json.gz', [r for r in search if r[4] == d]) for d in range(len(departments))]
+    starter, category_counts = [], collections.Counter()
+    for row in search:
+        if departments[row[4]] in ('FMCG','FRESH & STAPLE') and category_counts[row[2]] < 8:
+            starter.append(row)
+            category_counts[row[2]] += 1
+    starter_file = save_gzip(output/'starter.v1.json.gz', starter)
+    files.append(starter_file)
     for n, rows in enumerate(buckets): files.append(save_gzip(output/f'products.v1.{n}.json.gz',rows))
     for n, index in enumerate(barcode_buckets): files.append(save_gzip(output/f'barcodes.v1.{n}.json.gz',index))
     source_hash = hashlib.sha256(Path(source).read_bytes()).hexdigest()
     meta = {'version':1,'schemaVersion':1,'mode':'reference-only','sourceSheet':'HYPERMART','sourceName':Path(source).name,
       'updatedAt':datetime.datetime.now(datetime.timezone.utc).isoformat(),'priceAsOf':None,'itemCount':len(products),
-      'pricedItemCount':0,'sourceChecksum':source_hash,'checksum':hashlib.sha256(''.join(f['checksum'] for f in files).encode()).hexdigest(),'categories':categories,'subcategories':subcategories,'departments':departments,
+      'pricedItemCount':0,'starterPath':starter_file['path'],'sourceChecksum':source_hash,'checksum':hashlib.sha256(''.join(f['checksum'] for f in files).encode()).hexdigest(),'categories':categories,'subcategories':subcategories,'departments':departments,
       'files':files,'counts':dict(counts),'priceWarning':'Prices may not always be accurate. Estimate only. Final prices are confirmed at the cashier.'}
     (output/'catalog-meta.json').write_text(json.dumps(meta,ensure_ascii=False,separators=(',',':')),encoding='utf8')
     (ROOT/'docs'/'catalog-import-report.json').write_text(json.dumps(meta,ensure_ascii=False,indent=2),encoding='utf8')

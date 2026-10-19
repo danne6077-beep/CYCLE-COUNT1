@@ -3,25 +3,34 @@ import {barcodeVariants,bucket,normalizeText} from './core.js';
 const base=new URL('../',import.meta.url);
 export class Catalog {
   constructor(){this.meta=null;this.rows=[];this.bySku=new Map();this.parts=new Map();this.prices=new Map();this.progress=()=>{};}
-  async init() {
+  async init({quick=false}={}) {
     const cached=await read('meta','catalog');
     try {const r=await fetch(new URL('catalog/catalog-meta.json',base),{cache:'no-store'});if(!r.ok)throw new Error('Catalog unavailable');this.meta=await r.json();}
     catch(error){if(!cached)throw new Error('Connect once to download the Hypermart catalog.');this.meta=cached;}
     if(cached&&cached.checksum!==this.meta.checksum) await clearStore('catalog');
     await write('meta',this.meta,'catalog');
     this.loadedDepartments=new Set();
-    await this.loadDepartment('groceries');
+    this.departmentLoads=new Map();
+    if(quick&&this.meta.starterPath){this.rows=await this.file(this.meta.starterPath);for(const row of this.rows)this.bySku.set(row[0],row);this.starterOnly=true;}
+    else await this.loadDepartment('groceries');
     await this.refreshPrices();
     return this;
   }
+  isDepartmentLoaded(department='groceries') {
+    return this.meta.departments.every((name,i)=>!(department==='all'||(department==='groceries'?['FMCG','FRESH & STAPLE'].includes(name):name===department))||this.loadedDepartments.has(i));
+  }
   async loadDepartment(department='groceries') {
+    if(this.starterOnly){this.rows=[];this.starterOnly=false;}
     const wanted=this.meta.departments.map((name,i)=>({name,i})).filter(d=>department==='all'||(department==='groceries'?['FMCG','FRESH & STAPLE'].includes(d.name):d.name===department));
     for(const d of wanted) {
       if(this.loadedDepartments.has(d.i))continue;
-      const rows=await this.file(`catalog/search.v${this.meta.version}.${d.i}.json.gz`);
-      this.rows=this.rows.concat(rows);
-      for(const row of rows)this.bySku.set(row[0],row);
-      this.loadedDepartments.add(d.i);
+      if(!this.departmentLoads.has(d.i))this.departmentLoads.set(d.i,(async()=>{
+        const rows=await this.file(`catalog/search.v${this.meta.version}.${d.i}.json.gz`);
+        this.rows=this.rows.concat(rows);
+        for(const row of rows)this.bySku.set(row[0],row);
+        this.loadedDepartments.add(d.i);
+      })().catch(error=>{this.departmentLoads.delete(d.i);throw error;}));
+      await this.departmentLoads.get(d.i);
     }
   }
   async refreshPrices() {

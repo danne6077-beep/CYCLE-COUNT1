@@ -8,7 +8,7 @@
   "priceAsOf": null,
   "itemCount": 672040,
   "pricedItemCount": 0,
-  "checksum": "4ac7c74c8416fd156d0453249d13d574ca32e805fc2149acf4a87c9680e44a94",
+  "checksum": "acd592867dd80fcb60e994366d5ae6341bb98978a626f2bbab63d2730679c212",
   "categories": [
     "INFANTS",
     "INNER",
@@ -3329,6 +3329,11 @@
       "path": "catalog/barcodes.v1.63.json.gz",
       "bytes": 123452,
       "checksum": "c3c8953fb53b8681ffaac76270d25762eb436c12ff095fca87829302567ebc16"
+    },
+    {
+      "path": "catalog/starter.v1.json.gz",
+      "bytes": 3331,
+      "checksum": "ab5b2c7a68e422416cc54b2efacf0f44b74abca5bee2f3e54378252dc40eb09b"
     }
   ],
   "counts": {
@@ -3347,5 +3352,6 @@
     "missingPrice": 672040
   },
   "priceWarning": "Prices may not always be accurate. Estimate only. Final prices are confirmed at the cashier.",
-  "sourceChecksum": "6158fed2e87cddf3dd8ae974a172b06710ae4a3b4639da4a7e9e89a40b73d7c8"
+  "sourceChecksum": "6158fed2e87cddf3dd8ae974a172b06710ae4a3b4639da4a7e9e89a40b73d7c8",
+  "starterPath": "catalog/starter.v1.json.gz"
 }

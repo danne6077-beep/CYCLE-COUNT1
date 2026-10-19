@@ -20,10 +20,10 @@ pnpm --dir shopper lint
 pnpm --dir shopper typecheck
 node --test
 node scripts/build_pages.js
-node shopper/scripts/serve.mjs
+node shopper/scripts/serve.mjs --dist
 ```
 
-Open `http://127.0.0.1:4173/shopper/`. The development server serves source files; the production build puts the app and lazy scanner/QR bundles in `dist/shopper/`. For camera fallback and QR poster checks, serve the generated build rather than unbundled source. Build output also retains the admin's static files at the root. No shopper runtime dependency is loaded from a third-party CDN.
+Open `http://127.0.0.1:4173/shopper/`. `--dist` serves the generated production build, including the lazy scanner/QR bundles. Omit `--dist` for source development. Build output also retains the admin's static files at the root. No shopper runtime dependency is loaded from a third-party CDN.
 
 The build minifies and bundles ZXing separately, generates an app-shell content version, verifies every catalog shard's SHA-256 checksum and rejects initial JavaScript above 150 KB gzipped. The QR encoder is lazy-loaded. Source JavaScript is approximately 34 KB gzipped; use the generated `docs/shopper-build-report.json` for final build measurements.
 
@@ -33,6 +33,9 @@ Run the mobile smoke flow with an installed Playwright Chromium:
 npm ci
 npx playwright install chromium
 node scripts/shopper-smoke.cjs
+node scripts/shopper-swap-check.cjs
+node scripts/shopper-offline-check.cjs
+node scripts/shopper-bundle-check.cjs
 ```
 
 Set `TEST_BROWSER_CHANNEL=chrome` to use an installed Chrome, or `SHOPPER_TEST_URL` to check a deployed preview. Each run uses an isolated test browser profile. The test scans real source SKUs through mocked camera input and manual entry, checks exact shelf-price totals, crosses a budget threshold, saves history, checks the local helper, reloads offline and captures mobile light/dark and desktop screenshots. It does not claim that physical camera hardware or Safari has been verified.
@@ -45,7 +48,7 @@ python scripts/import-hypermart.py "/path/to/ITEM MASTER AS OF 09-02-2026 1.xlsx
 
 The standard-library importer streams only HYPERMART, merges repeated SKU rows and keeps all source barcode aliases as strings. Existing numeric-cell leading zeros cannot be reconstructed; correct these in the source file rather than guessing. Import reports list missing fields, invalid check digits, duplicate UPC ownership, row counts and checksums. Some internal labels do not follow GS1 and are warnings. Ambiguous lookups require shopper selection.
 
-The compressed reference files total about 33 MB. The app loads grocery departments first, loads other departments on demand and uses 64 barcode and product partitions. Settings → Download full catalog stores compressed files without expanding every partition into RAM. IndexedDB stores the catalog and shopping data; scans make zero Firestore reads. After download, the same lookups work offline. Source checksum and transformed-catalog checksum are separate so importer changes invalidate stale caches correctly.
+The compressed reference files total about 33 MB. Startup uses 216 exact source records across grocery categories in a 3.3 KB starter file. Search, category selection and further browsing load the full department index when needed, with a visible loading state. Barcode lookup uses 64 barcode and product partitions and does not need the entire search index. Settings → Download full catalog stores compressed files without expanding every partition into RAM. IndexedDB stores the catalog and shopping data; scans make zero Firestore reads. After download, the same lookups work offline. Source checksum and transformed-catalog checksum are separate so importer changes invalidate stale caches correctly.
 
 ## Staff price and promo publication
 

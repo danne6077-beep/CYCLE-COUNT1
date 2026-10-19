@@ -2,15 +2,16 @@ const {chromium}=require('playwright');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
-let browser;
+let browser,page;
 (async()=>{
   const output=path.resolve(__dirname,'../qa/shopper');
   fs.mkdirSync(output,{recursive:true});
   browser=await chromium.launch({headless:true,...(process.env.TEST_BROWSER_CHANNEL?{channel:process.env.TEST_BROWSER_CHANNEL}:{})});
-  const page=await browser.newPage({viewport:{width:360,height:800}});
+  page=await browser.newPage({viewport:{width:360,height:800}});
   const url=process.env.SHOPPER_TEST_URL||'http://127.0.0.1:4173/shopper/';
   const response=await page.goto(url,{waitUntil:'networkidle'});
   assert.equal(response.status(),200);
+  assert.match(await page.title(),/FUJI.*Grocery Tracker/,'Expected the shopper app; a protected preview may require Vercel sign-in.');
   await page.getByRole('heading',{name:'Welcome to a better basket.'}).waitFor({timeout:60000});
   assert.ok(await page.getByText('Prices may not always be accurate. Estimate only. Final prices are confirmed at the cashier.',{exact:true}).isVisible());
   const roundtrip=await page.evaluate(async()=>{
@@ -42,4 +43,4 @@ let browser;
   fs.writeFileSync(path.join(output,'bundle-report.json'),JSON.stringify({status:'passed',url,roundtrip,headers:checkedHeaders,screenshots:['built-mobile-light.png','built-mobile-dark.png']},null,2));
   await browser.close();
   console.log('Production bundles passed: QR generation, ZXing decode, visible price warning, light/dark shopper UI.');
-})().catch(async error=>{console.error(error);await browser?.close();process.exitCode=1;});
+})().catch(async error=>{console.error(error);if(page){const location=new URL(page.url());console.error('Page:',await page.title(),location.origin+location.pathname);}await browser?.close();process.exitCode=1;});
