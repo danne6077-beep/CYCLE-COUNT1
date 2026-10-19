@@ -6,7 +6,7 @@ const stem=s=>s.length>4?s.replace(/(?:es|s)$/,''):s;
 const choose=(lang,en,tl,taglish=tl)=>lang==='en'?en:lang==='tl'?tl:taglish;
 const initial=['Pinakamurang bigas','Cheapest cooking oil','Magkano ang itlog?','May ₱500 ako, ano mabibili?','Compare Coke vs Pepsi','Ano ang promo ngayon?'];
 const serious=new Set(['CLEAR_BASKET','RESET','ERROR']);
-for(const word of 'hindi add remove idagdag lagay ilagay isama tanggalin alisin mo yan iyon iyan pa first second third fourth fifth una pangalawa pangatlo pang may mabibili bibilhin saan nasaan hanapin ikumpara kumpara mas sa kanya kami tayo para ngayon bagong usapan need needs want looking sku barcode code'.split(' '))stop.add(word);
+for(const word of 'hindi lalagpas hanggang mababa add remove idagdag lagay ilagay isama tanggalin alisin mo yan iyon iyan pa first second third fourth fifth una pangalawa pangatlo pang may mabibili bibilhin saan nasaan hanapin ikumpara kumpara mas sa kanya kami tayo para ngayon bagong usapan need needs want looking sku barcode code'.split(' '))stop.add(word);
 export function classify(raw,focus={}){
  const text=normalizeNumbers(raw),n=fold(text),basket=/\b(basket|cart|badyet ko|budget ko|my budget|matitira|remaining|balance|kasya ba|how is my budget|what should i remove)\b/.test(n);
  let intent='UNKNOWN';
@@ -24,6 +24,7 @@ export function classify(raw,focus={}){
  else if(/\b(breakfast|dinner|lunch|hapunan|tanghalian|agahan|almusal|ulam|recipe|adobo|sinigang|spaghetti|baon|handaan)\b/.test(n))intent='MEAL_HELP';
  else if(/\b(may|budget|pera|with)\s*(?:₱|php\s*|p\s*)?\d|₱\s*\d.*(?:mabibili|bibilhin|plan|week|linggo)|\d+\s*(?:pesos|peso).*(?:plan|buy|mabibili)/.test(n)&&!/\b(under|below|between|max|lalagpas|hanggang)\b/.test(n))intent='BUDGET_PLAN';
  else if(/\b(under|below|between|less than|max|maximum|hanggang|lalagpas|mababa sa)\b/.test(n)&&/\d/.test(n))intent='UNDER_BUDGET';
+ else if(/\b(mabibili|bibilhin)\b/.test(n)&&/(?:₱|php\s*|\bp\s*)\d/.test(n))intent='UNDER_BUDGET';
  else if(/\b(cheapest|cheaper|lowest|affordable|pinakamura|pinakamurang|mura|murang|tipid|abot kaya)\b/.test(n))intent='CHEAPEST';
  else if(/\b(expensive|priciest|highest|pinakamahal|mahal|mamahalin)\b/.test(n))intent='MOST_EXPENSIVE';
  else if(/\b(how much|magkano|price|presyo|halaga|cost)\b/.test(n))intent='PRICE_OF';
@@ -32,7 +33,7 @@ export function classify(raw,focus={}){
  else if(/^(more|next|ano pa|iba pa|what else|eh sa iba)$/.test(n)&&focus.lastQuery)intent='MORE';
  const currency=n.match(/(?:₱|php\s*|\bp\s*)(\d+(?:\.\d{1,2})?)\b/),range=n.match(/between\s+(\d+(?:\.\d+)?)\s+(?:and|at)\s+(\d+(?:\.\d+)?)/),limit=n.match(/(?:under|below|max(?:imum)?|than|hanggang|lalagpas ng|sa)\s*₱?\s*(\d+(?:\.\d+)?)/),budget=n.match(/(?:may|budget|pera|with)\s*(?:₱|php\s*|p\s*)?(\d+(?:\.\d+)?)/)||n.match(/(\d+(?:\.\d+)?)\s*(?:pesos|peso)/);
  const amount=range?+range[2]:+(currency?.[1]??(intent==='BUDGET_PLAN'?budget?.[1]:limit?.[1]??budget?.[1])??NaN),count=n.match(/\btop\s+(\d+)|\b(\d+)\s+(?:pinakamura|cheapest|items|products)/);
- return {intent,text:n,amount:Number.isFinite(amount)?Math.round(amount*100):null,min:range?Math.round(+range[1]*100):null,count:Math.min(20,Math.max(1,+(count?.[1]||count?.[2]||5))),invalidAmount:/-\s*\d/.test(raw)||amount<=0||amount>10000000,requestedSize:parseSize(n),strictMax:/\b(under|below|less than)\b/.test(n)};
+ return {intent,text:n,amount:Number.isFinite(amount)?Math.round(amount*100):null,min:range?Math.round(+range[1]*100):null,count:Math.min(20,Math.max(1,+(count?.[1]||count?.[2]||5))),invalidAmount:/-\s*\d|\d+\.\d{3,}/.test(raw)||amount<=0||amount>10000000||!!range&&+range[1]>+range[2],requestedSize:parseSize(n),strictMax:/\b(under|below|less than)\b/.test(n)};
 }
 export class ChatEngine{
  constructor(products,aliases={},jokes={},config={}){
@@ -75,7 +76,7 @@ export class ChatEngine{
  if(q.intent==='CHEAPEST'&&!found.terms.length&&hasFocus&&!reference){found=this.search(this.focus.lastQuery||'');rows=found.rows;}
   reply.intent=q.intent;
   if(q.intent==='UNKNOWN'&&rows.length)q.intent=reply.intent='LIST_CATEGORY';
-  if(q.intent==='MORE'){found=this.search(this.focus.lastQuery);rows=found.rows;reply.intent='LIST_CATEGORY';}
+  if(q.intent==='MORE'){found=this.search(this.focus.lastQuery);rows=found.rows;if(this.focus.sizeFilter)rows=rows.filter(p=>p.parsedSize?.baseUnit===this.focus.sizeFilter.baseUnit&&p.parsedSize.baseValue===this.focus.sizeFilter.baseValue);reply.intent='LIST_CATEGORY';}
   if(q.intent==='RESET'){this.focus={};this.turns=[];reply.text=say('New conversation. What would you like to find?','Bagong usapan po. Ano ang hahanapin natin?');return reply;}
   if(!raw||!/[\p{L}\p{N}]/u.test(raw)){reply.text=say('Ask a product or budget question, such as “cheapest rice”.','Magtanong po tungkol sa produkto o budget, gaya ng “pinakamurang bigas”.');return reply;}
   if(q.intent==='SMALLTALK')reply.text=say('Hello! I’m FUJI, your offline Hypermart catalog assistant. Ask about prices, your basket or a shopping budget.','Kumusta po! Si FUJI ito, ang offline na katulong mo sa Hypermart catalog. Puwedeng magtanong ng presyo, basket o budget.','Hi! FUJI here, ang offline Hypermart shopping buddy mo. Ask about prices, basket, o budget.');
@@ -128,7 +129,7 @@ export class ChatEngine{
     else if(q.intent==='BEST_VALUE')reply.text=say('Unit costs below use clearly parsed label sizes, not verified selling-pack data. Unknown or ambiguous sizes cannot establish best value.','Gamit ng unit cost sa ibaba ang malinaw na sukat mula sa pangalan, hindi beripikadong selling-pack data. Hindi mairaranggo ang kulang o malabong sukat.');
     else reply.text=say(`Here are ${reply.cards.length} of ${rows.length} matching saved items and their supplied prices.`,`Narito ang ${reply.cards.length} sa ${rows.length} katugmang naka-save na item at presyo.`,`${reply.cards.length} sa ${rows.length} matching items, with supplied prices, nasa ibaba.`);
    }
-   if(rows.length){this.focus={lastQuery:found.text||this.focus.lastQuery,topic:found.topic,ids:reply.cards.map(p=>p.id),offset};if(rows.length>offset+q.count)reply.quickReplies=[...initial.slice(0,2),lang==='en'?'What else?':'Ano pa?'];}
+   if(rows.length){this.focus={lastQuery:found.text||this.focus.lastQuery,topic:found.topic,ids:reply.cards.map(p=>p.id),offset,sizeFilter:q.intent==='MORE'?this.focus.sizeFilter:q.requestedSize||null};if(rows.length>offset+q.count)reply.quickReplies=[...initial.slice(0,2),lang==='en'?'What else?':'Ano pa?'];}
   }
   if(reply.cards.length){
    if(!reply.table)reply.table={kind:'products',rows:reply.cards.map(p=>({id:p.id,name:p.name,priceCentavos:p.priceCentavos,size:p.parsedSize?.label||null,sizeSource:p.sizeSource,unitPrice:p.unitPrice,aisle:p.aisle,stock:p.inStock}))};
@@ -137,7 +138,7 @@ export class ChatEngine{
    if(reply.cards.some(p=>!p.parsedSize))reply.text+=' '+say('Some sizes are not listed; their unit cost is unknown.','May mga sukat na hindi nakalista; hindi alam ang unit cost nila.');
    if(reply.cards.some(p=>['INFANTS','OTC MEDS','ALCOHOLIC BEVERAGES'].includes(p.category)))reply.text+=' '+say('Prices/catalog information only; no medical, infant-feeding or drinking advice.','Presyo at catalog information lamang; walang payong medikal, pagpapakain ng sanggol o pag-inom.');
    reply.text+='\n'+source;
-   if(!['BASKET_ACTION','BUDGET_PLAN','MEAL_HELP','MORE'].includes(q.intent))this.focus={lastQuery:found.text,topic:found.topic,ids:reply.cards.map(p=>p.id),offset:0};
+   if(!['BASKET_ACTION','BUDGET_PLAN','MEAL_HELP','MORE'].includes(q.intent))this.focus={lastQuery:found.text,topic:found.topic,ids:reply.cards.map(p=>p.id),offset:0,sizeFilter:q.requestedSize||null};
   }
   if(found.corrections.length){reply.corrections=found.corrections;reply.confidence=Math.min(...found.corrections.map(c=>c.confidence));reply.text=say(reply.confidence<.8?'Did you mean ':'Matched spelling: ',reply.confidence<.8?'Ang ibig mo ba ay ':'Katugmang baybay: ')+found.corrections.map(c=>c.from+' → '+c.to).join(', ')+(reply.confidence<.8?'?\n':'.\n')+reply.text;if(reply.confidence<.8)reply.actions=reply.actions.filter(a=>!a.auto);}
   const intro=opening(reply.intent,lang,raw+'|'+this.turns.length);if(intro)reply.text=intro+'\n'+reply.text;
