@@ -1,34 +1,31 @@
 # Shopper validation — 19 October 2026
 
-## Verified
+## Data and public website
 
-- **57 repository tests** pass, including existing admin checks and shopper money, promo, barcode, unit-price, savings, catalog-integrity, API and contrast checks.
-- **Syntax and typecheck** pass in GitHub CI. Syntax checks cover the shopper source; TypeScript checks the money/savings and enrichment-validation modules configured in shopper/jsconfig.json.
-- **Production build** passes. It verifies every catalog checksum, generates the PWA shell version and enforces the 150 KB initial JavaScript gzip budget.
-- **Mobile production flow** passes at 360 px: onboarding/budget, a mocked camera read plus five real Hypermart SKU lookups, exact shelf-price totals, quantity changes, budget overrun, saved history, local helper, offline reload, themes and no horizontal overflow. Camera tracks stop when the scan sheet closes. No uncaught browser errors.
-- **Scanner and QR bundles** pass a round-trip test: generate a PNG QR with the shipped encoder and decode it using the shipped ZXing browser bundle. This verifies bundling and decoder operation, rather than physical camera hardware.
-- **Savings UI** passes with isolated, intercepted test-only prices: an exact ₱20 swap and budget rescue. Fixture prices never enter the catalog.
-- **Full offline catalog** passes: 135 compressed files, 33,934,645 bytes. An unvisited non-grocery SKU resolves offline. Downloads retain two parsed partitions instead of expanding the entire reference into RAM. Cached desktop lookup averaged 0.01 ms, maximum 0.1 ms; these figures exclude camera/network and are not mobile hardware measurements.
-- **Startup** uses 216 exact source grocery records in a 3,331-byte compressed starter. Search and further browsing load the full department index with a visible loading state. The mobile test checks that the initial usable screen does not request the large search shards.
-- **Lighthouse mobile 13.5.0:** Performance **97**, Accessibility **100**, on the generated production build in [CI run 39204341645](https://github.com/danne6077-beep/CYCLE-COUNT1/actions/runs/39204341645), app commit 2e62f60. This is a lab measurement, not a guarantee for every device or network. Reports and built-screen screenshots are in that run's shopper-proof artifact.
-- **Reference integrity:** only HYPERMART; 672,040 unique products; no invented selling prices, stock or net sizes. Vendor fields are excluded. Text contrast checks meet the 4.5:1 threshold.
-- **Firestore emulator rules** pass in [CI run 39204593995](https://github.com/danne6077-beep/CYCLE-COUNT1/actions/runs/39204593995): owner access/deletion, cross-user read/write/delete denial, unauthenticated access denial, payload/field/path restrictions and admin-role escalation denial. The project is demo-fuji-shopper; no production Firebase project is touched.
+The grocery website is https://fuji-grocery-tracker.vercel.app/. An anonymous HTTPS request returned 200 with the FUJI Grocery Tracker page and no Vercel login. Its Vercel project is fuji-grocery-tracker (root shopper), separate from the Cycle Count Generator. The previous temporary domain redirects to this address. Preview deployments may remain protected.
 
-The earlier Performance score of 74 exposed the full-index startup delay. The smaller starter catalog resolved that issue; the score threshold remains enforced in CI.
+The visible catalog is the supplied 14,076-item assortment: 14,026 exact HYPERMART SKU matches and 50 explicitly unmatched supplied items. Unlisted master items, GOMART and SET are excluded. There is no effective price date. SKU 2028 rounds half up from 0.209 to 0.21 pesos. Every estimate displays: **Prices may not always be accurate. Estimate only. Final prices are confirmed at the cashier.**
 
-## GitHub and Vercel
+Stock, verified package sizes and comparison groups remain unknown. Personal shelf prices do not rewrite shared data. Website and Android share catalog provenance; personal shopping data stays separately on each device.
 
-The implementation is published in [PR #2](https://github.com/danne6077-beep/CYCLE-COUNT1/pull/2) on codex/fuji-shopper-hypermart. The existing GitHub → Vercel integration builds the admin root and /shopper/ together.
+## Verified web baseline
 
-[Vercel shopper preview](https://fujisupersystem-git-codex-fuji-shopper-hypermart-fuji-92d1.vercel.app/shopper/) was opened in the signed-in browser. The Hypermart product count, unavailable prices and required warning were visible. An isolated anonymous browser is redirected to Vercel sign-in, so this is a protected preview, not a public store launch. Protection has not been weakened.
+The redesigned app at commit 91c2255 passed [CI run 39226997714](https://github.com/danne6077-beep/CYCLE-COUNT1/actions/runs/39226997714): syntax/type checks, 59 repository tests, production build, the mobile shopping flow, exact centavo totals, budget/history/helper/theme behavior, offline reload, fixture-only savings, shipped QR/ZXing round-trip decoding and Firestore emulator isolation tests. Lighthouse mobile 13.5.0 scored **Performance 91 / Accessibility 100**. These are lab measurements, not guarantees for all devices.
 
-The hosting dashboard identifies team fuji as **Hobby**. [Vercel Hobby](https://vercel.com/docs/plans/hobby) is restricted to non-commercial personal use. A commercial store launch conflicts with the brief's simultaneous free-only and Vercel requirements. No plan was purchased or upgraded, and this PR has not been merged to the production branch. An eligible Vercel plan or a different eligible host is required for commercial operation.
+The filtered offline catalog has 136 compressed files totaling 965,395 bytes. A small starter plus 48 first-screen prices makes all 24 initial cards priced without loading the full price/search overlays. The importer and Android seed derive from the same filtered export.
 
-Mobile source-preview screenshots are also committed in docs/images/. The CI artifact contains the generated-build screenshots, Lighthouse reports, build report and generated dependency lockfile.
+## Camera update
 
-## Remaining limits
+The phone-camera update requests getUserMedia directly from the Scan tap before decoder loading. It uses muted inline playback, visible opening/permission/error states, a basic-camera constraint retry, a single-stream ZXing fallback when native BarcodeDetector is absent or broken, cancellation/late-stream cleanup and a local Take barcode photo option. Images and frames are not uploaded.
 
-- Local registry downloads still fail certificate-chain verification, including attempts using the existing Windows root/intermediate trust stores. TLS verification was never disabled. Build, TypeScript, bundle and browser verification completed successfully in GitHub CI instead.
-- Physical Android Chrome/iPhone Safari cameras, torch/focus, damaged labels, native home-screen installation and screen-reader checks remain on the [device checklist](shopper-device-checklist.md).
-- Optional cloud sync, online model classification and staff price publication remain disabled without provider credentials and security configuration. Production Firestore rules have not been deployed. Public privacy contact/retention details and App Check/domain verification are required before enabling cloud sync.
-- Google sign-in, sign-up, streaming AI and complete Filipino translation are deferred. The default device-local shopping app works without those services.
+**65 repository tests pass locally**, including six camera lifecycle/error regressions. The complete source mobile shopping flow passes after the update. Camera browser checks pass at both /shopper/ and the standalone / root using Chromium's simulated camera and real getUserMedia/video playback. They cover absent/broken native detectors, one camera request per session, permission denial and enabled retry, actual shipped ZXing decoding of a barcode photo into SKU 486522 at 14.05 pesos, and stopped tracks after close.
+
+The production build now replaces the precache placeholder correctly, includes decoder assets, and versions app/scanner entry points so an older worker cannot retain the previous camera implementation. Updated production CI and public deployment verification are recorded after publication.
+
+## Limits and paused work
+
+Physical phone camera hardware, torch/focus behavior, iPhone Safari and screen-reader use remain device checks. A site cannot override a permission denial in the phone's browser or OS. In embedded browsers, open the public URL directly in Chrome or Safari; permission guidance and photo/manual fallbacks remain available.
+
+Optional cloud sync, online AI and staff publication remain disabled without provider/security configuration. Production Firestore rules and cross-device shopping sync are not provisioned. The default app works without these services.
+
+Local dependency installation still encounters certificate-chain issues; TLS verification has not been disabled. Production build/type/bundle checks run in GitHub CI. Android APK work is paused at the user's explicit request; no final native build or physical-device validation is claimed.

@@ -23,9 +23,9 @@ let browser;
  const skus=await page.locator('[data-add]').evaluateAll(elements=>elements.slice(0,5).map(el=>el.dataset.add));assert.equal(skus.length,5);
  await page.locator('[data-plan]').first().click();
  await page.locator('[data-action=scan]:visible').first().click();
- await page.locator('[data-action=camera-start]').click();await page.getByText('Keep the barcode inside the frame. Tap video to refocus.').waitFor();
- await page.evaluate(sku=>window.__fujiTestBarcodes.push(sku),skus[0]);await page.getByText('ADDED TO YOUR BASKET',{exact:true}).waitFor();
- for(const sku of skus.slice(1)){await page.locator('#barcode-input').fill(sku);await page.locator('#barcode-form button').click();await page.getByText('ADDED TO YOUR BASKET',{exact:true}).waitFor();await page.waitForTimeout(100);}
+ await page.getByText('Keep the barcode inside the frame. Tap video to refocus.').waitFor();
+ await page.evaluate(sku=>window.__fujiTestBarcodes.push(sku),skus[0]);await page.locator(`#scan-result [data-price="${skus[0]}"]`).waitFor();
+ for(const sku of skus.slice(1)){await page.locator('#barcode-input').fill(sku);await page.locator('#barcode-form button').click();await page.locator(`#scan-result [data-price="${sku}"]`).waitFor();}
  await page.locator('[data-action=close-sheet]').click();
  assert.equal(await page.evaluate(()=>window.__fujiTestStream.getTracks().every(t=>t.readyState==='ended')),true);
  await page.locator('.mobile-nav [data-tab=cart]').click();await page.locator('.cart-item').first().waitFor();assert.equal(await page.locator('.cart-item').count(),5);

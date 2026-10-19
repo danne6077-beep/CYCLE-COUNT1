@@ -1,5 +1,5 @@
 const CACHE='fuji-shopper-shell-__SHELL_VERSION__';
-const PRECACHE=/*PRECACHE*/['./','./index.html','./app.js','./style.css','./design.css','./lib/art.js','./fonts/inter-latin.woff2','./fonts/inter-latin-ext.woff2','./i18n.js','./lib/core.js','./lib/catalog.js','./lib/storage.js','./lib/icons.js','./lib/scanner.js','./lib/account.js','./account-config.json','./manifest.webmanifest','./icon.svg'];
+const PRECACHE=/*PRECACHE*/['./','./index.html','./app.js?v=camera2','./style.css','./design.css','./lib/art.js','./fonts/inter-latin.woff2','./fonts/inter-latin-ext.woff2','./i18n.js','./lib/core.js','./lib/catalog.js','./lib/storage.js','./lib/icons.js','./lib/scanner.js?v=camera2','./lib/account.js','./account-config.json','./manifest.webmanifest','./icon.svg'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(c=>c.addAll(PRECACHE)).then(()=>self.skipWaiting()));});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('fuji-shopper-shell-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
 self.addEventListener('fetch',event=>{

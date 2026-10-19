@@ -1,6 +1,6 @@
 # FUJI Grocery Tracker
 
-A mobile-first, device-local Hypermart shopping companion at `/shopper/`, alongside the existing FUJI Cycle Count System. It uses only the supplied workbook's **HYPERMART** sheet. GOMART and SET are excluded.
+A mobile-first, device-local Hypermart shopping companion at https://fuji-grocery-tracker.vercel.app/. It uses only the supplied workbook's **HYPERMART** sheet. GOMART and SET are excluded.
 
 The separate Vercel project **fuji-grocery-tracker** builds the `shopper/` directory and serves this app at its own web root. The Cycle Count Generator keeps its existing project. The two projects share this repository and master-data exports; the grocery deployment excludes the generator's pages. `shopper/vercel.json`, relative manifest paths and service-worker scope support the standalone origin. The older `/shopper/` preview remains a development compatibility route.
 
@@ -70,28 +70,17 @@ Barcode lookup uses 64 barcode and product partitions. Settings → Download ful
 
 `catalog.schema.json` describes normalized data; compressed reference arrays use category dictionaries for smaller transfers. Missing values remain null when decoded. `catalog/catalog-meta.json` identifies the product reference; `catalog/catalog-prices.json` is the current price overlay, with `prices.vN.json` immutable price snapshots after publication.
 
-## Deployment on the existing Vercel project
+## Public website and separate Vercel project
 
-The existing repository already has a working GitHub → Vercel integration for `fujisupersystem.vercel.app`. Keeping `/shopper` in this repo avoids introducing a second admin system or a second source of truth.
+The public website is **https://fuji-grocery-tracker.vercel.app/**. It opens without Vercel sign-in. Project `fuji-grocery-tracker` uses root directory `shopper` and its nested `vercel.json`. The Cycle Count Generator remains on its own project and address. Shared catalog exports come from the same repository. The old temporary domain redirects to the FUJI address.
 
-- Deploy the feature branch as a Vercel preview, run the checks and then merge its reviewed changes to the configured production branch.
-- `vercel.json` builds `dist/`, preserves the root admin app and exposes `/shopper/`, `/api/chat`, and `/api/catalog-publish` on the same origin. API source is excluded from static output.
-- Camera permission is restricted to the same origin. CSP permits only the app and the named optional Firebase endpoints; scanner and QR libraries are self-hosted. Metadata and price overlays use `no-store`; reference partitions are checksum verified. App-shell caches are content versioned.
-- Set any optional environment values in **both Production and Preview** as appropriate. Keep GitHub publishing credentials on Production only if previews must not publish to the production branch. A token needs contents write on this one repository; never put it in browser configuration.
-- The default app needs **no secrets, no Firebase account and no AI key**. Never enable a paid plan implicitly.
+The feature branch is `codex/fuji-shopper-hypermart`, tracked in [PR #2](https://github.com/danne6077-beep/CYCLE-COUNT1/pull/2). Preview deployments may still require Vercel sign-in. Production is published separately from the Cycle Count production branch; do not merge the projects' hosting configurations.
 
-The feature branch is deployed as a [protected Vercel preview](https://fuji-grocery-tracker-git-codex-fuji-shopper-hypermart-fuji-92d1.vercel.app/) and linked to [PR #2](https://github.com/danne6077-beep/CYCLE-COUNT1/pull/2). Vercel sign-in is required. The dashboard confirms the team is on Hobby; commercial store operation requires an eligible plan or a different eligible host. Production merge has not been performed. Publishing prices, online AI and cloud sync fail closed until their required settings are present.
+Camera access is requested directly when Scan is tapped, before decoder initialization. The preview uses muted inline playback on mobile, falls back to self-hosted ZXing if native BarcodeDetector is missing or broken, and releases its camera on close. Permission failures have visible retry guidance. **Take barcode photo** opens the phone's capture/file picker and decodes the image locally. No photo or video frames are uploaded. A browser or OS permission denial must be changed by the phone owner; open the public URL directly in Chrome or Safari if an embedded browser blocks camera access.
 
-## Free-tier review — checked 19 October 2026
+The PWA build versions the camera entry points and precaches the shipped decoder so an older app-shell cache cannot silently keep the previous scanner. Camera browser tests use Chromium's simulated camera and actual video playback/ZXing photo decoding. Physical phone hardware remains a device check.
 
-| Service | Current documented allowance / condition | Choice |
-|---|---|---|
-| [Vercel Hobby](https://vercel.com/docs/plans/hobby) | 100 GB fast transfer/month; 1,000,000 CDN requests and function invocations; 4 CPU-hours; 360 GB-hours memory; 100 deployments/day. Hobby is restricted to non-commercial personal use. | A store-owned public shopper app conflicts with that commercial-use restriction. The existing integration is retained; no paid upgrade is authorized by the “free tiers” requirement. Confirm an eligible plan before public store operation. |
-| [Firebase Spark](https://firebase.google.com/pricing) | Standard Firestore: 1 GiB stored, 10 GiB egress/month, 50,000 reads/day, 20,000 writes/day, 20,000 deletes/day. [Auth limits](https://firebase.google.com/docs/auth/limits) apply; Identity Platform Spark has 3,000 tier-1 daily active users. | Optional private snapshots only; never a lookup per scan. Phone/SMS sign-in and Cloud Functions are not used. |
-| [Upstash Redis Free](https://upstash.com/pricing/redis) | 256 MB and 500,000 commands/month. Lua operations consume the applicable command quota; this is not a promise of 500,000 AI requests. | Optional persistent AI rate limits. Stay on Free; no automatic upgrade. |
-| [Gemini API](https://ai.google.dev/gemini-api/docs/pricing) | Selected models have free input/output tiers. [RPM/TPM/RPD depend on model/project and are shown in AI Studio](https://ai.google.dev/gemini-api/docs/rate-limits); no account quota was available to verify here. [Unpaid-service terms](https://ai.google.dev/gemini-api/terms) permit submitted content to be used for product/model improvement. | Disabled by default. The account owner must select an available free model. Send no sensitive data. No universal free request limit is claimed. |
-
-Groq and OpenRouter are not configured; no reliance is placed on their free limits. The deterministic local helper needs no AI provider and remains available if all online quotas are exhausted.
+The default app needs no account, Firebase project, paid API or secrets. Optional cloud sync, online AI and staff publication remain disabled without their required settings. Android APK work is paused at the user's request.
 
 ## Optional accounts and online helper
 

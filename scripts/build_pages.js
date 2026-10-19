@@ -9,7 +9,7 @@ if(path.dirname(output)!==root||path.basename(output)!=='dist')throw new Error('
 execFileSync(process.execPath,[path.join(root,'shopper','scripts','build.mjs')],{stdio:'inherit'});
 fs.rmSync(output,{recursive:true,force:true});
 fs.mkdirSync(output,{recursive:true});
-const excludedDirectories=new Set(['.git','.github','node_modules','dist','scripts','tests','qa','docs','api','server','shopper']);
+const excludedDirectories=new Set(['.git','.github','node_modules','dist','scripts','tests','qa','docs','api','server','shopper','android']);
 const publicFileExtensions=new Set(['.html','.js','.css','.json','.jpg','.jpeg','.png','.webp','.svg','.ico','.woff','.woff2']);
 for(const entry of fs.readdirSync(root,{withFileTypes:true})){
   if(entry.isDirectory()){
