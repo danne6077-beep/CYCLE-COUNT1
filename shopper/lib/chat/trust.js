@@ -1,0 +1,4 @@
+export function provenance(lang='en',date=null){
+ const labels=date?{en:`Saved price, effective ${date}. Confirm at cashier.`,tl:`Na-save na presyo, petsa ${date}. Tiyakin sa cashier.`,taglish:`Saved price, effective ${date}. Confirm sa cashier.`}:{en:'Saved price, date unknown. Confirm at cashier.',tl:'Na-save na presyo, hindi alam ang petsa. Tiyakin sa cashier.',taglish:'Saved price, unknown ang date. Confirm sa cashier.'};return labels[lang]||labels.en;
+}
+export function priceCaveat(product,lang='en'){if(!product.anomalyFlags?.length)return '';return lang==='en'?'Price needs checking: unusual saved value; this may be inaccurate.':lang==='tl'?'Kailangang tiyakin ang presyo: kakaiba ang na-save na halaga; maaaring mali ito.':'Check muna ang price: unusual ang saved value; maaaring inaccurate.';}

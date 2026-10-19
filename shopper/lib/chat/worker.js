@@ -10,8 +10,8 @@ async function initialize(){
    try{const paths=['catalog.json','aliases.json'];const [snapshot,aliases]=await Promise.all(paths.map(async path=>{const response=await fetch(new URL('../../chat-data/'+path,import.meta.url));if(!response.ok)throw new Error('Chat catalog could not be prepared.');return response.json();}));saved={buildVersion:version,snapshot,aliases};await write('chat-index',saved,'catalog');}
    catch(error){if(!saved)throw error;}
   }
-  const products=saved.snapshot.rows.map(r=>({sku:r[0],name:r[1],category:r[2],subcategory:r[3],department:r[4],priceCentavos:r[5],brand:r[6],size:r[7],unit:r[8],aisle:r[9],inStock:r[10],barcodes:r[11],promoCentavos:r[12],promoStart:r[13],promoEnd:r[14],priceAsOf:saved.snapshot.priceAsOf}));
-  engine=new ChatEngine(products,saved.aliases);return engine;
+  const products=saved.snapshot.rows.map(r=>({sku:r[0],name:r[1],category:r[2],subcategory:r[3],department:r[4],priceCentavos:r[5],brand:r[6],size:r[7],unit:r[8],aisle:r[9],inStock:r[10],barcodes:r[11],promoCentavos:r[12],promoStart:r[13],promoEnd:r[14],anomalyFlags:r[15]||[],priceAsOf:saved.snapshot.effectiveDate||saved.snapshot.priceAsOf}));
+  engine=new ChatEngine(products,saved.aliases,{metadata:saved.snapshot});return engine;
  })().catch(error=>{initializing=null;throw error;});return initializing;
 }
 self.onmessage=async event=>{
