@@ -2,9 +2,9 @@ import test from 'node:test';import assert from 'node:assert/strict';import fs f
 import {ChatEngine,classify} from '../lib/chat/engine.js';
 import {parseSize,unitCost,normalizeNumbers,detectLanguage,distance,pesos} from '../lib/chat/normalize.js';
 const json=name=>JSON.parse(fs.readFileSync(new URL('../chat-data/'+name,import.meta.url)));
-const aliases=json('aliases.json'),jokes=json('julian-lines.json');
+const aliases=json('aliases.json');
 const prices=JSON.parse(fs.readFileSync(new URL('../catalog/catalog-prices.json',import.meta.url))).items;
-const real=new ChatEngine(prices,aliases,jokes);
+const real=new ChatEngine(prices,aliases);
 test('sizes, fractions, multipacks, unknown and ambiguous labels',()=>{
  for(const [name,value,unit] of [['1kg',1000,'g'],['1 kg',1000,'g'],['1KG',1000,'g'],['1 kilo',1000,'g'],['500g',500,'g'],['500 grams',500,'g'],['1L',1000,'ml'],['1 liter',1000,'ml'],['750ml',750,'ml'],['6s',6,'pc'],['x6',6,'pc'],['12 pcs',12,'pc'],['1/2 kg',500,'g'],['½ kilo',500,'g'],['1.5L',1500,'ml'],['250 ml',250,'ml'],['2x250g',500,'g'],['2 x 250g',500,'g'],['6 pcs',6,'pc'],['12s',12,'pc'],['dozen',12,'pc'],['pack of 6',6,'pc']]){const p=parseSize(name);assert.equal(p.baseValue,value,name);assert.equal(p.baseUnit,unit,name);}
  assert.equal(parseSize('rice kilo'),null);assert.equal(parseSize('250g 500g'),null);assert.equal(parseSize('190MLX12',{fromName:true}).comparable,false);
@@ -41,9 +41,4 @@ test('price strings come from actual prices, derived unit costs or independently
 test('availability, aisles and promotions report missing facts honestly',()=>{assert.match(real.respond('meron bigas').text,/live stock/i);assert.match(real.respond('where is rice').text,/not supplied/i);assert.equal(real.respond('promo').cards.length,0);assert.equal(real.respond('xyzzzzqqq').cards.length,0);});
 test('Tagalog price ceilings, currency-first limits and invalid amounts are handled',()=>{assert.ok(real.respond('hindi lalagpas ng 100 ang bigas').cards.length);const r=real.respond('ano mabibili ko sa ₱100');assert.equal(r.intent,'UNDER_BUDGET');assert.ok(r.cards.length);assert.ok(r.cards.every(p=>p.priceCentavos<=10000));assert.equal(real.respond('budget 500.123').intent,'ERROR');assert.equal(real.respond('rice between 100 and 50').intent,'ERROR');});
 test('natural intent words do not prevent matching the requested products',()=>{for(const q of ['cheaper rice','affordable milk','priciest soap','mamahalin coffee','availability coffee','lokasyon coffee','unit price oil','pinakasulit bigas','tipid rice','abot kaya rice','where can I find rice','can you tell me the price of rice','hanap murang bigas'])assert.ok(real.respond(q).cards.length,q);});
-test('Julian has 120 friendly editable lines, variants, toggle and no immediate repeats',()=>{
- assert.equal(Object.values(jokes.pools).flat().length,120);assert.ok(!/bading/i.test(JSON.stringify(jokes)));
- const bot=new ChatEngine(prices,aliases,jokes);let previous='';for(let i=0;i<20;i++){const r=bot.respond('cheapest rice Julian');assert.equal(r.julian,true);const joke=r.text.split('\n\n')[0];assert.notEqual(joke,previous);previous=joke;assert.equal(r.cards[0].sku,'9613');}
- for(const name of ['Julian','Julyan','Hulyan','Julz','Jul','Julien','Julain'])assert.equal(bot.respond('rice '+name).julian,true,name);
- assert.equal(bot.respond('rice Julian',{julian:false}).julian,undefined);assert.equal(bot.respond('clear basket Julian').julian,undefined);assert.equal(new ChatEngine(prices,aliases,jokes,{enableJulian:false}).respond('rice Julian').julian,undefined);
-});
+test('removed name mode never changes catalog answers',()=>{for(const name of ['Julian','Julyan','Julz']){const r=real.respond(name);assert.equal(r.julian,undefined);assert.ok(!r.text.includes(name));}});

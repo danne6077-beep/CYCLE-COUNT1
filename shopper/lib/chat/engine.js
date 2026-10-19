@@ -5,7 +5,6 @@ const escapeRE=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
 const stem=s=>s.length>4?s.replace(/(?:es|s)$/,''):s;
 const choose=(lang,en,tl,taglish=tl)=>lang==='en'?en:lang==='tl'?tl:taglish;
 const initial=['Pinakamurang bigas','Cheapest cooking oil','Magkano ang itlog?','May ₱500 ako, ano mabibili?','Compare Coke vs Pepsi','Ano ang promo ngayon?'];
-const serious=new Set(['CLEAR_BASKET','RESET','ERROR']);
 for(const word of 'cheaper affordable priciest mamahalin availability lokasyon unit substitute pamalit kapalit pinakasulit tipid abot kaya i tell options option choices choice hanap looking look hindi lalagpas hanggang mababa add remove idagdag lagay ilagay isama tanggalin alisin mo yan iyon iyan pa first second third fourth fifth una pangalawa pangatlo pang may mabibili bibilhin saan nasaan hanapin ikumpara kumpara mas sa kanya kami tayo para ngayon bagong usapan need needs want looking sku barcode code'.split(' '))stop.add(word);
 export function classify(raw,focus={}){
  const text=normalizeNumbers(raw),n=fold(text),basket=/\b(basket|cart|badyet ko|budget ko|my budget|matitira|remaining|balance|kasya ba|how is my budget|what should i remove)\b/.test(n);
@@ -36,15 +35,15 @@ export function classify(raw,focus={}){
  return {intent,text:n,amount:Number.isFinite(amount)?Math.round(amount*100):null,min:range?Math.round(+range[1]*100):null,count:Math.min(20,Math.max(1,+(count?.[1]||count?.[2]||5))),invalidAmount:/-\s*\d|\d+\.\d{3,}/.test(raw)||amount<=0||amount>10000000||!!range&&+range[1]>+range[2],requestedSize:parseSize(n),strictMax:/\b(under|below|less than)\b/.test(n)};
 }
 export class ChatEngine{
- constructor(products,aliases={},jokes={},config={}){
-  this.aliases=aliases;this.jokes=jokes;this.config=config;this.focus={};this.mentions=0;this.previousJoke='';this.turns=[];
+ constructor(products,aliases={},config={}){
+  this.aliases=aliases;this.config=config;this.focus={};this.turns=[];
   this.rules=Object.entries(aliases).flatMap(([key,values])=>values.map(value=>({key,phrase:fold(value)}))).sort((a,b)=>b.phrase.length-a.phrase.length);
   this.products=products.map(normalizeProduct);this.byId=new Map(this.products.map(p=>[p.id,p]));this.postings=new Map();
   for(const p of this.products){let extra=[];for(const rule of this.rules)if((' '+p.searchText+' ').includes(' '+rule.phrase+' '))extra.push(rule.key);p.tokens=[...new Set((p.searchText+' '+extra.join(' ')).split(' ').map(stem))];for(const token of p.tokens){if(!this.postings.has(token))this.postings.set(token,[]);this.postings.get(token).push(p.id);}}
   this.vocabulary=[...new Set([...Object.values(aliases).flat().map(fold),...this.postings.keys()])].filter(t=>t.length>=4&&!t.includes(' '));
  }
  canonical(text){let n=' '+fold(text)+' ';for(const {phrase,key} of this.rules)n=n.replace(new RegExp('(^| )'+escapeRE(phrase)+'(?= |$)','g'),'$1'+key+' ');return n.trim().replace(/\s+/g,' ');}
- terms(text){const numeric=/^\d+$/.test(fold(text))||/\b(sku|barcode|code)\b/.test(text);return this.canonical(text).split(' ').filter(t=>!stop.has(t)&&(!/^\d+(?:\.\d+)?(?:kg|kilo|g|ml|l|pcs?|s)?$/.test(t)||numeric&&/^\d+$/.test(t))&&!/^₱/.test(t)&&!['julian','julien','julyan','hulyan','julz','jul','sino','who','new','ngayon'].includes(t)).map(stem);}
+ terms(text){const numeric=/^\d+$/.test(fold(text))||/\b(sku|barcode|code)\b/.test(text);return this.canonical(text).split(' ').filter(t=>!stop.has(t)&&(!/^\d+(?:\.\d+)?(?:kg|kilo|g|ml|l|pcs?|s)?$/.test(t)||numeric&&/^\d+$/.test(t))&&!/^₱/.test(t)&&!['sino','who','new','ngayon'].includes(t)).map(stem);}
  search(text,{lastQuery=false}={}){
   let terms=this.terms(text),corrections=[];
   for(let i=0;i<terms.length;i++)if(!this.postings.has(terms[i])&&terms[i].length>=4){let best=null,bestD=3;for(const word of this.vocabulary){if(Math.abs(word.length-terms[i].length)>2)continue;const d=distance(terms[i],word);if(d<bestD){best=word;bestD=d;}if(!d)break;}const threshold=terms[i].length>=7?2:1;if(best&&bestD<=threshold){corrections.push({from:terms[i],to:best,confidence:1-bestD/Math.max(best.length,terms[i].length)});terms[i]=this.canonical(best);}}
@@ -61,7 +60,7 @@ export class ChatEngine{
   return {rows,terms,topic,corrections,text};
  }
  restore(focus){if(focus&&Array.isArray(focus.ids))this.focus={...focus,ids:focus.ids.filter(id=>this.byId.has(id))};}
- respond(raw,{language='auto',julian=true,basket=[],budget=null,day='2026-10-19'}={}){
+ respond(raw,{language='auto',basket=[],budget=null,day='2026-10-19'}={}){
   raw=String(raw??'').slice(0,500).trim();const lang=language==='auto'?detectLanguage(raw):language;
   const q=classify(raw,this.focus),reply={text:'',lang,cards:[],table:null,actions:[],quickReplies:initial,confidence:1,intent:q.intent,followUpHint:'',context:null};
   const say=(en,tl,mixed)=>choose(lang,en,tl,mixed),source=say('Based on the saved Hypermart catalog. Price date unavailable.','Batay sa na-save na Hypermart catalog. Walang petsa ng presyo.','Saved Hypermart catalog ito; walang price date.');
@@ -142,13 +141,6 @@ export class ChatEngine{
   }
   if(found.corrections.length){reply.corrections=found.corrections;reply.confidence=Math.min(...found.corrections.map(c=>c.confidence));reply.text=say(reply.confidence<.8?'Did you mean ':'Matched spelling: ',reply.confidence<.8?'Ang ibig mo ba ay ':'Katugmang baybay: ')+found.corrections.map(c=>c.from+' → '+c.to).join(', ')+(reply.confidence<.8?'?\n':'.\n')+reply.text;if(reply.confidence<.8)reply.actions=reply.actions.filter(a=>!a.auto);}
   const intro=opening(reply.intent,lang,raw+'|'+this.turns.length);if(intro)reply.text=intro+'\n'+reply.text;
-  const nameTokens=fold(raw).split(' '),nicknames=this.jokes.nicknames||['julian','julyan','hulyan','julz','jul','julien'];const named=nameTokens.some(token=>nicknames.includes(token)||token.length>=6&&distance(token,'julian')<=1);
-  if(named&&julian&&this.config.enableJulian!==false&&!serious.has(reply.intent)){
-   this.mentions++;let key=/late|oras|huli/.test(q.text)?'late':/sino|who/.test(q.text)?'who':/love|crush|jowa/.test(q.text)?'crush':/pogi|ganda|handsome|compliment/.test(q.text)?'compliment':['BUDGET_PLAN','BASKET_QUERY'].includes(q.intent)?'budget':found.topic==='rice'?'rice':q.intent==='MOST_EXPENSIVE'?'premium':/shampoo|beauty|lotion/.test(q.text)?'beauty':/beer|alak|drink|juice|water/.test(q.text)?'drinks':q.intent==='SMALLTALK'?'greetings':['PRICE_OF','CHEAPEST'].includes(q.intent)?'price':'generic';
-   const pool=(this.jokes.pools?.[key]||[]).filter(line=>line.lang===lang||lang==='taglish');const all=pool.length?pool:(this.jokes.pools?.generic||[]);let line=all[(this.mentions*7+raw.length)%Math.max(1,all.length)]?.text||'Julian brought the dramatic entrance again. Friendly joke lang!';if(line===this.previousJoke)line=all[(all.findIndex(x=>x.text===line)+1)%all.length]?.text||line;this.previousJoke=line;
-   if(this.mentions===2)line+=say(' Julian is back in the spotlight!',' Si Julian na naman ang bida!');if(this.mentions===5)line+=say(' Fifth cameo—confetti for Julian! 🎉',' Ikalimang cameo—confetti para kay Julian! 🎉');
-   reply.text=line+(reply.intent==='UNKNOWN'?'':'\n\n'+reply.text);reply.julian=true;
-  }
   reply.context={...this.focus};this.turns.push({question:raw,intent:reply.intent});this.turns=this.turns.slice(-20);return reply;
  }
 }
