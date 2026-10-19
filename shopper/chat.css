@@ -22,3 +22,4 @@ body:has(#sheet[open]) #chat-launcher{display:none}@media(max-width:800px){.chat
 
 .chat-season-art{display:none;align-items:center;gap:4px;margin-left:6px;color:#962738}.chat-season-art svg{width:24px;height:24px}#fuji-chat[data-chat-theme=christmas] .chat-season-art{display:inline-flex}[data-theme=dark] .chat-season-art{color:#ffb5bf}
 #fuji-chat .message time{opacity:1}
+.chat-history-controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.chat-history-controls button{border:1px solid var(--border);border-radius:10px;padding:8px 12px;background:var(--surface);color:var(--ink);font-size:12px!important}#fuji-chat::backdrop{backdrop-filter:none}
