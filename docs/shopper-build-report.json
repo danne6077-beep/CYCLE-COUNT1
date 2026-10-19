@@ -1,7 +1,7 @@
 {
-  "shellVersion": "58dcc33ad69a",
+  "shellVersion": "123e7e89b6c5",
   "initialJavaScriptGzipBytes": 45215,
-  "chatWorkerGzipBytes": 14652,
+  "chatWorkerGzipBytes": 14710,
   "chatSnapshotGzipBytes": 498732,
   "chatVersion": "1005bde1110d54ebbdf4",
   "scannerLazyGzipBytes": 116532,

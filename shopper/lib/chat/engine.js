@@ -6,7 +6,7 @@ const stem=s=>s.length>4?s.replace(/(?:es|s)$/,''):s;
 const choose=(lang,en,tl,taglish=tl)=>lang==='en'?en:lang==='tl'?tl:taglish;
 const initial=['Pinakamurang bigas','Cheapest cooking oil','Magkano ang itlog?','May ₱500 ako, ano mabibili?','Compare Coke vs Pepsi','Ano ang promo ngayon?'];
 const serious=new Set(['CLEAR_BASKET','RESET','ERROR']);
-for(const word of 'hindi lalagpas hanggang mababa add remove idagdag lagay ilagay isama tanggalin alisin mo yan iyon iyan pa first second third fourth fifth una pangalawa pangatlo pang may mabibili bibilhin saan nasaan hanapin ikumpara kumpara mas sa kanya kami tayo para ngayon bagong usapan need needs want looking sku barcode code'.split(' '))stop.add(word);
+for(const word of 'cheaper affordable priciest mamahalin availability lokasyon unit substitute pamalit kapalit pinakasulit tipid abot kaya i tell options option choices choice hanap looking look hindi lalagpas hanggang mababa add remove idagdag lagay ilagay isama tanggalin alisin mo yan iyon iyan pa first second third fourth fifth una pangalawa pangatlo pang may mabibili bibilhin saan nasaan hanapin ikumpara kumpara mas sa kanya kami tayo para ngayon bagong usapan need needs want looking sku barcode code'.split(' '))stop.add(word);
 export function classify(raw,focus={}){
  const text=normalizeNumbers(raw),n=fold(text),basket=/\b(basket|cart|badyet ko|budget ko|my budget|matitira|remaining|balance|kasya ba|how is my budget|what should i remove)\b/.test(n);
  let intent='UNKNOWN';
