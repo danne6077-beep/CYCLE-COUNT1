@@ -1,17 +1,15 @@
-# FUJI grocery website and native Android app
+# FUJI Grocery Tracker website and Android companion
 
-Adds `/shopper/` alongside the existing cycle-count system and a native Kotlin/Compose Android companion. Both use **14,076 supplied items and prices** joined by exact SKU to HYPERMART: **14,026 matches and 50 explicitly unmatched items**. Only listed products are exported. The price list has no effective date; SKU 2028 is rounded from 0.209 to 0.21 pesos. Every estimate carries the required price-accuracy/cashier warning.
+The public grocery website is **https://fuji-grocery-tracker.vercel.app/**. Its own Vercel project uses root directory shopper and branch codex/fuji-shopper-hypermart, independently of the Cycle Count Generator. No production merge into the generator's branch is required. Shared master-data exports stay in this repository.
 
-Web features include camera/manual lookup, offline catalog caching, exact centavo totals, basket budgets, lists, frozen-price trip history, a local catalog helper and a gated staff workspace. Startup loads a small starter and its prices; full search and prices load on demand. Optional cloud sync, online AI and staff publication remain disabled until configured.
+Only the supplied 14,076-item list is visible, joined by exact SKU to HYPERMART: 14,026 matches and 50 explicitly unmatched supplied items. Unlisted master products, GOMART and SET are excluded. The price list has no effective date; SKU 2028 rounds from 0.209 to 0.21 pesos. Every estimate carries the required price-accuracy/cashier warning.
 
-Android uses Compose Material 3, MVVM/Repository, Hilt, Room, DataStore, Navigation and Coil. It supports offline search/scanning, basket budgets and shelf overrides, lists/favorites, saved trips and CSV sharing, private Photo Picker images, themes and source/privacy/credits. The APK has no internet permission, paid API, ads or analytics. Both apps share catalog provenance; personal shopping records stay separately on each device.
+The Scrnshts-inspired redesign uses a dark-first editorial layout, self-hosted Inter and original illustrated category cards, with matching mobile/desktop light and dark themes. Browsing, camera/manual lookup, offline catalog caching, exact-centavo baskets, budgets, shopping lists, frozen trip history and the local catalog helper remain available. Optional cloud services fail closed without configuration.
 
-Web validation includes repository tests, syntax/type checks, production build, mobile shopping flow, offline lookup, scanner/QR round-trip, fixture-only savings and Firestore emulator isolation checks. Android validation and downloadable artifacts are produced by `.github/workflows/android.yml`; see `shopper-validation.md` for the final actual results.
+The mobile camera fix requests access directly from the Scan tap, starts muted inline video before decoder initialization, handles missing/broken native barcode support with a single-stream ZXing fallback, and shows visible permission/busy/retry states. Take barcode photo decodes locally into the same SKU/price lookup. Closing or canceling the scanner releases camera tracks, including late permission responses. Versioned entry points and a complete PWA precache prevent an older shell from retaining the previous scanner.
 
-The [Vercel website](https://fuji-grocery-tracker-git-codex-fuji-shopper-hypermart-fuji-92d1.vercel.app/) remains the **protected review preview selected by the user**, linked to [PR #2](https://github.com/danne6077-beep/CYCLE-COUNT1/pull/2). No production merge or paid hosting upgrade is performed.
+Validation: 65 repository tests; syntax/type checks; production build; the mobile basket/budget/history/offline flow; native-detector-absent/broken camera tests; denied-permission guidance; actual ZXing photo-to-SKU lookup; and camera-track cleanup. Camera browser tests use a simulated Chromium device with real getUserMedia/video playback. Physical phone camera hardware remains unverified. See docs/shopper-validation.md for exact CI results.
 
-The user subsequently requested a separate grocery website. Vercel project **fuji-grocery-tracker** now uses root directory `shopper`, sharing this repository's master files while excluding the Cycle Count Generator from its deployed pages. The redesign uses the supplied Scrnshts visual reference, original illustrated cards and self-hosted Inter.
+A Kotlin/Compose Android companion using the same catalog is included. **APK work is paused at the user's request.** Its personal Room/DataStore records and website IndexedDB records are separate device-local stores; live cross-device sync is not provisioned.
 
 ![FUJI gallery design](images/shopper-desktop-gallery.png)
-![FUJI mobile light](images/shopper-mobile-light.png)
-![FUJI mobile dark](images/shopper-mobile-dark.png)

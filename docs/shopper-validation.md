@@ -20,7 +20,7 @@ The phone-camera update requests getUserMedia directly from the Scan tap before 
 
 **65 repository tests pass locally**, including six camera lifecycle/error regressions. The complete source mobile shopping flow passes after the update. Camera browser checks pass at both /shopper/ and the standalone / root using Chromium's simulated camera and real getUserMedia/video playback. They cover absent/broken native detectors, one camera request per session, permission denial and enabled retry, actual shipped ZXing decoding of a barcode photo into SKU 486522 at 14.05 pesos, and stopped tracks after close.
 
-The production build now replaces the precache placeholder correctly, includes decoder assets, and versions app/scanner entry points so an older worker cannot retain the previous camera implementation. Updated production CI and public deployment verification are recorded after publication.
+The production build now replaces the precache placeholder correctly, includes decoder assets, and versions app/scanner entry points so an older worker cannot retain the previous camera implementation. The camera update passed production [CI run 39232206052](https://github.com/danne6077-beep/CYCLE-COUNT1/actions/runs/39232206052) at commit 0e14a69: all 65 tests, syntax/type checks, production build, complete mobile shopping flow, barcode bundles, both camera route checks and Firestore isolation. Lighthouse mobile scored **Performance 92 / Accessibility 100**. Public-release verification follows deployment to the standalone grocery project.
 
 ## Limits and paused work
 
