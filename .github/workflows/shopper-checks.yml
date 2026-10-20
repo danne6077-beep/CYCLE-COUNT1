@@ -1,0 +1,91 @@
+name: Shopper checks
+on:
+  pull_request:
+    paths: ['shopper/**', 'api/**', 'server/**', 'firestore.rules', 'scripts/**', 'vercel.json', 'docs/**', '.github/workflows/shopper-checks.yml']
+  push:
+    branches: ['codex/fuji-shopper-hypermart', 'feat/offline-chatbot']
+permissions:
+  contents: read
+concurrency:
+  group: shopper-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.20.0
+      - run: pnpm --dir shopper install --no-frozen-lockfile
+      - run: pnpm --dir shopper lint
+      - run: pnpm --dir shopper typecheck
+      - run: node --test
+      - run: node scripts/build_pages.js
+      - run: node shopper/scripts/evaluate-chat.mjs
+      - run: node shopper/scripts/evaluate-smart.mjs
+      - run: node shopper/scripts/review-content.mjs
+      - run: npm ci --ignore-scripts
+      - run: npx playwright install --with-deps chromium
+      - name: Mobile browser flow
+        run: |
+          node shopper/scripts/serve.mjs --dist > /tmp/fuji-preview.log 2>&1 &
+          for attempt in $(seq 1 30); do
+            if curl --silent --fail http://127.0.0.1:4173/shopper/ > /dev/null; then break; fi
+            sleep 1
+          done
+          curl --silent --fail http://127.0.0.1:4173/shopper/ > /dev/null
+          node scripts/shopper-smoke.cjs
+          node scripts/shopper-swap-check.cjs
+          node scripts/shopper-offline-check.cjs
+          node scripts/shopper-bundle-check.cjs
+          node scripts/shopper-camera-check.cjs
+          node scripts/shopper-chat-check.cjs
+          SHOPPER_PREVIEW_PORT=4184 node shopper/scripts/serve.mjs --dist --standalone > /tmp/fuji-standalone.log 2>&1 &
+          for attempt in $(seq 1 30); do
+            if curl --silent --fail http://127.0.0.1:4184/ > /dev/null; then break; fi
+            sleep 1
+          done
+          SHOPPER_TEST_URL=http://127.0.0.1:4184/ node scripts/shopper-camera-check.cjs
+          SHOPPER_TEST_URL=http://127.0.0.1:4184/ node scripts/shopper-chat-check.cjs
+          node scripts/shopper-planner-ui-check.cjs
+          node scripts/shopper-resilience-check.cjs
+          node scripts/shopper-installability-check.cjs
+          node scripts/shopper-privacy-check.cjs
+          node scripts/shopper-history-check.cjs
+          node scripts/shopper-smart-check.cjs
+          node scripts/shopper-perf-check.cjs
+      - name: Lighthouse mobile
+        run: |
+          export CHROME_PATH="$(node -p "require('playwright').chromium.executablePath()")"
+          npx --yes lighthouse@13.5.0 http://127.0.0.1:4173/shopper/ --chrome-flags="--headless --no-sandbox" --only-categories=performance,accessibility --output=json --output=html --output-path=qa/shopper/lighthouse --quiet
+          node scripts/shopper-lighthouse-check.cjs
+          node scripts/shopper-hardening-gates.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: shopper-proof
+          path: |
+            qa/shopper
+            docs/shopper-build-report.json
+            shopper/pnpm-lock.yaml
+  firestore-rules:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Install isolated emulator test dependencies
+        run: npm --prefix shopper/emulator install --ignore-scripts --no-package-lock
+      - name: Check private snapshot rules
+        env:
+          FIREBASE_CLI_DISABLE_UPDATE_CHECK: 'true'
+        run: shopper/emulator/node_modules/.bin/firebase emulators:exec --only firestore --project demo-fuji-shopper "node shopper/emulator/firestore.mjs"

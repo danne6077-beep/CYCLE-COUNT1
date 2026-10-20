@@ -1,0 +1,17 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import {gunzipSync} from 'node:zlib';
+import {createHash} from 'node:crypto';
+const root=path.resolve(import.meta.dirname,'..');
+const catalog=path.join(root,'shopper/catalog');
+const meta=JSON.parse(fs.readFileSync(path.join(catalog,'catalog-meta.json')));
+const prices=JSON.parse(fs.readFileSync(path.join(catalog,'catalog-prices.json')));
+const details=new Map();
+for(const file of meta.files.filter(f=>f.path.includes('products.')))for(const row of JSON.parse(gunzipSync(fs.readFileSync(path.join(root,'shopper',file.path)))))details.set(row[0],row);
+const items=prices.items.map(p=>({sku:p.sku,name:p.name,category:p.category,department:p.department,priceCentavos:p.priceCentavos,masterMatched:p.masterMatched,barcodes:details.get(p.sku)?.[5]||[]}));
+if(items.length!==meta.itemCount||items.some(p=>!Number.isSafeInteger(p.priceCentavos)))throw Error('Android catalog does not match website');
+const assets=path.join(root,'android/app/src/main/assets');fs.mkdirSync(assets,{recursive:true});
+const data=JSON.stringify(items);fs.writeFileSync(path.join(assets,'seed_data.json'),data);
+fs.writeFileSync(path.join(assets,'catalog-version.txt'),createHash('sha256').update(data).digest('hex')+'\n');
+fs.copyFileSync(path.join(root,'docs/assortment-import-report.json'),path.join(assets,'import-report.json'));
+console.log(`Android and web catalog synchronized: ${items.length} products, ${Buffer.byteLength(data)} bytes.`);

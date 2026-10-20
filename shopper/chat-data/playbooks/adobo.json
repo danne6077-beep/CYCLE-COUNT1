@@ -1,0 +1,156 @@
+{
+  "schemaVersion": 1,
+  "id": "adobo",
+  "names": {
+    "en": "Adobo ingredients",
+    "tl": "Mga sangkap sa adobo",
+    "taglish": "Adobo ingredients"
+  },
+  "triggers": [
+    "adobo"
+  ],
+  "season": null,
+  "defaults": {
+    "people": 4,
+    "days": 1
+  },
+  "groups": [
+    {
+      "id": "essentials",
+      "name": {
+        "en": "Essentials",
+        "tl": "Pangunahing items",
+        "taglish": "Essentials"
+      }
+    },
+    {
+      "id": "extras",
+      "name": {
+        "en": "Nice to have",
+        "tl": "Maaaring idagdag",
+        "taglish": "Extras"
+      }
+    }
+  ],
+  "tradition": null,
+  "items": [
+    {
+      "id": "chicken",
+      "group": "essentials",
+      "concept": "chicken",
+      "terms": [
+        "chicken",
+        "manok"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.25
+      },
+      "priority": "essential",
+      "substitutes": [
+        "egg"
+      ],
+      "tags": [
+        "meat"
+      ],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "soy",
+      "group": "essentials",
+      "concept": "soy",
+      "terms": [
+        "soy sauce",
+        "toyo"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.125
+      },
+      "priority": "essential",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "vinegar",
+      "group": "essentials",
+      "concept": "vinegar",
+      "terms": [
+        "vinegar",
+        "suka"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.125
+      },
+      "priority": "essential",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "garlic",
+      "group": "essentials",
+      "concept": "garlic",
+      "terms": [
+        "garlic",
+        "bawang"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.125
+      },
+      "priority": "essential",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "rice",
+      "group": "essentials",
+      "concept": "rice",
+      "terms": [
+        "rice",
+        "bigas"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 150,
+        "unit": "g",
+        "approxUnits": 0.15
+      },
+      "priority": "essential",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "onion",
+      "group": "extras",
+      "concept": "onion",
+      "terms": [
+        "onion",
+        "sibuyas"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.125
+      },
+      "priority": "nice",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    }
+  ]
+}

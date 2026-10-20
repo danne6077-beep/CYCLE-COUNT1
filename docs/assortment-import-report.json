@@ -1,0 +1,272 @@
+{
+  "sourceSheet": "Sheet1",
+  "sourceRows": 14076,
+  "duplicateSku": [],
+  "roundedPrices": [
+    {
+      "row": 14077,
+      "sku": "2028",
+      "sourcePrice": "0.20899999999999999",
+      "priceCentavos": 21
+    }
+  ],
+  "matchedSku": 14026,
+  "unmatchedSku": 50,
+  "unmatched": [
+    {
+      "sku": "694500",
+      "description": "SELECTA SUP CHOCO MUDPIE 450ML",
+      "row": 1715
+    },
+    {
+      "sku": "694013",
+      "description": "138819860 WARDROBE 4-DOOR",
+      "row": 2711
+    },
+    {
+      "sku": "694499",
+      "description": "SELECTA SUP CHOCO MUDPIE 1.25L",
+      "row": 2882
+    },
+    {
+      "sku": "694502",
+      "description": "SELECTA IH SUP APPLE PIE 1.25L",
+      "row": 2883
+    },
+    {
+      "sku": "694442",
+      "description": "ETIV10CFWEDAEVRSTINVRTERAIRCON",
+      "row": 3426
+    },
+    {
+      "sku": "694441",
+      "description": "ET2RN181DIVEVERESTREF2D6.4CUFT",
+      "row": 3434
+    },
+    {
+      "sku": "694503",
+      "description": "SELECTA IH SUP APPLE PIE 450ML",
+      "row": 3581
+    },
+    {
+      "sku": "695201",
+      "description": "VICKS VAPORUB XTRA STRONG 25G",
+      "row": 4115
+    },
+    {
+      "sku": "694368",
+      "description": "4DGUMMY BLOCKSRPRSBXZOOTPIA24G",
+      "row": 6356
+    },
+    {
+      "sku": "695482",
+      "description": "LYSOL PH MACLEM900 FR LEM400ML",
+      "row": 6615
+    },
+    {
+      "sku": "694490",
+      "description": "PIATTOS SNOW CHEESE 40G",
+      "row": 7695
+    },
+    {
+      "sku": "693981",
+      "description": "BUY2NIPS COLOR PLAY PACK",
+      "row": 7995
+    },
+    {
+      "sku": "695484",
+      "description": "LYSOL PH MACLAV900 FR LAV400ML",
+      "row": 8002
+    },
+    {
+      "sku": "695433",
+      "description": "1026 2006 HJIAYIMENSBOXERBRIEF",
+      "row": 8262
+    },
+    {
+      "sku": "695432",
+      "description": "1026 714 HJIAYIMENSBOXERBRIEF",
+      "row": 8511
+    },
+    {
+      "sku": "695434",
+      "description": "1026 8954 HJIAYIMENSBOXERBRIEF",
+      "row": 8639
+    },
+    {
+      "sku": "695203",
+      "description": "VICKS VAPO DROP HONEY LEMON 8S",
+      "row": 8700
+    },
+    {
+      "sku": "694783",
+      "description": "SISTER LONG PLINER GT SCNT 20S",
+      "row": 8829
+    },
+    {
+      "sku": "694156",
+      "description": "B1 LS CHESECAKE ORG30GPMILO24G",
+      "row": 8957
+    },
+    {
+      "sku": "695435",
+      "description": "1026 8957 HJIAYIMENSBOXERBRIEF",
+      "row": 9195
+    },
+    {
+      "sku": "694886",
+      "description": "DONYA LUCIA SPGTSC900GPSTA700G",
+      "row": 9527
+    },
+    {
+      "sku": "695569",
+      "description": "EQ COLORS BIG PACK NEWBORN 46S",
+      "row": 9574
+    },
+    {
+      "sku": "694781",
+      "description": "SISTER LNG PLINER PWD SCNT20S",
+      "row": 9589
+    },
+    {
+      "sku": "694772",
+      "description": "ECOPR AL CPN3 32.5X26.2X6.3 3S",
+      "row": 10538
+    },
+    {
+      "sku": "695033",
+      "description": "NUTSWORLD FRUITSGREENPEAMIX35G",
+      "row": 10683
+    },
+    {
+      "sku": "694444",
+      "description": "SNICKERS ALMND DARKCHOCOBAR40G",
+      "row": 10687
+    },
+    {
+      "sku": "694364",
+      "description": "AMOS PEELERZ MTCHA MOCHI65G",
+      "row": 10688
+    },
+    {
+      "sku": "694770",
+      "description": "ECOPRO AL CATRPN2 34.2X25X5 3S",
+      "row": 10695
+    },
+    {
+      "sku": "694492",
+      "description": "PIATTOS SNOW CHEESE 85G",
+      "row": 11325
+    },
+    {
+      "sku": "694366",
+      "description": "4D SOUR RAINBOW BTE FLLD72G",
+      "row": 11492
+    },
+    {
+      "sku": "695197",
+      "description": "SFG DERM PROTECT BAR ACNE 108G",
+      "row": 11499
+    },
+    {
+      "sku": "695195",
+      "description": "SFG DERM PROTECT BAR DRY 108G",
+      "row": 11530
+    },
+    {
+      "sku": "695199",
+      "description": "SFG DERM PRTCT BAR CLNSE 108G",
+      "row": 11531
+    },
+    {
+      "sku": "695021",
+      "description": "TWINLIONCRSPYPNTFLVRSNCK65G",
+      "row": 11604
+    },
+    {
+      "sku": "695567",
+      "description": "CHARMEE ULTHN NPKN WW HVYFLW6S",
+      "row": 11673
+    },
+    {
+      "sku": "694110",
+      "description": "SISTERS DMAXI REG FLW NW8S 5P1",
+      "row": 11727
+    },
+    {
+      "sku": "694888",
+      "description": "GN FRESH GATA 125 ML",
+      "row": 11761
+    },
+    {
+      "sku": "694532",
+      "description": "GTP 20G W 4PCS GTP1.9G STCK",
+      "row": 12043
+    },
+    {
+      "sku": "694536",
+      "description": "BAG O FUN 2026 40G",
+      "row": 12063
+    },
+    {
+      "sku": "694766",
+      "description": "ECO PRO RND PAPER PLT SLVR9X20",
+      "row": 12070
+    },
+    {
+      "sku": "695027",
+      "description": "TWINLIONCRSPYCHCOLTESNCK65G",
+      "row": 12640
+    },
+    {
+      "sku": "695193",
+      "description": "TIDE LAU PWD DEEP CLEAN 95G",
+      "row": 12724
+    },
+    {
+      "sku": "694779",
+      "description": "SISTER LONG PLINER LAV SCNT20S",
+      "row": 12803
+    },
+    {
+      "sku": "694785",
+      "description": "SISTER LNG PLINER ACT CRBN 20S",
+      "row": 12900
+    },
+    {
+      "sku": "695029",
+      "description": "NUTS WORLD ALMOND 35G",
+      "row": 13074
+    },
+    {
+      "sku": "695031",
+      "description": "NUTSWORLD GREASELSS PNUT35G",
+      "row": 13079
+    },
+    {
+      "sku": "694534",
+      "description": "TIMPLA NATIN PANLO PRMO50G",
+      "row": 13269
+    },
+    {
+      "sku": "694894",
+      "description": "LM PNTCTN XTR HOTCHLIPCHESE80G",
+      "row": 13457
+    },
+    {
+      "sku": "694896",
+      "description": "LM PNCTCNTN ORIGNL P BARBEQ80G",
+      "row": 13460
+    },
+    {
+      "sku": "695034",
+      "description": "EC TWINLION PEAS BONE 58G",
+      "row": 13615
+    }
+  ],
+  "masterDescriptionDifferences": 71,
+  "priceDateSupplied": false,
+  "roundingPolicy": "Nearest centavo, decimal ROUND_HALF_UP",
+  "sourceName": "list of inventory and price list.xlsx",
+  "checksum": "b7bb51bcdb491cd103db86ba859e18df8e0a9fc4bc4fb9e1f3624505e5222c8c"
+}

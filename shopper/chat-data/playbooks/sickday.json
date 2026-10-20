@@ -1,0 +1,140 @@
+{
+  "schemaVersion": 1,
+  "id": "sickday",
+  "names": {
+    "en": "Sick-day household supplies",
+    "tl": "Gamit sa bahay sa araw ng pahinga",
+    "taglish": "Sick-day household supplies"
+  },
+  "triggers": [
+    "sick day",
+    "sickday",
+    "sick",
+    "may sakit",
+    "trangkaso",
+    "rest day"
+  ],
+  "season": null,
+  "defaults": {
+    "people": 1,
+    "days": 2
+  },
+  "groups": [
+    {
+      "id": "essentials",
+      "name": {
+        "en": "Essentials",
+        "tl": "Pangunahing items",
+        "taglish": "Essentials"
+      }
+    },
+    {
+      "id": "extras",
+      "name": {
+        "en": "Nice to have",
+        "tl": "Maaaring idagdag",
+        "taglish": "Extras"
+      }
+    }
+  ],
+  "tradition": null,
+  "items": [
+    {
+      "id": "water",
+      "group": "essentials",
+      "concept": "water",
+      "terms": [
+        "water",
+        "tubig"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.5,
+        "unit": null,
+        "approxUnits": 0.5
+      },
+      "priority": "essential",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "bread",
+      "group": "essentials",
+      "concept": "bread",
+      "terms": [
+        "bread",
+        "tinapay"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.125
+      },
+      "priority": "essential",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "tissue",
+      "group": "essentials",
+      "concept": "tissue",
+      "terms": [
+        "tissue"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.1,
+        "unit": null,
+        "approxUnits": 0.1
+      },
+      "priority": "essential",
+      "substitutes": [],
+      "tags": [
+        "nonfood"
+      ],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "oat",
+      "group": "extras",
+      "concept": "oat",
+      "terms": [
+        "oat"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.125
+      },
+      "priority": "nice",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "soap",
+      "group": "extras",
+      "concept": "soap",
+      "terms": [
+        "soap",
+        "sabon"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.1,
+        "unit": null,
+        "approxUnits": 0.1
+      },
+      "priority": "nice",
+      "substitutes": [],
+      "tags": [
+        "nonfood"
+      ],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+const test=require('node:test'),assert=require('node:assert/strict');const chat=require('../api/chat.js'),publish=require('../api/catalog-publish.js');
+function response(){return {code:null,data:null,setHeader(){},status(n){this.code=n;return this;},json(data){this.data=data;return this;}};}
+test('chat only accepts POST',async()=>{const res=response();await chat({method:'GET',headers:{}},res);assert.equal(res.code,405);});
+test('chat requires affirmative consent before looking up identity',async()=>{const res=response();await chat({method:'POST',body:{question:'rice',cart:[],consent:false},headers:{}},res);assert.equal(res.code,400);});
+test('chat rejects oversized questions',async()=>{const res=response();await chat({method:'POST',body:{question:'x'.repeat(501),cart:[],consent:true},headers:{}},res);assert.equal(res.code,400);});
+test('chat and publishing fail closed without authentication configuration',async()=>{const previous=process.env.FIREBASE_API_KEY;delete process.env.FIREBASE_API_KEY;for(const handler of [chat,publish]){const res=response();await handler({method:'POST',body:{question:'rice',cart:[],consent:true,rows:[]},headers:{}},res);assert.equal(res.code,503);assert.match(res.data.error,/optional online feature/);}if(previous)process.env.FIREBASE_API_KEY=previous;});

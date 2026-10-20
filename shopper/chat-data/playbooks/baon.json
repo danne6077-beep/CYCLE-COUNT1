@@ -1,0 +1,175 @@
+{
+  "schemaVersion": 1,
+  "id": "baon",
+  "names": {
+    "en": "School baon",
+    "tl": "Baon sa paaralan",
+    "taglish": "School baon"
+  },
+  "triggers": [
+    "school baon",
+    "baon",
+    "lunchbox",
+    "lunch box",
+    "packed lunch"
+  ],
+  "season": null,
+  "defaults": {
+    "people": 2,
+    "days": 5
+  },
+  "groups": [
+    {
+      "id": "essentials",
+      "name": {
+        "en": "Essentials",
+        "tl": "Pangunahing items",
+        "taglish": "Essentials"
+      }
+    },
+    {
+      "id": "extras",
+      "name": {
+        "en": "Nice to have",
+        "tl": "Maaaring idagdag",
+        "taglish": "Extras"
+      }
+    }
+  ],
+  "tradition": null,
+  "items": [
+    {
+      "id": "rice",
+      "group": "essentials",
+      "concept": "rice",
+      "terms": [
+        "rice",
+        "bigas"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 150,
+        "unit": "g",
+        "approxUnits": 0.15
+      },
+      "priority": "essential",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "egg",
+      "group": "essentials",
+      "concept": "egg",
+      "terms": [
+        "egg",
+        "itlog"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.5
+      },
+      "priority": "essential",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "vegetable",
+      "group": "essentials",
+      "concept": "vegetable",
+      "terms": [
+        "vegetable",
+        "gulay"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.25
+      },
+      "priority": "essential",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "bread",
+      "group": "essentials",
+      "concept": "bread",
+      "terms": [
+        "bread",
+        "tinapay"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.125
+      },
+      "priority": "essential",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "water",
+      "group": "essentials",
+      "concept": "water",
+      "terms": [
+        "water",
+        "tubig"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.5,
+        "unit": null,
+        "approxUnits": 0.5
+      },
+      "priority": "essential",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "fruit",
+      "group": "extras",
+      "concept": "fruit",
+      "terms": [
+        "fruit",
+        "prutas"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.125
+      },
+      "priority": "nice",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "biscuit",
+      "group": "extras",
+      "concept": "biscuit",
+      "terms": [
+        "biscuit",
+        "biskwit"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.125
+      },
+      "priority": "nice",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    }
+  ]
+}

@@ -1,0 +1,89 @@
+import {fold,normalizeNumbers,detectLanguage,pesos} from './normalize.js';
+import {provenance} from './trust.js';
+const tr=(lang,en,tl,mixed=tl)=>lang==='en'?en:lang==='tl'?tl:mixed;
+const restricted=/\b(pork|baboy|ham|bacon|hotdog|longganisa|sausage)\b/;
+const seafood=/\b(fish|seafood|shrimp|prawn|tuna|sardine|sardines|bangus|tilapia|isda|patis|oyster)\b/;
+const flesh=/\b(chicken|ckn|chkn|pork|beef|fish|ham|bacon|meat|hotdog|manok|baboy|baka|tuna|sardine|seafood|shrimp|sausage)\b/;
+// Search includes flavor words and category aliases. Recipe ingredients also need a compatible shelf category.
+function ingredientMatch(p,concept){
+ const category=fold(p.category).replace(/\band\b/g,'').replace(/\s+/g,' ').trim(),sub=fold(p.subcategory),name=fold(p.name),fresh=p.department==='FRESH & STAPLE';
+ const dairy=category==='milk dairy',baking=category==='baking salad aids',cooking=category==='cooking essentials',staple=category==='staple';
+ if(['chicken','pork','fish','ham','hotdog'].includes(concept))return fresh&&category==='fresh frozen'&&!/ice cream|wrapper/.test(sub);
+ if(concept==='egg')return fresh&&/egg/.test(sub+' '+name)&&!/(?:flavor|crack|noodle|biscuit)/.test(sub+' '+name);
+ if(['garlic','onion','ginger','tomato','vegetable','fruit'].includes(concept))return fresh&&category==='fresh frozen'&&!/ice cream/.test(sub);
+ if(concept==='spaghetti'||concept==='noodle')return category==='pasta noodles';
+ if(concept==='cheese')return (dairy||baking)&&/cheese/.test(sub);
+ if(concept==='cream')return (dairy||baking)&&/^(?:all purpose |cooking |thick |whipping )?cream$/.test(sub);
+ if(concept==='milk')return dairy&&!/condensed|cheese|butter|creamer/.test(sub)&&/milk|yoghurt|yogurt|evaporated|fresh|fortified|powder/.test(sub+' '+name);
+ if(concept==='condensed')return dairy&&/condensed|condens/.test(sub+' '+name);
+ if(concept==='bread')return category==='bakery delicacies'&&/bread|loaf|bun|pandesal/.test(sub+' '+name)&&!/crack|biscuit|crumb|breading/.test(sub+' '+name);
+ if(concept==='rice')return staple&&/plain|rice|bigas/.test(sub+' '+name);
+ if(concept==='sugar')return (staple||cooking)&&/sugar|asukal/.test(name);
+ if(concept==='salt'||concept==='oil'||concept==='soy'||concept==='vinegar'||concept==='sauce')return staple||cooking;
+ if(['water','juice','coffee'].includes(concept))return category==='non alcoholic beverages';
+ return true;
+}
+export function extractSlots(raw,previous={},defaults={people:4,days:1}){
+ const n=normalizeNumbers(raw).replace(/(\d+(?:\.\d+)?)\s*k\b/g,(_,v)=>String(Number(v)*1000));
+ const people=n.match(/(?:for|para sa|pang)\s+(\d+)\b(?!\s*(?:days?|araw|weeks?|linggo|budget|pesos?|piso))|\b(\d+)\s*(?:people|persons?|pax|guests?|kids?|children|adults?|tao|kami|tayo|bata)\b|(?:headcount|tao)\s+(\d+)/);
+ const days=n.match(/(\d+)\s*(?:days?|araw)\b/)||n.match(/(?:days?|araw)\s+(\d+)/),weeks=n.match(/(\d+)\s*(?:weeks?|linggo)\b/);
+ const budget=n.match(/(?:₱|php\s*|\bp\s*)(\d+(?:\.\d+)?)\b|(?:budget|badyet|hanggang|under|not more than|maximum|may)\s*(\d+(?:\.\d+)?)\b|\b(\d+(?:\.\d+)?)\s*(?:budget|pesos?|piso)\b/);
+ const value=budget?Number(budget[1]||budget[2]||budget[3]):null;
+ const exclusions=new Set(previous.exclusions||[]);if(/no pork|without pork|walang baboy|bawal baboy/.test(n))exclusions.add('pork');if(/no seafood|without seafood|walang seafood|walang isda/.test(n))exclusions.add('seafood');if(/vegetarian|vegetariano|gulay lang/.test(n))exclusions.add('vegetarian');if(/no alcohol|walang alak|without alcohol/.test(n))exclusions.add('alcohol');
+ return {people:Math.min(200,Math.max(1,Number(people?.[1]||people?.[2]||people?.[3]||previous.people||defaults.people))),days:Math.min(31,Math.max(1,Number(days?.[1]||weeks&&Number(weeks[1])*7||/\bweek\b|linggo/.test(n)&&7||previous.days||defaults.days))),budgetCentavos:budget?Number.isFinite(value)&&value>0&&value<=10000000&&!(value*100%1)&&!/-\s*\d/.test(raw)?Math.round(value*100):null:previous.budgetCentavos??null,invalidBudget:!!budget&&(!Number.isFinite(value)||value<=0||value>10000000||value*100%1!==0||/-\s*\d/.test(raw)),exclusions:[...exclusions],explicitPeople:!!people,explicitDays:!!days||!!weeks,explicitBudget:!!budget};
+}
+export function planningText(raw){return fold(raw).replace(/\bnochebuena\b/g,'noche buena').replace(/\bpansit\b/g,'pancit').replace(/\bspageti\b/g,'spaghetti').replace(/\bkrismas\b/g,'christmas');}
+export function choosePlaybook(raw,books,day){
+ const n=planningText(raw);let best=null,score=0;for(const book of books)for(const term of book.triggers){const phrase=fold(term);if((' '+n+' ').includes(' '+phrase+' ')&&phrase.length>score){best=book;score=phrase.length;}}
+ if(/birthday|bday|kaarawan/.test(n)&&/kids|children|bata/.test(n))best=books.find(b=>b.id==='birthday-kids')||best;
+ if(!best&&/cook with|maluluto|lutuin/.test(n)){let hits=0;for(const b of books.filter(b=>['adobo','sinigang','tinola','pancit','spaghetti','menudo','lumpia'].includes(b.id))){const count=b.items.filter(i=>i.terms.some(t=>(' '+n+' ').includes(' '+fold(t)+' '))).length;if(count>hits){hits=count;best=b;}}if(hits<2)best=null;}
+ if(!best&&/this season|this month|ngayong buwan|ngayon|seasonal/.test(n)){const month=Number(day.slice(5,7)),id=[11,12].includes(month)?'christmas':month===1?'newyear':[3,4].includes(month)?'lent':[6,7,8].includes(month)?'school':'weekly';best=books.find(b=>b.id===id);}
+ return best;
+}
+export function wantsPlan(raw,previous){raw=planningText(raw);if(/^(cheapest|price of|how much|magkano|compare)/i.test(raw)&&!/(?:plan|buy|cook|ingredients|sangkap|for \d+ people|week|linggo)/i.test(raw))return false;return /cook with|maluluto|christmas|noche|pasko|xmas|holiday|simbang|birthday|kaarawan|bday|lent|holy week|semana|fiesta|handaan|baon|school|pasukan|typhoon|bagyo|emergency|storm|sick|may sakit|weekly|week|linggo|student|dorm|pantry|new home|bagong bahay|adobo|sinigang|tinola|pancit|spaghetti|fruit salad|menudo|lumpia|this season|this month|ngayong buwan/i.test(raw)||!!previous&&/include flagged|include unusual|make it cheaper|cheapest basket|balanced|complete|for \d|people instead|remove the|without the|add drinks|ulitin|why|bakit|scale|days|headcount|budget \d|no pork|no seafood|vegetarian|no alcohol/i.test(raw);}
+export class Planner{
+ constructor(engine,books){this.engine=engine;this.books=books;this.cache=new Map();}
+ candidates(item,slots,includeFlagged=false){
+  const key=JSON.stringify([item.concept,item.tags,item.terms,item.substitutes,slots.exclusions,includeFlagged]);if(this.cache.has(key))return this.cache.get(key);
+  const allowed=p=>p.priceCentavos>0&&(includeFlagged||!p.anomalyFlags?.length)&&(item.tags.includes('nonfood')||['FMCG','FRESH & STAPLE'].includes(p.department)&&!/(?:CARE|COSMETIC|INFANT|OTC MED)/.test(p.category)&&p.category!=='ALCOHOLIC BEVERAGES')&&(!['fruit','vegetable'].includes(item.concept)||p.department==='FRESH & STAPLE')&&(!slots.exclusions.includes('pork')||!restricted.test(p.searchText))&&(!slots.exclusions.includes('seafood')||!seafood.test(p.searchText))&&(!slots.exclusions.includes('vegetarian')||!flesh.test(p.searchText))&&(!slots.exclusions.includes('alcohol')||p.category!=='ALCOHOLIC BEVERAGES');
+  const matches=(terms,substitute=false)=>[...new Map(terms.flatMap(term=>this.engine.search(term).rows.filter(p=>allowed(p)&&ingredientMatch(p,substitute?term:item.concept))).map(p=>[p.sku,p])).values()].sort((a,b)=>a.priceCentavos-b.priceCentavos||a.sku.localeCompare(b.sku));
+  let choices=matches(item.terms),substitute=false;if(!choices.length){choices=matches(item.substitutes,true);substitute=choices.length>0;}const result={choices,substitute};this.cache.set(key,result);return result;
+ }
+ plan(raw,options={},previous=null){
+  const lang=/ulitin.*tagalog|sa tagalog/.test(fold(raw))?'tl':options.language&&options.language!=='auto'?options.language:detectLanguage(raw),day=options.day||new Date().toISOString().slice(0,10);
+  const selected=choosePlaybook(raw,this.books,day);let book=selected||this.books.find(b=>b.id===previous?.playbookId);
+  if(!book)return null;
+  const slots=extractSlots(raw,selected&&selected.id!==previous?.playbookId?{}:previous?.slots||{},book.defaults),say=(en,tl,mix)=>tr(lang,en,tl,mix);
+  if(slots.invalidBudget)return {intent:'ERROR',lang,text:say('Enter a positive budget, up to ₱10,000,000 with two decimal places.','Maglagay ng positibong budget hanggang ₱10,000,000, na hanggang dalawang decimal.'),cards:[],actions:[],quickReplies:['Budget 500','Budget 5000','Noche Buena plan']};
+  const inherited=selected&&selected.id!==previous?.playbookId?{}:previous||{},removed=new Set(inherited.removed||[]),remove=fold(raw).match(/(?:remove|without|alisin|tanggalin)(?: the| ang)?\s+([a-z ]+?)(?: from| sa|$)/);if(remove)removed.add(remove[1].trim());
+  const includesDrinks=inherited.includeDrinks||/add drinks|dagdag.*inumin/.test(fold(raw)),includeFlagged=/include flagged|include unusual prices/.test(fold(raw)),missing=[],excluded=[],requirements=[],swaps={...(inherited.swaps||{})};
+  let items=[...book.items];if(includesDrinks&&!items.some(i=>i.concept==='juice'))items.push({id:'extra-drinks',concept:'juice',group:'extras',terms:['juice'],substitutes:['water'],quantityRule:{basis:'person',quantity:.25},priority:'essential',tags:[],notes:'Sample suggestion, not verified advice.'});
+  for(const item of items){if([...removed].some(term=>item.concept.includes(term)||item.terms.some(t=>t.includes(term))))continue;
+   if(slots.exclusions.includes('vegetarian')&&item.tags.includes('meat')||slots.exclusions.includes('pork')&&item.tags.includes('pork')||slots.exclusions.includes('seafood')&&item.tags.includes('seafood')){excluded.push(item.concept);continue;}
+   const found=this.candidates(item,slots,includeFlagged);if(!found.choices.length){missing.push(item.concept);continue;}let p=found.choices[0];const swapping=swaps,swap=fold(raw).match(/swap (?:item )?([a-z-]+)/);if(swap&&swap[1]===item.concept)swapping[item.concept]=(swapping[item.concept]||0)+1;if(swapping[item.concept])p=found.choices[swapping[item.concept]%found.choices.length];
+   const rule=item.quantityRule,scale=rule.basis==='person-day'?slots.people*slots.days:rule.basis==='person'?slots.people:rule.basis==='day'?slots.days:1;
+   const verified=rule.unit&&p.sizeSource==='verified'&&p.parsedSize?.baseUnit===rule.unit;let quantity=Math.min(9999,Math.max(1,Math.ceil(verified?rule.quantity*scale/p.parsedSize.baseValue:(rule.approxUnits??rule.quantity)*scale)));
+   if(!slots.explicitPeople&&!slots.explicitDays&&inherited.edits?.[item.concept]!=null)quantity=Math.max(0,Math.min(9999,Number(inherited.edits[item.concept])));if(quantity===0)continue;
+   requirements.push({concept:item.concept,group:item.group,priority:item.priority,product:p,sku:p.sku,name:p.name,quantity,priceCentavos:p.priceCentavos,subtotalCentavos:p.priceCentavos*quantity,approx:!verified,substitute:found.substitute,requestedQuantity:quantity,notes:item.notes});
+  }
+  const make=variant=>{let remaining=slots.budgetCentavos??Infinity;const lines=[],trimmed=[];for(const priority of ['essential','nice','optional'])for(const line of requirements.filter(l=>l.priority===priority)){
+    if(variant==='cheapest'&&priority!=='essential'){trimmed.push(line.concept);continue;}let quantity=line.quantity;if(variant!=='complete'&&Number.isFinite(remaining))quantity=Math.min(quantity,Math.floor(remaining/line.priceCentavos));if(quantity<1){trimmed.push(line.concept);continue;}if(quantity<line.quantity)trimmed.push(`${line.concept} (${line.quantity-quantity} units)`);const row={...line,quantity,subtotalCentavos:quantity*line.priceCentavos};lines.push(row);remaining-=row.subtotalCentavos;
+   }const totalCentavos=lines.reduce((sum,l)=>sum+l.subtotalCentavos,0);return {id:variant,lines,totalCentavos,remainingCentavos:slots.budgetCentavos==null?null:slots.budgetCentavos-totalCentavos,trimmed};};
+  const variants=['cheapest','balanced','complete'].map(make),mode=/make it cheaper|cheapest basket|mas mura/.test(fold(raw))?'cheapest':/\bcomplete\b/.test(fold(raw))?'complete':/\bbalanced\b/.test(fold(raw))?'balanced':inherited.variant||'balanced',active=variants.find(v=>v.id===mode);
+  const seasonal=/this season|this month|ngayon|seasonal/.test(fold(raw));
+  const assumptions={people:slots.people,days:slots.days,budgetCentavos:slots.budgetCentavos,exclusions:slots.exclusions,packBasis:say('Approximate selling units; sizes/ingredients are not verified.','Tantiyang selling units; hindi beripikado ang sukat/sangkap.'),date:day,seasonalSelection:seasonal?book.id:null};
+  const summary=say(`Sample ${book.names.en} plan for ${slots.people} people, ${slots.days} day(s).`,`Halimbawang ${book.names.tl} para sa ${slots.people} tao, ${slots.days} araw.`,`Sample ${book.names.taglish} para sa ${slots.people} people, ${slots.days} day(s).`);
+  let text=summary+'\n'+say('Assumptions: ','Mga palagay: ')+`${slots.people} ${say('people','tao')}; ${slots.days} ${say('days','araw')}; ${say('budget','budget')} ${slots.budgetCentavos==null?say('not set','hindi itinakda'):pesos(slots.budgetCentavos)}; ${say('dietary exclusions','di isinama')}: ${slots.exclusions.join(', ')||say('none specified','walang tinukoy')}.\n`+assumptions.packBasis;
+  if(seasonal)text+='\n'+say(`Device date ${day}: chose ${book.names.en}; no stock/promo claim.`,`Petsa ng device ${day}: pinili ang ${book.names.tl}; walang pagtiyak sa stock/promo.`);
+  text+='\n'+say(`Total: ${pesos(active.totalCentavos)}.`,`Kabuuan: ${pesos(active.totalCentavos)}.`)+(active.remainingCentavos==null?'':active.remainingCentavos<0?say(` Over budget by ${pesos(-active.remainingCentavos)}; trim optional lines or choose Make it cheaper.`,` Sobra ng ${pesos(-active.remainingCentavos)}; bawasan ang dagdag o piliin ang Mas mura.`):say(` Remaining: ${pesos(active.remainingCentavos)}.`,` Matitira: ${pesos(active.remainingCentavos)}.`));
+  if(active.trimmed.length)text+='\n'+say('Trimmed to fit: ','Binawasan upang magkasya: ')+active.trimmed.join(', ')+'.';
+  text+='\n'+say('Not in my saved catalog (or no suitable unflagged match): ','Wala sa na-save kong catalog (o walang angkop na presyong walang flag): ')+(missing.join(', ')||say('none','wala'))+'.';if(excluded.length)text+='\n'+say('Excluded by your preferences: ','Hindi isinama ayon sa kagustuhan mo: ')+excluded.join(', ')+'.';if(book.tradition)text+='\n'+book.tradition;if(book.id==='emergency')text+='\n'+say('This is not a complete emergency supply assessment. Confirm household needs with local authorities.','Hindi ito kumpletong pagsusuri ng emergency supplies. Tiyakin ang pangangailangan sa lokal na awtoridad.');
+  if(slots.exclusions.length)text+='\n'+say('Dietary suitability of packaged ingredients is unverified; check labels.','Hindi beripikado ang angkop na sangkap ng mga pack; basahin ang label.');
+  if(/healthy/.test(fold(raw)))text+='\n'+say('This is a shopping suggestion, not a verified nutrition plan.','Mungkahi ito sa pamimili, hindi beripikadong plano ng nutrisyon.');
+  if(/why|bakit/.test(fold(raw)))text+='\n'+say('Why: cheapest unflagged match per concept, unless you chose a swap; quantities rounded up by the displayed people/day rules, then essentials first within budget. Each subtotal is quantity × saved pack price.','Bakit: pinakamurang walang flag bawat konsepto; bilugan pataas ayon sa tao/araw, unahin ang kailangan sa budget. Ang subtotal ay dami × na-save na pack price.');
+  const priceSource=provenance(lang,this.engine.config.metadata?.effectiveDate);text+='\n'+priceSource;
+  const planContext={playbookId:book.id,slots,removed:[...removed],includeDrinks:includesDrinks,variant:mode,swaps};
+  const plan={notes:[...(book.tradition?[book.tradition]:[]),...(book.id==='emergency'?['Sample list only; not a complete emergency assessment. Confirm household needs with local authorities.']:[]),...(/healthy/.test(fold(raw))?['Shopping suggestion only; not a verified nutrition plan.']:[])],id:book.id,title:book.names[lang]||book.names.en,summary,assumptions,groups:book.groups,variants,active:mode,lines:active.lines,totalCentavos:active.totalCentavos,remainingCentavos:active.remainingCentavos,missing,excluded,trimmed:active.trimmed,provenance:priceSource,context:planContext};
+  return {intent:'PLAN',lang,text,plan,cards:active.lines.slice(0,30).map(l=>l.product),table:{kind:'plan',rows:active.lines.slice(0,30).map(l=>({id:l.sku,name:l.name,quantity:l.quantity,priceCentavos:l.priceCentavos,subtotalCentavos:l.subtotalCentavos})),totalCentavos:active.totalCentavos},actions:[{type:'plan-add-all',label:say('Add all to basket','Idagdag lahat sa basket')},{type:'plan-share',label:say('Share my plan','Ibahagi ang plano')}],quickReplies:['Headcount '+slots.people,'Days '+slots.days,'Budget '+((slots.budgetCentavos||50000)/100),'No pork','No seafood','Vegetarian','No alcohol','Make it cheaper','Balanced','Complete','Add drinks','For 12 people instead','Ulitin sa Tagalog'],provenance:priceSource,confidence:1,context:{ids:[],planContext}};
+ }
+}

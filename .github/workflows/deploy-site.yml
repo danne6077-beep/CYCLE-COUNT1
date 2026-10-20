@@ -25,6 +25,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.20.0
+      - name: Install shopper build dependencies
+        run: pnpm --dir shopper install --no-frozen-lockfile
       - name: Build configured site
         run: npm run build:pages
       - name: Configure Pages

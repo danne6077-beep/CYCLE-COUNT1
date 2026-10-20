@@ -1,0 +1,613 @@
+{
+ "rice": [
+  "rice",
+  "bigas",
+  "kanin",
+  "bgas",
+  "ricee"
+ ],
+ "jasmine": [
+  "jasmine",
+  "hasmin"
+ ],
+ "sticky": [
+  "malagkit",
+  "pilit",
+  "sticky"
+ ],
+ "brown rice": [
+  "brown rice",
+  "brown na bigas"
+ ],
+ "chicken": [
+  "chicken",
+  "manok",
+  "mnok",
+  "ckn",
+  "ckn"
+ ],
+ "pork": [
+  "pork",
+  "baboy"
+ ],
+ "beef": [
+  "beef",
+  "baka"
+ ],
+ "fish": [
+  "fish",
+  "isda"
+ ],
+ "sardines": [
+  "sardines",
+  "sardinas"
+ ],
+ "egg": [
+  "egg",
+  "eggs",
+  "itlog"
+ ],
+ "milk": [
+  "milk",
+  "gatas",
+  "gtas",
+  "mlk"
+ ],
+ "cheese": [
+  "cheese",
+  "keso",
+  "chs"
+ ],
+ "butter": [
+  "butter",
+  "mantikilya"
+ ],
+ "evaporated": [
+  "evaporated",
+  "evap"
+ ],
+ "condensed": [
+  "condensed",
+  "condensada"
+ ],
+ "vegetable": [
+  "vegetable",
+  "vegetables",
+  "gulay",
+  "veggies"
+ ],
+ "fruit": [
+  "fruit",
+  "fruits",
+  "prutas"
+ ],
+ "onion": [
+  "onion",
+  "sibuyas"
+ ],
+ "garlic": [
+  "garlic",
+  "bawang"
+ ],
+ "tomato": [
+  "tomato",
+  "kamatis"
+ ],
+ "potato": [
+  "potato",
+  "patatas"
+ ],
+ "cabbage": [
+  "cabbage",
+  "repolyo"
+ ],
+ "banana": [
+  "banana",
+  "saging"
+ ],
+ "apple": [
+  "apple",
+  "mansanas",
+  "aple"
+ ],
+ "ginger": [
+  "ginger",
+  "luya"
+ ],
+ "calamansi": [
+  "calamansi",
+  "kalamansi",
+  "kalmnsi"
+ ],
+ "oil": [
+  "cooking oil",
+  "mantika",
+  "oil",
+  "oyl"
+ ],
+ "sugar": [
+  "sugar",
+  "asukal"
+ ],
+ "salt": [
+  "salt",
+  "asin"
+ ],
+ "vinegar": [
+  "vinegar",
+  "suka"
+ ],
+ "soy sauce": [
+  "soy sauce",
+  "soysauce",
+  "toyo",
+  "ssauce"
+ ],
+ "fish sauce": [
+  "fish sauce",
+  "patis"
+ ],
+ "ketchup": [
+  "ketchup",
+  "catsup",
+  "catsup"
+ ],
+ "mayonnaise": [
+  "mayonnaise",
+  "mayo"
+ ],
+ "noodle": [
+  "noodles",
+  "noodle",
+  "pancit",
+  "pancit canton",
+  "pancanton",
+  "pcntn"
+ ],
+ "flour": [
+  "flour",
+  "harina"
+ ],
+ "bread": [
+  "bread",
+  "tinapay"
+ ],
+ "coffee": [
+  "coffee",
+  "kape",
+  "3 in 1",
+  "3-in-1"
+ ],
+ "tea": [
+  "tea",
+  "tsaa"
+ ],
+ "oat": [
+  "oat",
+  "oats"
+ ],
+ "snack": [
+  "snack",
+  "snacks",
+  "chichirya",
+  "chips"
+ ],
+ "biscuit": [
+  "biscuit",
+  "biscuits",
+  "biskwit"
+ ],
+ "cracker": [
+  "cracker",
+  "crackers"
+ ],
+ "chocolate": [
+  "chocolate",
+  "tsokolate",
+  "choco"
+ ],
+ "candy": [
+  "candy",
+  "kendi"
+ ],
+ "ice cream": [
+  "ice cream",
+  "sorbetes"
+ ],
+ "softdrink": [
+  "softdrinks",
+  "softdrink",
+  "soda"
+ ],
+ "water": [
+  "drinking water",
+  "mineral water",
+  "water",
+  "tubig"
+ ],
+ "juice": [
+  "juice",
+  "dyus"
+ ],
+ "alcohol drink": [
+  "alcoholic drinks",
+  "alak",
+  "beer",
+  "gin",
+  "rum"
+ ],
+ "soap": [
+  "soap",
+  "sabon"
+ ],
+ "detergent": [
+  "sabon panlaba",
+  "detergent",
+  "panlaba",
+  "dtrgnt"
+ ],
+ "fabric conditioner": [
+  "fabric conditioner",
+  "fabcon",
+  "fabcond",
+  "fben"
+ ],
+ "bleach": [
+  "bleach",
+  "pampaputi"
+ ],
+ "dishwashing": [
+  "dishwashing liquid",
+  "dishwashing",
+  "panghugas",
+  "dishwash"
+ ],
+ "tissue": [
+  "tissue",
+  "toilet paper",
+  "kitchen towel"
+ ],
+ "garbage bag": [
+  "garbage bag",
+  "trash bag",
+  "basurahan bag"
+ ],
+ "foil": [
+  "foil",
+  "aluminum foil"
+ ],
+ "battery": [
+  "battery",
+  "batteries",
+  "baterya"
+ ],
+ "bulb": [
+  "bulb",
+  "bumbilya",
+  "light bulb"
+ ],
+ "shampoo": [
+  "shampoo",
+  "syampu",
+  "shmp",
+  "shmpo"
+ ],
+ "conditioner": [
+  "conditioner",
+  "hair conditioner"
+ ],
+ "toothpaste": [
+  "toothpaste",
+  "tooth paste",
+  "toothpst",
+  "tpaste"
+ ],
+ "toothbrush": [
+  "toothbrush",
+  "sipilyo"
+ ],
+ "deodorant": [
+  "deodorant",
+  "deodorante",
+  "deod"
+ ],
+ "lotion": [
+  "lotion",
+  "losyon"
+ ],
+ "pads": [
+  "sanitary napkin",
+  "napkin",
+  "pads"
+ ],
+ "diaper": [
+  "diaper",
+  "diapers",
+  "lampin"
+ ],
+ "wipes": [
+  "wipes",
+  "wet wipes"
+ ],
+ "sanitizer": [
+  "sanitizer",
+  "sanitiser",
+  "rubbing alcohol"
+ ],
+ "cotton": [
+  "cotton",
+  "bulak"
+ ],
+ "perfume": [
+  "perfume",
+  "pabango"
+ ],
+ "baby formula": [
+  "baby formula",
+  "gatas ng baby",
+  "infant formula"
+ ],
+ "pet food": [
+  "pet food",
+  "pagkain ng pet"
+ ],
+ "dog food": [
+  "dog food",
+  "pagkain ng aso"
+ ],
+ "cat food": [
+  "cat food",
+  "pagkain ng pusa"
+ ],
+ "canned": [
+  "canned goods",
+  "de lata",
+  "delata"
+ ],
+ "shirt": [
+  "shirt",
+  "damit",
+  "tshirt"
+ ],
+ "pants": [
+  "pants",
+  "pantalon"
+ ],
+ "shoes": [
+  "shoes",
+  "sapatos"
+ ],
+ "slippers": [
+  "slippers",
+  "tsinelas"
+ ],
+ "notebook": [
+  "notebook",
+  "kuwaderno"
+ ],
+ "pen": [
+  "ballpen",
+  "pen",
+  "panulat"
+ ],
+ "toy": [
+  "toy",
+  "toys",
+  "laruan"
+ ],
+ "chair": [
+  "chair",
+  "upuan"
+ ],
+ "pillow": [
+  "pillow",
+  "unan"
+ ],
+ "blanket": [
+  "blanket",
+  "kumot"
+ ],
+ "towel": [
+  "towel",
+  "tuwalya"
+ ],
+ "plate": [
+  "plate",
+  "plato"
+ ],
+ "spoon": [
+  "spoon",
+  "kutsara"
+ ],
+ "fork": [
+  "fork",
+  "tinidor"
+ ],
+ "pot": [
+  "cooking pot",
+  "kaldero"
+ ],
+ "fan": [
+  "electric fan",
+  "bentilador"
+ ],
+ "furniture": [
+  "furniture",
+  "furnitures",
+  "muwebles"
+ ],
+ "lucky me": [
+  "lucky me",
+  "luckyme"
+ ],
+ "bear brand": [
+  "bear brand",
+  "bearbrand"
+ ],
+ "coke": [
+  "coke",
+  "coca cola",
+  "coca-cola"
+ ],
+ "pepsi": [
+  "pepsi"
+ ],
+ "nescafe": [
+  "nescafe",
+  "nescafé"
+ ],
+ "nissin": [
+  "nissin"
+ ],
+ "palmolive": [
+  "palmolive"
+ ],
+ "colgate": [
+  "colgate"
+ ],
+ "kopiko": [
+  "kopiko"
+ ],
+ "milo": [
+  "milo"
+ ],
+ "safeguard": [
+  "safeguard"
+ ],
+ "surf": [
+  "surf"
+ ],
+ "downy": [
+  "downy"
+ ],
+ "datu puti": [
+  "datu puti"
+ ],
+ "silver swan": [
+  "silver swan"
+ ],
+ "margarine": [
+  "margarine",
+  "margarin"
+ ],
+ "yogurt": [
+  "yogurt",
+  "yoghurt"
+ ],
+ "cream": [
+  "cream",
+  "krema"
+ ],
+ "carrot": [
+  "carrot",
+  "carrots",
+  "karot"
+ ],
+ "orange": [
+  "orange",
+  "oranges",
+  "dalandan"
+ ],
+ "pasta": [
+  "pasta",
+  "macaroni",
+  "makaroni"
+ ],
+ "spaghetti": [
+  "spaghetti",
+  "spageti"
+ ],
+ "cereal": [
+  "cereal",
+  "cereals"
+ ],
+ "creamer": [
+  "creamer",
+  "coffee mate",
+  "coffeemate"
+ ],
+ "energy drink": [
+  "energy drink",
+  "energy drinks"
+ ],
+ "sports drink": [
+  "sports drink",
+  "sports drinks"
+ ],
+ "powdered juice": [
+  "powdered juice",
+  "juice powder"
+ ],
+ "plastic": [
+  "plastic",
+  "plastik"
+ ],
+ "face mask": [
+  "face mask",
+  "mask"
+ ],
+ "razor": [
+  "razor",
+  "pang ahit"
+ ],
+ "frozen": [
+  "frozen",
+  "frozen food"
+ ],
+ "nugget": [
+  "nugget",
+  "nuggets"
+ ],
+ "fries": [
+  "fries",
+  "french fries"
+ ],
+ "instant meals": [
+  "instant meals",
+  "instant meal"
+ ],
+ "cup noodle": [
+  "cup noodles",
+  "noodle cups"
+ ],
+ "bangus": [
+  "bangus",
+  "milkfish"
+ ],
+ "tilapia": [
+  "tilapia"
+ ],
+ "galunggong": [
+  "galunggong"
+ ],
+ "hotdog": [
+  "hotdog",
+  "hot dog"
+ ],
+ "tocino": [
+  "tocino"
+ ],
+ "longganisa": [
+  "longganisa",
+  "longanisa"
+ ],
+ "corned beef": [
+  "corned beef",
+  "cornbeef"
+ ],
+ "tuna": [
+  "tuna"
+ ],
+ "spam": [
+  "spam"
+ ],
+ "sprite": [
+  "sprite"
+ ],
+ "sinandomeng": [
+  "sinandomeng"
+ ],
+ "dinorado": [
+  "dinorado"
+ ]
+}

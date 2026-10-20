@@ -1,0 +1,138 @@
+{
+  "schemaVersion": 1,
+  "id": "lumpia",
+  "names": {
+    "en": "Lumpia ingredients",
+    "tl": "Mga sangkap sa lumpia",
+    "taglish": "Lumpia ingredients"
+  },
+  "triggers": [
+    "lumpia",
+    "spring rolls"
+  ],
+  "season": null,
+  "defaults": {
+    "people": 4,
+    "days": 1
+  },
+  "groups": [
+    {
+      "id": "essentials",
+      "name": {
+        "en": "Essentials",
+        "tl": "Pangunahing items",
+        "taglish": "Essentials"
+      }
+    },
+    {
+      "id": "extras",
+      "name": {
+        "en": "Nice to have",
+        "tl": "Maaaring idagdag",
+        "taglish": "Extras"
+      }
+    }
+  ],
+  "tradition": null,
+  "items": [
+    {
+      "id": "wrapper",
+      "group": "essentials",
+      "concept": "wrapper",
+      "terms": [
+        "lumpia wrapper"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.125
+      },
+      "priority": "essential",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "pork",
+      "group": "essentials",
+      "concept": "pork",
+      "terms": [
+        "pork",
+        "baboy"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.25
+      },
+      "priority": "essential",
+      "substitutes": [
+        "chicken"
+      ],
+      "tags": [
+        "meat",
+        "pork"
+      ],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "vegetable",
+      "group": "essentials",
+      "concept": "vegetable",
+      "terms": [
+        "vegetable",
+        "gulay"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.25
+      },
+      "priority": "essential",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "oil",
+      "group": "essentials",
+      "concept": "oil",
+      "terms": [
+        "oil",
+        "mantika"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.125
+      },
+      "priority": "essential",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "onion",
+      "group": "extras",
+      "concept": "onion",
+      "terms": [
+        "onion",
+        "sibuyas"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.125
+      },
+      "priority": "nice",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    }
+  ]
+}

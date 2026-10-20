@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+function lum(hex){const v=hex.replace('#','').match(/../g).map(s=>parseInt(s,16)/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4);return v[0]*.2126+v[1]*.7152+v[2]*.0722;}
+test('shopper foreground/background text tokens meet AA',()=>{const pairs=[['#17201d','#ffffff'],['#536158','#ffffff'],['#536158','#f7faf8'],['#ffffff','#08785b'],['#065f46','#e6f4ef'],['#b45309','#fff8e8'],['#edf6f0','#192722'],['#b4c5bc','#101b17'],['#b4c5bc','#192722'],['#082b20','#34d399'],['#74e5b5','#1b3d30'],['#f3be69','#332c1d'],['#64714d','#f5f1e6']];for(const [fg,bg] of pairs){const values=[lum(fg),lum(bg)].sort((a,b)=>b-a),ratio=(values[0]+.05)/(values[1]+.05);assert.ok(ratio>=4.5,`${fg} on ${bg}: ${ratio}`);}});

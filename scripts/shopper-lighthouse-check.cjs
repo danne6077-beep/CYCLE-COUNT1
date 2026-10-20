@@ -1,0 +1,10 @@
+const fs=require('node:fs');
+const path=require('node:path');
+const report=JSON.parse(fs.readFileSync(path.join(__dirname,'../qa/shopper/lighthouse.report.json'),'utf8'));
+const scores={performance:Math.round(report.categories.performance.score*100),accessibility:Math.round(report.categories.accessibility.score*100)};
+console.log('LIGHTHOUSE_SCORES '+JSON.stringify(scores));
+const failed=Object.values(report.audits).filter(a=>a.score!==null&&a.score<1&&['binary','numeric'].includes(a.scoreDisplayMode));
+console.log(JSON.stringify(failed.map(a=>({id:a.id,title:a.title,score:a.score,details:a.details?.items})),null,2));
+fs.writeFileSync(path.join(__dirname,'../qa/shopper/lighthouse-scores.json'),JSON.stringify({version:report.lighthouseVersion,fetchTime:report.fetchTime,url:report.finalDisplayedUrl,...scores},null,2));
+if(process.env.GITHUB_STEP_SUMMARY)fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,`## Shopper Lighthouse mobile\n\nPerformance: **${scores.performance}** · Accessibility: **${scores.accessibility}**\n\nReports and screenshots are in the shopper-proof artifact.\n`);
+if(scores.performance<90||scores.accessibility<95)process.exitCode=1;

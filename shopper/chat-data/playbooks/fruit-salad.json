@@ -1,0 +1,111 @@
+{
+  "schemaVersion": 1,
+  "id": "fruit-salad",
+  "names": {
+    "en": "Fruit salad ingredients",
+    "tl": "Mga sangkap sa fruit salad",
+    "taglish": "Fruit salad ingredients"
+  },
+  "triggers": [
+    "fruit salad",
+    "salad na prutas"
+  ],
+  "season": null,
+  "defaults": {
+    "people": 4,
+    "days": 1
+  },
+  "groups": [
+    {
+      "id": "essentials",
+      "name": {
+        "en": "Essentials",
+        "tl": "Pangunahing items",
+        "taglish": "Essentials"
+      }
+    },
+    {
+      "id": "extras",
+      "name": {
+        "en": "Nice to have",
+        "tl": "Maaaring idagdag",
+        "taglish": "Extras"
+      }
+    }
+  ],
+  "tradition": null,
+  "items": [
+    {
+      "id": "cocktail",
+      "group": "essentials",
+      "concept": "cocktail",
+      "terms": [
+        "fruit cocktail"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.125
+      },
+      "priority": "essential",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "cream",
+      "group": "essentials",
+      "concept": "cream",
+      "terms": [
+        "cream"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.125
+      },
+      "priority": "essential",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "condensed",
+      "group": "essentials",
+      "concept": "condensed",
+      "terms": [
+        "condensed"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.125
+      },
+      "priority": "essential",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "raisin",
+      "group": "extras",
+      "concept": "raisin",
+      "terms": [
+        "raisin"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.125
+      },
+      "priority": "nice",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    }
+  ]
+}
