@@ -1,7 +1,7 @@
 name: Shopper checks
 on:
   pull_request:
-    paths: ['shopper/**', 'api/**', 'server/**', 'firestore.rules', 'scripts/**', 'vercel.json']
+    paths: ['shopper/**', 'api/**', 'server/**', 'firestore.rules', 'scripts/**', 'vercel.json', 'docs/**', '.github/workflows/shopper-checks.yml']
   push:
     branches: ['codex/fuji-shopper-hypermart', 'feat/offline-chatbot']
 permissions:
@@ -25,6 +25,9 @@ jobs:
       - run: pnpm --dir shopper typecheck
       - run: node --test
       - run: node scripts/build_pages.js
+      - run: node shopper/scripts/evaluate-chat.mjs
+      - run: node shopper/scripts/evaluate-smart.mjs
+      - run: node shopper/scripts/review-content.mjs
       - run: npm ci --ignore-scripts
       - run: npx playwright install --with-deps chromium
       - name: Mobile browser flow
@@ -48,11 +51,19 @@ jobs:
           done
           SHOPPER_TEST_URL=http://127.0.0.1:4184/ node scripts/shopper-camera-check.cjs
           SHOPPER_TEST_URL=http://127.0.0.1:4184/ node scripts/shopper-chat-check.cjs
+          node scripts/shopper-planner-ui-check.cjs
+          node scripts/shopper-resilience-check.cjs
+          node scripts/shopper-installability-check.cjs
+          node scripts/shopper-privacy-check.cjs
+          node scripts/shopper-history-check.cjs
+          node scripts/shopper-smart-check.cjs
+          node scripts/shopper-perf-check.cjs
       - name: Lighthouse mobile
         run: |
           export CHROME_PATH="$(node -p "require('playwright').chromium.executablePath()")"
           npx --yes lighthouse@13.5.0 http://127.0.0.1:4173/shopper/ --chrome-flags="--headless --no-sandbox" --only-categories=performance,accessibility --output=json --output=html --output-path=qa/shopper/lighthouse --quiet
           node scripts/shopper-lighthouse-check.cjs
+          node scripts/shopper-hardening-gates.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:

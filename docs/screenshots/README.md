@@ -1,0 +1,25 @@
+# Review screenshots
+
+Captured from the local production build with an isolated synthetic trip. Christmas theme is explicitly enabled for these views. Smart mode is off. No external sharing or provider calls occurred.
+
+- [plan-mobile-light.png](plan-mobile-light.png)
+- [budget-mobile-light.png](budget-mobile-light.png)
+- [game-guess-mobile-light.png](game-guess-mobile-light.png)
+- [game-budget-mobile-light.png](game-budget-mobile-light.png)
+- [game-streak-mobile-light.png](game-streak-mobile-light.png)
+- [plan-mobile-dark.png](plan-mobile-dark.png)
+- [budget-mobile-dark.png](budget-mobile-dark.png)
+- [game-guess-mobile-dark.png](game-guess-mobile-dark.png)
+- [game-budget-mobile-dark.png](game-budget-mobile-dark.png)
+- [game-streak-mobile-dark.png](game-streak-mobile-dark.png)
+- [plan-desktop-light.png](plan-desktop-light.png)
+- [budget-desktop-light.png](budget-desktop-light.png)
+- [game-guess-desktop-light.png](game-guess-desktop-light.png)
+- [game-budget-desktop-light.png](game-budget-desktop-light.png)
+- [game-streak-desktop-light.png](game-streak-desktop-light.png)
+- [plan-desktop-dark.png](plan-desktop-dark.png)
+- [budget-desktop-dark.png](budget-desktop-dark.png)
+- [game-guess-desktop-dark.png](game-guess-desktop-dark.png)
+- [game-budget-desktop-dark.png](game-budget-desktop-dark.png)
+- [game-streak-desktop-dark.png](game-streak-desktop-dark.png)
+- [Smart consent](smart-consent-mobile.png)

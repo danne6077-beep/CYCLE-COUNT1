@@ -6,7 +6,7 @@ const seafood=/\b(fish|seafood|shrimp|prawn|tuna|sardine|sardines|bangus|tilapia
 const flesh=/\b(chicken|ckn|chkn|pork|beef|fish|ham|bacon|meat|hotdog|manok|baboy|baka|tuna|sardine|seafood|shrimp|sausage)\b/;
 export function extractSlots(raw,previous={},defaults={people:4,days:1}){
  const n=normalizeNumbers(raw).replace(/(\d+(?:\.\d+)?)\s*k\b/g,(_,v)=>String(Number(v)*1000));
- const people=n.match(/(?:for|para sa|pang)\s+(\d+)\b(?!\s*(?:days?|araw|weeks?|linggo))|\b(\d+)\s*(?:people|persons?|pax|guests?|kids?|children|adults?|tao|kami|tayo|bata)\b|(?:headcount|tao)\s+(\d+)/);
+ const people=n.match(/(?:for|para sa|pang)\s+(\d+)\b(?!\s*(?:days?|araw|weeks?|linggo|budget|pesos?|piso))|\b(\d+)\s*(?:people|persons?|pax|guests?|kids?|children|adults?|tao|kami|tayo|bata)\b|(?:headcount|tao)\s+(\d+)/);
  const days=n.match(/(\d+)\s*(?:days?|araw)\b/)||n.match(/(?:days?|araw)\s+(\d+)/),weeks=n.match(/(\d+)\s*(?:weeks?|linggo)\b/);
  const budget=n.match(/(?:₱|php\s*|\bp\s*)(\d+(?:\.\d+)?)\b|(?:budget|badyet|hanggang|under|not more than|maximum|may)\s*(\d+(?:\.\d+)?)\b|\b(\d+(?:\.\d+)?)\s*(?:budget|pesos?|piso)\b/);
  const value=budget?Number(budget[1]||budget[2]||budget[3]):null;
@@ -25,7 +25,7 @@ export function wantsPlan(raw,previous){raw=planningText(raw);if(/^(cheapest|pri
 export class Planner{
  constructor(engine,books){this.engine=engine;this.books=books;this.cache=new Map();}
  candidates(item,slots,includeFlagged=false){
-  const key=JSON.stringify([item.terms,item.substitutes,slots.exclusions,includeFlagged]);if(this.cache.has(key))return this.cache.get(key);
+  const key=JSON.stringify([item.concept,item.tags,item.terms,item.substitutes,slots.exclusions,includeFlagged]);if(this.cache.has(key))return this.cache.get(key);
   const allowed=p=>p.priceCentavos>0&&(includeFlagged||!p.anomalyFlags?.length)&&(item.tags.includes('nonfood')||['FMCG','FRESH & STAPLE'].includes(p.department)&&!/(?:CARE|COSMETIC|INFANT|OTC MED)/.test(p.category)&&p.category!=='ALCOHOLIC BEVERAGES')&&(!['fruit','vegetable'].includes(item.concept)||p.department==='FRESH & STAPLE')&&(!slots.exclusions.includes('pork')||!restricted.test(p.searchText))&&(!slots.exclusions.includes('seafood')||!seafood.test(p.searchText))&&(!slots.exclusions.includes('vegetarian')||!flesh.test(p.searchText))&&(!slots.exclusions.includes('alcohol')||p.category!=='ALCOHOLIC BEVERAGES');
   const matches=terms=>[...new Map(terms.flatMap(term=>this.engine.search(term).rows).filter(allowed).map(p=>[p.sku,p])).values()].sort((a,b)=>a.priceCentavos-b.priceCentavos||a.sku.localeCompare(b.sku));
   let choices=matches(item.terms),substitute=false;if(!choices.length){choices=matches(item.substitutes);substitute=choices.length>0;}const result={choices,substitute};this.cache.set(key,result);return result;

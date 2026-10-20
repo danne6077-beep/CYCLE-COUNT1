@@ -72,3 +72,10 @@ No full Cebuano support was added. Improvement from 21/30 to 24/30 is incidental
 ## Properties verified
 
 Every golden answer resolves the expected playbook, people, days and budget; variant totals equal quantity × actual saved product prices; cheapest variants stay within the cap; all returned SKUs exist; flagged items are excluded by default; uncapped quantity scaling is monotonic. Dietary tests cover concept exclusions and obvious title conflicts, **not verified packaged ingredient suitability**. All plans explicitly disclose that gap.
+
+
+## Owner-approved Smart mode follow-up (2026-10-20)
+
+Commands: `node --test shopper/tests/smart.test.js` -> 11 pass, 0 fail; `node shopper/scripts/evaluate-smart.mjs` -> golden 220/220 offline and contract replay; held-out 154/154 offline and contract replay; 374/374 injected unknown IDs rejected, zero accepted fake IDs, zero arithmetic errors. `node scripts/shopper-smart-check.cjs` -> consent off by default, one same-origin POST when enabled, real worker verification, tamper/429 fallback, retry, one-tap off and axe zero violations.
+
+Smart-only and hybrid numbers here are **deterministic contract replays, not live model quality**. All four candidate thresholds (0.50/0.65/0.75/0.85) escalate every complex fixture; 0.75 is the retained policy tie, not an empirically unique optimum. Full per-language/playbook replay buckets are in qa/shopper/smart-eval.json. Live per-intent/language accuracy, verifier rejection rate, hallucinated-ID rate, arithmetic rate, p50/p95, escalation and actual cost are **not measured**: local Anthropic/limiter credentials are absent and no deployment/provider call was made. A human review of 50 actual Smart answers is also **not measured**. Do not substitute mock replay accuracy for those results. No live gain over offline is established; keep Smart optional. See smart-mode.md for cost calculations, limits and the enabling checklist.

@@ -13,3 +13,8 @@ Plan edits are previews until Add is chosen. Rows added from a card are linked s
 Commands: `node --test shopper/tests/games.test.js` → tests 2, pass 2, fail 0. `node --test shopper/tests/planner.test.js` → tests 3, pass 3, fail 0.
 
 The production builder fingerprints every module import and worker URL, and measures the actual static import graph. This avoids stale storage/client modules during updates. The 150 KiB initial JavaScript and 60 KiB playbook gates remain enforced.
+
+
+## Final rendering method
+
+The final harness keeps only two rich messages in the rendered window while retaining 200 on device. Earlier/latest controls page through history. The warm 4x render check runs in a fresh Chrome process with the real synthetic saved history, after tooling/font setup; one in-page interval covers submission, worker reply, persistence and paint. No Playwright injection/actionability scan runs inside that interval. The 50ms limit is unchanged. Layout containment, local chat scrolling and per-message atomic persistence reduce actual rendering/serialization work. This is one representative warm scenario, not a physical-device or all-states guarantee.

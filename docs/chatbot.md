@@ -1,62 +1,70 @@
 # Offline Ask FUJI
 
-## What changed
+This branch upgrades the deterministic Hypermart assistant with 22 editable occasion/dish playbooks, scaled sample plans, real catalog prices, grouped basket actions, comparisons and local games. It removes Julian mode, its toggle, generated configuration and all joke assets. A migration strips retired response prefixes from older saved conversations while preserving factual replies. There is no replacement mascot or name-triggered response.
 
-The old keyword-only helper and optional online provider request are replaced by an on-device catalog assistant. English, Tagalog and Taglish questions produce supplied prices, ranked product cards and tables. Follow-ups resolve the last results, product size or cheaper choices. Explicit add/remove commands and card buttons update the real basket, with undo; clearing requires confirmation. Basket answers use actual quantities, private shelf overrides and the trip budget. Sample meal/budget lists explain their subtotal and remaining amount.
+## Data and answers
 
-The chat uses a native modal dialog: full height on mobile, a side panel on desktop, keyboard focus containment, Escape, reduced motion, 44px buttons, a 500-character composer, language selection, copy, retry and local history capped at 200 messages. Julian mode has 120 editable friendly lines, a persistent toggle and a build-time kill switch. The jokes never replace product answers or target sexual orientation.
+The supplied assortment contains 14,076 items; master data enrichment remains restricted to HYPERMART. No source price effective date is supplied. Every priced answer/card/plan carries localized saved-price provenance and asks for cashier confirmation. Build-time anomaly flags retain the supplied amounts, disclose caveats in search and exclude flagged prices from automatic plans unless explicitly requested. Flags are review hints, not verified errors.
 
-## Architecture
+Facts come from catalog records, human-edited playbooks and integer-centavo arithmetic. Label sizes are estimates unless verified metadata exists. Plans show people/days/budget/diet assumptions, quantities, group subtotals, totals, trims, substitutions, unmatched concepts and provenance. Edit chips, steppers, swap, three budget variants, Add all/by group, undo, explicit trip-budget adoption and text sharing operate on those calculations. A fresh question creates a preview; rows added from a card become linked to the actual trip until undone. Saved plans are recalculated before restoring.
+
+Diet filters exclude named concepts and obvious product-title matches; packaged ingredients and allergy suitability are unverified. Plans are sample selling-unit suggestions, not verified serving counts, nutrition, medical advice, shelf stock or promotions. General knowledge, legal/medical advice and unsupported live-store facts get a scoped fallback. Cebuano/Bisaya has measured partial recognition, not full language support. Unusual questions may need a shorter name, SKU or suggested question.
+
+## Architecture and preparation
 
 ```text
-HYPERMART-filtered catalog + supplied item/price list
-                |
-     build-chat.mjs: SKU join + version hash
-                |
-       chat-data/catalog.json (14,076 rows)
-                |
-Service worker precache ---- versioned IndexedDB snapshot
-                |                    |
-app basket <-- client.js <--> Worker: normalize -> classify -> retrieve
-                |                    -> rank -> calculate -> templates
-          local chat history          |
-                +----------- structured answer, cards, table, actions
+HYPERMART enrichment + supplied assortment/prices
+             -> anomaly report + canonical version digest
+             -> snapshot + aliases + 22 playbooks (atomic package)
+                                      |
+first paint -> deferred preparation -> worker -> token postings / planner
+                    |                    |             |
+              complete SW cache      versioned IDB   factual answer
+                    |                    |             |
+              Offline ready        fallback memory  Plan Card -> actual basket
 ```
 
-The worker constructs a token posting index and alias vocabulary away from the UI thread. The raw versioned snapshot is cached in IndexedDB; the index is reconstructed in the worker on startup. All prices use integer centavos. Search uses exact/alias token intersection, inverse-frequency relevance and limited Damerau-Levenshtein corrections. Short tokens are never fuzzy matched. Low-confidence corrections are disclosed and cannot automatically change the basket. Responses have three deterministic introductory variants per intent in English, Tagalog and Taglish, followed by factual templates.
+The first preparation runs after paint, or when chat is opened. With Smart mode off, questions, plans and prepared games make zero HTTP/provider requests. Offline ready requires a complete version-matched page cache; a prepared catalog without a page cache is labeled separately. Worker package digests reject mixed snapshot/alias/playbook versions. An older complete package can be used with an explicit notice. Postings are persisted by snapshot version, with rebuild on failure. Schema version and existing IndexedDB stores remain unchanged; added keys do not invalidate trip data. Private/quota failures fall back to tab memory with a visible persistence warning.
 
-The first online preparation caches the shell, worker, aliases, jokes and full chat catalog. “Offline ready” appears after worker preparation and service worker installation. Subsequent questions make zero HTTP/provider requests. Offline reload uses the cached shell and local index snapshot. Installing the site on a home screen is optional. Browser storage eviction or clearing data requires preparing again. The separate full barcode reference download remains available in Settings.
+The worker is separate from the initial page modules. Playbooks are loaded as data during preparation, games as a lazy module. Modules/data carry versioned URLs, the service worker installs a complete shell before old-cache cleanup, and minified static assets are compressed in production and local build preview. See [snapshot update evidence](snapshot-updates.md).
 
-## Updating the data or behavior
+## Interaction, privacy and accessibility
 
-- Publish prices through the existing validated HYPERMART assortment workflow. `node shopper/scripts/build.mjs` regenerates the chat snapshot automatically after preparing the public prices. Do not hand-edit generated `chat-data/catalog.json` or add other master sheets.
-- Add bilingual aliases to `shopper/chat-data/aliases.json`; keys are canonical searchable terms and values are spelling/translation arrays. Brand words are searched in supplied titles; they are not claimed as verified brand metadata.
-- Add friendly lines in `shopper/chat-data/julian-lines.json`, preserving the language tags and context pools. Set `ENABLE_JULIAN_EGG=false` at build time to disable and hide the feature.
-- Add language detection markers in `normalize.js`, openings in `templates.js`, factual translations in `engine.js` and a UI language option in `client.js`. Keep calculation logic shared.
-- `Clear chat` removes the saved conversation/context; `Delete my data` also terminates the worker before deleting IndexedDB. Chat is not uploaded with optional account snapshots.
+The native dialog supports bounded history (200 saved messages, 2 visible at a time with earlier/latest controls), focus containment, Escape, a labelled 500-character composer, bilingual onboarding, skeleton/busy states and retry. Christmas decoration is optional; a dismissible offer appears in November–January. Light/dark themes and reduced motion are respected. Sound, haptics and fun effects are off by default; reduced motion suppresses fun effects even if requested.
 
-## Validation
+Hula ang Presyo uses unflagged catalog prices. Beat the Budget scores coverage against a computed scenario baseline. Tipid Streak stores daily check-ins and local results. A baseline comparison is not a promise of shelf savings or nutritional adequacy.
 
-From the repository root:
+Unanswered logging is opt-in and local (200 entries); wrong-price/missing-item notes are local (200 combined), saved plans are capped at 20 and game results at 100. Export/share always requires a click. Clear chat data confirms, resets these keys/preferences/history/context and removes stale UI; it preserves the grocery trip. Delete my data handles the full device database/cache separately. Optional account snapshots do not contain chat keys. See [privacy review](security-privacy.md), [feedback workflow](feedback-loop.md) and [manual accessibility checklist](a11y-manual-checklist.md).
+
+## Commands
+
+From the repository root, install existing dependencies, then run:
 
 ```sh
-node shopper/scripts/check.mjs
-node shopper/node_modules/typescript/bin/tsc -p shopper/jsconfig.json
+pnpm --dir shopper install --no-frozen-lockfile
+pnpm --dir shopper lint
+pnpm --dir shopper typecheck
 node --test
 node scripts/build_pages.js
-node shopper/scripts/serve.mjs --dist
-node scripts/shopper-chat-check.cjs
+node shopper/scripts/evaluate-chat.mjs
+node shopper/scripts/review-content.mjs
+SHOPPER_PREVIEW_PORT=4184 node shopper/scripts/serve.mjs --dist --standalone
+# In another terminal:
+SHOPPER_TEST_URL=http://127.0.0.1:4184/ node scripts/shopper-chat-check.cjs
+node scripts/shopper-planner-ui-check.cjs
+node scripts/shopper-resilience-check.cjs
+node scripts/shopper-installability-check.cjs
+node scripts/shopper-privacy-check.cjs
+node scripts/shopper-perf-check.cjs
 ```
 
-The shopper package exposes `test:chat` and `test:e2e`. Install the repository Playwright dependencies and Chrome/Chromium before E2E tests. `TEST_BROWSER_CHANNEL=chrome` selects installed Chrome; CI uses Playwright Chromium. CI checks both `/shopper/` and standalone `/` hosting. It also retains the existing mobile, camera, pricing, offline, bundle, Lighthouse and Firestore checks.
+Install repository Playwright dependencies with `npm ci --ignore-scripts` and `npx playwright install chromium`. `TEST_BROWSER_CHANNEL=chrome` selects installed Chrome for isolated local tests. CI retains both hosting paths, camera/shopping/offline/bundle checks and Firestore emulator tests, and adds the planner/privacy/resilience/installability checks. Original Lighthouse checks remain; the additional hardening gate requires Accessibility exactly 100, Performance >=90, initial JS <150 KiB gzip and lazy playbooks <=60 KiB gzip. Every axe suite requires zero violations.
 
-The chat unit suite checks 160 intent utterances, 42 labeled language examples (at least 90% agreement), fractions/multipacks, number words, typos, real rice prices, ten controlled unit-price rankings, follow-ups, computed budgets, unknown data, currency provenance and Julian variants/toggles/repetition. E2E checks 5 English and 5 Tagalog queries, actual basket changes/undo, 33 more questions with networking disabled, offline reload/history, focus containment, button targets and axe accessibility. Generated proof is in `qa/shopper/chat-report.json`, screenshots and CI artifacts. Timing measurements are from desktop test browsers; they do not establish physical Android performance.
+Playbook/alias edits: follow [playbooks.md](playbooks.md), rebuild, evaluate and review the content dump. Do not hand-edit generated snapshot files or infer missing price dates. The owner subsequently approved optional online Smart mode, off by default; see [smart-mode.md](smart-mode.md). The separate on-device-model proposal remains unimplemented. The unused legacy basket-upload route is retired. Optional Smart mode uses /api/chat with a strict consented payload and no basket/history.
 
-## Known limitations
+## Performance
 
-## Performance (emulated, not physical)
-
-Command: `node scripts/shopper-perf-check.cjs`, against the production build at localhost:4184, 220 golden planner fixtures per run. CDP page CPU throttling is requested; equal worker slowdown is **not independently confirmed**. This is not a physical Android benchmark.
+Phase 4 command: `node scripts/shopper-perf-check.cjs`, production build on localhost:4184, 220 golden planner fixtures per run. These are **emulated desktop measurements, not physical Android**. CDP page CPU rates were requested; equal worker slowdown is **not independently confirmed**.
 
 | Requested CPU rate | Cold start ms | Warm start ms | p50 ms | p95 ms |
 | --- | --- | --- | --- | --- |
@@ -64,14 +72,10 @@ Command: `node scripts/shopper-perf-check.cjs`, against the production build at 
 | 4 | 1012.1 | 197.6 | 0.3 | 1.6 |
 | 6 | 1153.7 | 191.1 | 0.3 | 1.5 |
 
-The requested 4x run reports p95 below 150ms. Heap is **not measured** because performance.memory is unavailable in the worker. Postings are persisted by snapshot version and reused, with rebuild on cache failure. Main-thread long tasks are checked in the final UI harness. Playbooks total 14,282 gzip bytes at this phase, below 60 KiB.
+Final remeasurement and browser/Lighthouse results are recorded in [hardening-report.md](hardening-report.md) and the CI artifact, rather than overwriting the baseline. Heap is **not measured**: performance.memory is unavailable in the worker. Initial JS and playbook gzip counts are emitted by the build into shopper-build-report.json. Snapshot transfer follows first paint in the browser harness. Long-task assertions cover a representative warm planner query with bounded history, not every conceivable browser state.
 
-Physical Android steps (**not performed**; no physical phone connected): record model, OS, browser and battery state; load once on Wi-Fi; clear only the chat-postings key for a cold run; use Chrome remote debugging to collect worker startup and the 220 fixture latencies without CPU emulation; repeat warm, then airplane mode and offline reload; inspect keyboard/input, memory, thermal behavior and battery over a 15-minute session. Export JSON traces and label them with the device. Do not infer physical performance from desktop emulation.
+Physical Android performance is **not measured** because no phone is connected. To measure: record model, OS, browser, battery and date; prepare once on Wi-Fi; clear only the chat-postings key for cold startup; remotely debug the worker and run the 220 fixtures without CPU emulation; repeat warm; enable airplane mode, reload and repeat. Inspect keyboard/input, TalkBack, memory, thermal behavior and battery for 15 minutes. Export traces with device details. Use the manual checklist for VoiceOver and actual browser 200% zoom; desktop narrow-viewport reflow does not establish those results.
 
-- This is a deterministic Hypermart shopping assistant, not a general-purpose language model. Unusual phrasing may need a shorter name, SKU or a suggested question. Voice and the optional large on-device model are omitted to keep all question processing offline and lightweight.
-- Source prices have no effective date and may be inaccurate. The visible warning asks shoppers to confirm shelf/cashier prices. Source anomalies such as SKU 2028 at ₱0.21 are retained, not “corrected” by guesses.
-- Live inventory, aisle locations, current promotions, dietary labels and verified brand/net-size metadata are absent. A listed record does not establish stock. No current promo or aisle is invented.
-- Clear sizes parsed from titles are labeled as inferred. Ambiguous multipliers suppress unit-price rankings. Lowest pack price and best inferred price per kilo/liter are distinguished. Different product families are not guaranteed equivalent.
-- Plans buy one listed selling unit of each suggested ingredient. They are not verified serving counts, nutritional plans or a promise to feed a family for a week. Purchase decisions still require checking the actual pack.
-- The legacy authenticated `/api/chat` server route remains for compatibility, but this website's assistant never calls it and offers no online AI consent switch.
-- The user directly authorized publishing. Release targets only `codex/fuji-shopper-hypermart` and the separate grocery Vercel project, preserving Cycle Count production and paused APK work. This takes precedence over the attachment's suggested no-deployment workflow.
+## Release scope
+
+This post-release task authorizes one review PR on codex/shopper-planner-hardening, targeting codex/fuji-shopper-hypermart. Do not merge, deploy or push to production. Branch-specific Vercel Git configuration disables automatic deployment of the review branch. Grocery and Cycle Count remain separate projects; APK work remains paused. See [release-checklist.md](release-checklist.md) for a future authorized release and rollback process.

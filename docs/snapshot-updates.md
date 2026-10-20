@@ -11,3 +11,8 @@ If IndexedDB is unavailable or full, reads/writes use a clone-safe tab memory st
 Command: `node scripts/shopper-resilience-check.cjs` against localhost:4184 production build. Output: five cases passed: unavailable storage, quota failure, initial fetch failure, mixed-version rejection, and old cached package → new package. Fetch/version failure retries succeeded. No retry was needed for the two memory-store cases. The update test observed version/build `c321c263705279dfb989`, all 22 playbooks, oldCache false, and preserved factual history without the retired prefix. Storage failures are injected in page and worker; SW is blocked for degradation-only cases. The package-update case uses a real service worker.
 
 Commands: `node --test shopper/tests/storage.test.js` → tests 2, pass 2, fail 0. First-paint ordering and final UI long tasks are measured in the final browser harness; this document does not invent a physical-device result.
+
+
+## History serialization follow-up
+
+Full-array serialization was replaced by atomic per-message writes to avoid foreground work growing with all 200 messages. The database version/stores and message fields are unchanged. A legacy array is migrated losslessly in one transaction; on failure it remains intact. One real-browser test injects a quota exception on the second record and verifies original data survives, the current tab still has factual history and a warning is visible. A confirmed clear removes all message records and the legacy array. See the rollback conversion below before serving an older client.

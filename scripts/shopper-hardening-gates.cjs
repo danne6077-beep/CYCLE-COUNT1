@@ -1,0 +1,10 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const build=JSON.parse(fs.readFileSync('docs/shopper-build-report.json','utf8'));
+assert.ok(build.initialJavaScriptGzipBytes<150*1024,'Initial JavaScript must stay below 150 KiB gzip');
+assert.ok(build.playbookGzipBytes<=60*1024,'Lazy playbooks must stay at or below 60 KiB gzip');
+const lighthouse=JSON.parse(fs.readFileSync('qa/shopper/lighthouse.report.json','utf8'));
+const scores={performance:lighthouse.categories.performance.score*100,accessibility:lighthouse.categories.accessibility.score*100};
+assert.ok(scores.performance>=90,'Mobile Lighthouse Performance must be at least 90');
+assert.equal(scores.accessibility,100,'Mobile Lighthouse Accessibility must be 100');
+console.log('HARDENING_GATES '+JSON.stringify({...scores,initialJavaScriptGzipBytes:build.initialJavaScriptGzipBytes,playbookGzipBytes:build.playbookGzipBytes}));
