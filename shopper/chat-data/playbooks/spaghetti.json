@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "id": "spaghetti",
+  "names": {
+    "en": "Spaghetti ingredients",
+    "tl": "Mga sangkap sa spaghetti",
+    "taglish": "Spaghetti ingredients"
+  },
+  "triggers": [
+    "spaghetti",
+    "spageti"
+  ],
+  "season": null,
+  "defaults": {
+    "people": 4,
+    "days": 1
+  },
+  "groups": [
+    {
+      "id": "essentials",
+      "name": {
+        "en": "Essentials",
+        "tl": "Pangunahing items",
+        "taglish": "Essentials"
+      }
+    },
+    {
+      "id": "extras",
+      "name": {
+        "en": "Nice to have",
+        "tl": "Maaaring idagdag",
+        "taglish": "Extras"
+      }
+    }
+  ],
+  "tradition": null,
+  "items": [
+    {
+      "id": "spaghetti",
+      "group": "essentials",
+      "concept": "spaghetti",
+      "terms": [
+        "spaghetti"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.25
+      },
+      "priority": "essential",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "sauce",
+      "group": "essentials",
+      "concept": "sauce",
+      "terms": [
+        "spaghetti sauce",
+        "tomato sauce"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.125
+      },
+      "priority": "essential",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "cheese",
+      "group": "essentials",
+      "concept": "cheese",
+      "terms": [
+        "cheese",
+        "keso"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.125
+      },
+      "priority": "essential",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "hotdog",
+      "group": "extras",
+      "concept": "hotdog",
+      "terms": [
+        "hotdog"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.125
+      },
+      "priority": "nice",
+      "substitutes": [],
+      "tags": [
+        "meat",
+        "pork"
+      ],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    }
+  ]
+}

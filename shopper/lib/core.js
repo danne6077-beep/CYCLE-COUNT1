@@ -68,6 +68,12 @@ export function barcodeVariants(raw) {
   return [...variants];
 }
 export const bucket = code => [...String(code)].reduce((s,c)=>s+c.charCodeAt(0),0)%64;
+// Store rule: remove one leading zero, drop the final digit, then keep at most 12 digits.
+export function normalizeScannedBarcode(raw) {
+  const code=String(raw??'').trim();
+  if(!/^\d{2,100}$/.test(code))return '';
+  return code.replace(/^0/,'').slice(0,-1).slice(0,12);
+}
 /** @param {Product} p */
 export function comparable(p) {
   if(!p.size || !Number.isFinite(p.size) || p.size<=0 || !p.unit) return null;

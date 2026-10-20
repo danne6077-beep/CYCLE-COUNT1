@@ -1,5 +1,5 @@
 import {read,write,clearStore} from './storage.js';
-import {barcodeVariants,bucket,normalizeText} from './core.js';
+import {barcodeVariants,bucket,normalizeText,normalizeScannedBarcode} from './core.js';
 const base=new URL('../',import.meta.url);
 export class Catalog {
   constructor(){this.meta=null;this.rows=[];this.bySku=new Map();this.parts=new Map();this.prices=new Map();this.progress=()=>{};}
@@ -110,6 +110,14 @@ export class Catalog {
     }
     const products=[];
     for(const sku of skus){if(!this.bySku.has(sku))await this.details(sku);const p=this.product(this.bySku.get(sku));if(p)products.push(p);}
+    return products;
+  }
+  async lookupScanned(raw) {
+    const key=normalizeScannedBarcode(raw);if(!key)return [];
+    if(this.quickPricesOnly)await this.fullPrices();
+    if(!this.scanIndex)this.scanIndex=fetch(new URL('chat-data/scan-index.json',base)).then(async r=>{if(!r.ok)throw new Error('Scan lookup is unavailable offline. Connect once and retry.');const data=await r.json();if(data.rule!==1||data.catalogChecksum!==this.meta.checksum)throw new Error('Scan catalog changed. Reload the page and retry.');return data;}).catch(error=>{this.scanIndex=null;throw error;});
+    const index=await this.scanIndex,products=[];
+    for(const sku of index.keys[key]||index.fullKeys?.[key]||[]){if(!this.bySku.has(sku))await this.details(sku);const p=this.product(this.bySku.get(sku));if(p)products.push(p);}
     return products;
   }
   async details(sku) {

@@ -24,7 +24,9 @@ let browser;
  await page.locator('[data-plan]').first().click();
  await page.locator('[data-action=scan]:visible').first().click();
  await page.getByText('Keep the barcode inside the frame. Tap video to refocus.').waitFor();
- await page.evaluate(sku=>window.__fujiTestBarcodes.push(sku),skus[0]);await page.locator(`#scan-result [data-price="${skus[0]}"]`).waitFor();
+ const scanIndex=JSON.parse(fs.readFileSync(path.resolve(__dirname,'../shopper/chat-data/scan-index.json'))).keys;
+ const scanKey=Object.keys(scanIndex).find(key=>!key.startsWith('0')&&scanIndex[key].length===1&&scanIndex[key][0]===skus[0]);assert.ok(scanKey,'First fixture SKU must have a unique numeric master barcode');
+ await page.evaluate(code=>window.__fujiTestBarcodes.push(code),scanKey+'0');await page.locator(`#scan-result [data-price="${skus[0]}"]`).waitFor();
  for(const sku of skus.slice(1)){await page.locator('#barcode-input').fill(sku);await page.locator('#barcode-form button').click();await page.locator(`#scan-result [data-price="${sku}"]`).waitFor();}
  await page.locator('[data-action=close-sheet]').click();
  assert.equal(await page.evaluate(()=>window.__fujiTestStream.getTracks().every(t=>t.readyState==='ended')),true);

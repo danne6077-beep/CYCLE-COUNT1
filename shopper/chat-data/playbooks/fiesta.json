@@ -1,0 +1,184 @@
+{
+  "schemaVersion": 1,
+  "id": "fiesta",
+  "names": {
+    "en": "Fiesta / handaan",
+    "tl": "Pista / handaan",
+    "taglish": "Fiesta / handaan"
+  },
+  "triggers": [
+    "fiesta",
+    "pista",
+    "handaan",
+    "handa",
+    "celebration"
+  ],
+  "season": null,
+  "defaults": {
+    "people": 12,
+    "days": 1
+  },
+  "groups": [
+    {
+      "id": "essentials",
+      "name": {
+        "en": "Essentials",
+        "tl": "Pangunahing items",
+        "taglish": "Essentials"
+      }
+    },
+    {
+      "id": "extras",
+      "name": {
+        "en": "Nice to have",
+        "tl": "Maaaring idagdag",
+        "taglish": "Extras"
+      }
+    }
+  ],
+  "tradition": null,
+  "items": [
+    {
+      "id": "rice",
+      "group": "essentials",
+      "concept": "rice",
+      "terms": [
+        "rice",
+        "bigas"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 150,
+        "unit": "g",
+        "approxUnits": 0.15
+      },
+      "priority": "essential",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "chicken",
+      "group": "essentials",
+      "concept": "chicken",
+      "terms": [
+        "chicken",
+        "manok"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.25
+      },
+      "priority": "essential",
+      "substitutes": [
+        "egg"
+      ],
+      "tags": [
+        "meat"
+      ],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "pork",
+      "group": "essentials",
+      "concept": "pork",
+      "terms": [
+        "pork",
+        "baboy"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.25
+      },
+      "priority": "essential",
+      "substitutes": [
+        "chicken"
+      ],
+      "tags": [
+        "meat",
+        "pork"
+      ],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "noodle",
+      "group": "essentials",
+      "concept": "noodle",
+      "terms": [
+        "noodle",
+        "pancit"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.25
+      },
+      "priority": "essential",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "juice",
+      "group": "essentials",
+      "concept": "juice",
+      "terms": [
+        "juice"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.125
+      },
+      "priority": "essential",
+      "substitutes": [
+        "water"
+      ],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "fruit",
+      "group": "extras",
+      "concept": "fruit",
+      "terms": [
+        "fruit",
+        "prutas"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.125
+      },
+      "priority": "nice",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "spaghetti",
+      "group": "extras",
+      "concept": "spaghetti",
+      "terms": [
+        "spaghetti"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.25
+      },
+      "priority": "nice",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    }
+  ]
+}

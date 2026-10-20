@@ -39,7 +39,8 @@ export function unitCost(cents,size){
  if(!Number.isFinite(amount)||amount>Number.MAX_SAFE_INTEGER)return null;
  return {centavos:Math.round(amount),exact:amount,basis,unit:size.baseUnit,displayCentavos:Math.round(cents*(size.baseUnit==='pc'?1:1000)/size.baseValue),displayUnit:size.baseUnit==='g'?'kg':size.baseUnit==='ml'?'L':'pc'};
 }
-export const pesos=cents=>new Intl.NumberFormat('en-PH',{style:'currency',currency:'PHP',minimumFractionDigits:2,maximumFractionDigits:2}).format(cents/100);
+const currencyFormat=new Intl.NumberFormat('en-PH',{style:'currency',currency:'PHP',minimumFractionDigits:2,maximumFractionDigits:2});
+export const pesos=cents=>currencyFormat.format(cents/100);
 export function normalizeProduct(raw){
  const explicit=Number.isFinite(raw.size)&&raw.unit?parseSize(raw.size+' '+raw.unit):null,parsed=explicit||parseSize(raw.name,{fromName:true});
  const centavos=Number.isSafeInteger(raw.priceCentavos)&&raw.priceCentavos>=0?raw.priceCentavos:null;

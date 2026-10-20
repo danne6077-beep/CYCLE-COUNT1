@@ -6,7 +6,7 @@ const output=path.resolve(__dirname,'../qa/shopper');let browser;
  fs.mkdirSync(output,{recursive:true});
  const launchOptions={headless:true,...(process.env.TEST_BROWSER_CHANNEL?{channel:process.env.TEST_BROWSER_CHANNEL}:{}),args:['--use-fake-ui-for-media-stream','--use-fake-device-for-media-stream']};
  const checks=[];
- for(const mode of ['no-native-detector','broken-native-detector','denied-photo-fallback']){
+ for(const mode of ['no-native-detector','broken-native-detector','denied-photo-fallback','normalized-native-scan']){
   // Isolate the simulated camera device as well as site permissions between scenarios.
   browser=await chromium.launch(launchOptions);
   const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
@@ -18,7 +18,7 @@ const output=path.resolve(__dirname,'../qa/shopper');let browser;
     if(mode==='denied-photo-fallback')throw new DOMException('Permission denied for test','NotAllowedError');
     const stream=await original(options);window.__cameraStreams.push(stream);return stream;
    }});
-   Object.defineProperty(window,'BarcodeDetector',{configurable:true,value:mode==='broken-native-detector'?class{static async getSupportedFormats(){throw new Error('Native detector unavailable');}}:undefined});
+   Object.defineProperty(window,'BarcodeDetector',{configurable:true,value:mode==='broken-native-detector'?class{static async getSupportedFormats(){throw new Error('Native detector unavailable');}}:mode==='normalized-native-scan'?class{static async getSupportedFormats(){return ['ean_13'];}async detect(){return [{rawValue:'04800361415349'}];}}:undefined});
   },mode);
   const page=await context.newPage(),errors=[];page.on('pageerror',error=>errors.push(error.message));
   await page.goto(url,{waitUntil:'networkidle'});
@@ -28,7 +28,7 @@ const output=path.resolve(__dirname,'../qa/shopper');let browser;
   if(mode==='denied-photo-fallback'){
    await page.locator('#camera-state').filter({hasText:'Camera permission is blocked.'}).waitFor();
    assert.equal(await page.getByRole('button',{name:'Retry camera',exact:true}).isEnabled(),true);
-   const png=await page.evaluate(async()=>{const {toDataURL}=await import('./vendor/qr.js');return toDataURL('486522',{width:360,margin:4});});
+   const png=await page.evaluate(async()=>{const {toDataURL}=await import('./vendor/qr.js');return toDataURL('04800361415349',{width:360,margin:4});});
    await page.locator('#barcode-photo').setInputFiles({name:'barcode.png',mimeType:'image/png',buffer:Buffer.from(png.split(',')[1],'base64')});
    await page.locator('#scan-result [data-price="486522"]').waitFor({timeout:30000});
    assert.match(await page.locator('#scan-result').innerText(),/₱14\.05/);
@@ -39,6 +39,7 @@ const output=path.resolve(__dirname,'../qa/shopper');let browser;
    catch(error){console.error(JSON.stringify({mode,status:await page.locator('#camera-state').innerText(),requests:await page.evaluate(()=>window.__cameraRequests),errors}));await page.screenshot({path:path.join(output,'camera-failure.png')});throw error;}
    assert.equal(await page.evaluate(()=>document.querySelector('#camera').videoWidth>0),true);
    assert.equal(await page.evaluate(()=>window.__cameraRequests),1,'Fallback must reuse the same camera permission and stream.');
+   if(mode==='normalized-native-scan'){await page.locator('#scan-result [data-price="486522"]').waitFor({timeout:30000});assert.match(await page.locator('#scan-result').innerText(),/480036141534/);}
    await page.screenshot({path:path.join(output,'camera-'+mode+'.png')});
   }
   await page.locator('[data-action=close-sheet]').click();

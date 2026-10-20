@@ -1,16 +1,18 @@
 import {fold,normalizeNumbers,detectLanguage,distance,normalizeProduct,parseSize,pesos} from './normalize.js';
+import {provenance,priceCaveat} from './trust.js';
+import {Planner,wantsPlan} from './planner.js';
 import {opening} from './templates.js';
 const stop=new Set(('what whats is are the a an of here there can could would you me my please show list all items item products product cheapest cheap lowest most expensive highest price prices how much cost costs available have do does we they compare versus vs best value per under below less than above over between and to at maximum max minimum min php pesos peso p for with in stock where aisle location find suggest recommend alternatives alternative cheaper more than any anything else about kg kilo kilos g ml l pcs pack size top first second third fourth fifth ang mga ano anong ba po yung iyong iyong mga kay para sa si ni nang ng na meron mayroon kayong kayo magkano presyo halaga pinakamura pinakamurang mura murang mas pinakamahal mahal alin dito doon paki pakita ipakita mabibili bibilhin mabili may ako ko mo naman lang sana lahat wala isang dalawang tatlong weekly week linggo pang bakit today ngayon').split(/\s+/));
 const escapeRE=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
 const stem=s=>s.length>4?s.replace(/(?:es|s)$/,''):s;
 const choose=(lang,en,tl,taglish=tl)=>lang==='en'?en:lang==='tl'?tl:taglish;
 const initial=['Pinakamurang bigas','Cheapest cooking oil','Magkano ang itlog?','May ₱500 ako, ano mabibili?','Compare Coke vs Pepsi','Ano ang promo ngayon?'];
-const serious=new Set(['CLEAR_BASKET','RESET','ERROR']);
 for(const word of 'cheaper affordable priciest mamahalin availability lokasyon unit substitute pamalit kapalit pinakasulit tipid abot kaya i tell options option choices choice hanap looking look hindi lalagpas hanggang mababa add remove idagdag lagay ilagay isama tanggalin alisin mo yan iyon iyan pa first second third fourth fifth una pangalawa pangatlo pang may mabibili bibilhin saan nasaan hanapin ikumpara kumpara mas sa kanya kami tayo para ngayon bagong usapan need needs want looking sku barcode code'.split(' '))stop.add(word);
 export function classify(raw,focus={}){
  const text=normalizeNumbers(raw),n=fold(text),basket=/\b(basket|cart|badyet ko|budget ko|my budget|matitira|remaining|balance|kasya ba|how is my budget|what should i remove)\b/.test(n);
  let intent='UNKNOWN';
  if(/^(reset|start over|new chat|bagong usapan)$/.test(n))intent='RESET';
+ else if(/^(why|bakit)(\s|$)/.test(n))intent='WHY';
  else if(/\b(clear|empty|ubusin|limasin|burahin|tanggalin lahat|alisin lahat)\b/.test(n)&&/basket|cart/.test(n))intent='CLEAR_BASKET';
  else if(/^(add|idagdag|lagay|ilagay|isama|remove|tanggalin|alisin)\b/.test(n))intent='BASKET_ACTION';
  else if(basket)intent='BASKET_QUERY';
@@ -36,15 +38,18 @@ export function classify(raw,focus={}){
  return {intent,text:n,amount:Number.isFinite(amount)?Math.round(amount*100):null,min:range?Math.round(+range[1]*100):null,count:Math.min(20,Math.max(1,+(count?.[1]||count?.[2]||5))),invalidAmount:/-\s*\d|\d+\.\d{3,}/.test(raw)||amount<=0||amount>10000000||!!range&&+range[1]>+range[2],requestedSize:parseSize(n),strictMax:/\b(under|below|less than)\b/.test(n)};
 }
 export class ChatEngine{
- constructor(products,aliases={},jokes={},config={}){
-  this.aliases=aliases;this.jokes=jokes;this.config=config;this.focus={};this.mentions=0;this.previousJoke='';this.turns=[];
+ constructor(products,aliases={},config={}){
+  this.aliases=aliases;this.config=config;this.focus={};this.turns=[];
   this.rules=Object.entries(aliases).flatMap(([key,values])=>values.map(value=>({key,phrase:fold(value)}))).sort((a,b)=>b.phrase.length-a.phrase.length);
   this.products=products.map(normalizeProduct);this.byId=new Map(this.products.map(p=>[p.id,p]));this.postings=new Map();
-  for(const p of this.products){let extra=[];for(const rule of this.rules)if((' '+p.searchText+' ').includes(' '+rule.phrase+' '))extra.push(rule.key);p.tokens=[...new Set((p.searchText+' '+extra.join(' ')).split(' ').map(stem))];for(const token of p.tokens){if(!this.postings.has(token))this.postings.set(token,[]);this.postings.get(token).push(p.id);}}
-  this.vocabulary=[...new Set([...Object.values(aliases).flat().map(fold),...this.postings.keys()])].filter(t=>t.length>=4&&!t.includes(' '));
+  if(config.prebuilt){this.postings=new Map(config.prebuilt.postings);for(const [id,tokens] of config.prebuilt.tokens){const p=this.byId.get(id);if(p)p.tokens=tokens;}}
+  else for(const p of this.products){let extra=[];for(const rule of this.rules)if((' '+p.searchText+' ').includes(' '+rule.phrase+' '))extra.push(rule.key);p.tokens=[...new Set((p.searchText+' '+extra.join(' ')).split(' ').map(stem))];for(const token of p.tokens){if(!this.postings.has(token))this.postings.set(token,[]);this.postings.get(token).push(p.id);}}
+  this.planner=new Planner(this,config.playbooks||[]);
+  this.vocabulary=config.prebuilt?.vocabulary||[...new Set([...Object.values(aliases).flat().map(fold),...this.postings.keys()])].filter(t=>t.length>=4&&!t.includes(' '));
  }
+ exportIndex(){return {postings:[...this.postings],tokens:this.products.map(p=>[p.id,p.tokens]),vocabulary:this.vocabulary};}
  canonical(text){let n=' '+fold(text)+' ';for(const {phrase,key} of this.rules)n=n.replace(new RegExp('(^| )'+escapeRE(phrase)+'(?= |$)','g'),'$1'+key+' ');return n.trim().replace(/\s+/g,' ');}
- terms(text){const numeric=/^\d+$/.test(fold(text))||/\b(sku|barcode|code)\b/.test(text);return this.canonical(text).split(' ').filter(t=>!stop.has(t)&&(!/^\d+(?:\.\d+)?(?:kg|kilo|g|ml|l|pcs?|s)?$/.test(t)||numeric&&/^\d+$/.test(t))&&!/^₱/.test(t)&&!['julian','julien','julyan','hulyan','julz','jul','sino','who','new','ngayon'].includes(t)).map(stem);}
+ terms(text){const numeric=/^\d+$/.test(fold(text))||/\b(sku|barcode|code)\b/.test(text);return this.canonical(text).split(' ').filter(t=>!stop.has(t)&&(!/^\d+(?:\.\d+)?(?:kg|kilo|g|ml|l|pcs?|s)?$/.test(t)||numeric&&/^\d+$/.test(t))&&!/^₱/.test(t)&&!['sino','who','new','ngayon'].includes(t)).map(stem);}
  search(text,{lastQuery=false}={}){
   let terms=this.terms(text),corrections=[];
   for(let i=0;i<terms.length;i++)if(!this.postings.has(terms[i])&&terms[i].length>=4){let best=null,bestD=3;for(const word of this.vocabulary){if(Math.abs(word.length-terms[i].length)>2)continue;const d=distance(terms[i],word);if(d<bestD){best=word;bestD=d;}if(!d)break;}const threshold=terms[i].length>=7?2:1;if(best&&bestD<=threshold){corrections.push({from:terms[i],to:best,confidence:1-bestD/Math.max(best.length,terms[i].length)});terms[i]=this.canonical(best);}}
@@ -61,13 +66,15 @@ export class ChatEngine{
   return {rows,terms,topic,corrections,text};
  }
  restore(focus){if(focus&&Array.isArray(focus.ids))this.focus={...focus,ids:focus.ids.filter(id=>this.byId.has(id))};}
- respond(raw,{language='auto',julian=true,basket=[],budget=null,day='2026-10-19'}={}){
+ respond(raw,{language='auto',basket=[],budget=null,day=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Manila',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())}={}){
   raw=String(raw??'').slice(0,500).trim();const lang=language==='auto'?detectLanguage(raw):language;
+  if(/\b(weather|forecast|politics|president|homework|dosage|dose|diagnosis|cure|medical advice|legal advice|eleksyon)\b/i.test(raw)&&!/stock|supplies|kit/.test(raw))return {intent:'UNKNOWN',lang,text:choose(lang,'I can help with saved Hypermart items and shopping plans. General knowledge, medical, legal and live-store questions are outside my saved data.','Tungkol sa na-save na Hypermart items at plano sa pamimili ang kaya ko. Hindi sakop ang pangkalahatang kaalaman, payong medikal/legal o live-store na tanong.'),cards:[],actions:[],quickReplies:initial.slice(0,3),confidence:0,context:{...this.focus}};
+  if(wantsPlan(raw,this.focus.planContext)&&this.planner.books.length){const planned=this.planner.plan(raw,{language,day,budget},this.focus.planContext);if(planned){if(/cheapest rice.*(?:and|at)/i.test(raw)){const simple=this.respond('cheapest rice',{language,basket,budget,day});planned.parts=[simple.text,planned.text];planned.text=simple.text+'\n\n'+planned.text;}this.focus={...planned.context};return planned;}}
   const q=classify(raw,this.focus),reply={text:'',lang,cards:[],table:null,actions:[],quickReplies:initial,confidence:1,intent:q.intent,followUpHint:'',context:null};
   const say=(en,tl,mixed)=>choose(lang,en,tl,mixed),source=say('Based on the saved Hypermart catalog. Price date unavailable.','Batay sa na-save na Hypermart catalog. Walang petsa ng presyo.','Saved Hypermart catalog ito; walang price date.');
   let found=this.search(q.text),rows=found.rows,hasFocus=(this.focus.ids||[]).length>0;
   const direct=q.text.match(/^(?:add|idagdag|remove|tanggalin|alisin)\s+(\d+)$/);if(direct){found=this.search(direct[1]);rows=this.byId.has(direct[1])?[this.byId.get(direct[1])]:found.rows;}
-  if(q.requestedSize&&!['BUDGET_PLAN','MEAL_HELP','BASKET_ACTION','BASKET_QUERY'].includes(q.intent))rows=rows.filter(p=>p.parsedSize?.baseUnit===q.requestedSize.baseUnit&&p.parsedSize.baseValue===q.requestedSize.baseValue);
+  if(q.requestedSize&&!['COMPARE','BUDGET_PLAN','MEAL_HELP','BASKET_ACTION','BASKET_QUERY'].includes(q.intent))rows=rows.filter(p=>p.parsedSize?.baseUnit===q.requestedSize.baseUnit&&p.parsedSize.baseValue===q.requestedSize.baseValue);
   const ordinal=q.text.match(/\b(first|second|third|fourth|fifth|una|pangalawa|pangatlo|pang apat|pang lima|#?\d+)\b/),order={first:0,una:0,second:1,pangalawa:1,third:2,pangatlo:2,fourth:3,'pang apat':3,fifth:4,'pang lima':4};
   const reference=/\b(it|that one|this one|yan|iyon|iyan|yung|the second|pangalawa|una|pangatlo|how about|mas mura pa|cheaper|ano pa|what else|eh sa iba)\b/.test(q.text);
   const refIndex=ordinal?(order[ordinal[1]]??Math.max(0,+ordinal[1]-1)):Math.max(0,(this.focus.ids||[]).indexOf(this.focus.selectedId));
@@ -99,7 +106,7 @@ export class ChatEngine{
   else if(['BUDGET_PLAN','MEAL_HELP'].includes(q.intent)){
    if(q.invalidAmount){reply.text=say('Use a positive budget up to ₱10,000,000 with no more than two decimal places.','Maglagay ng positibong budget hanggang ₱10,000,000, na hanggang dalawang decimal lamang.');reply.intent='ERROR';}
    else{let needs=['rice','egg','vegetable'];if(q.intent==='MEAL_HELP')needs=/adobo/.test(q.text)?['chicken','soy sauce','vinegar','garlic']:/spaghetti/.test(q.text)?['spaghetti','tomato','cheese']:/sinigang/.test(q.text)?['pork','vegetable','tomato']:/breakfast|agahan|almusal|baon/.test(q.text)?['bread','egg','milk']:['rice','egg','vegetable'];else{const supplied=['rice','egg','vegetable','chicken','pork','milk','bread','oil','coffee','soap','shampoo'].filter(key=>this.terms(q.text).includes(key));if(supplied.length)needs=supplied;}
-    let balance=q.amount??Infinity,total=0;const picked=[],missing=[];for(const need of needs){const choices=this.search(need).rows.filter(p=>p.priceCentavos!=null&&p.inStock!==false&&p.priceCentavos<=balance).sort((a,b)=>a.priceCentavos-b.priceCentavos||a.sku.localeCompare(b.sku));if(!choices.length){missing.push(need);continue;}const p=choices[0];picked.push(p);total+=p.priceCentavos;balance-=p.priceCentavos;}
+    let balance=q.amount??Infinity,total=0;const picked=[],missing=[];for(const need of needs){const choices=this.search(need).rows.filter(p=>p.priceCentavos!=null&&p.inStock!==false&&p.priceCentavos<=balance&&!p.anomalyFlags?.length).sort((a,b)=>a.priceCentavos-b.priceCentavos||a.sku.localeCompare(b.sku));if(!choices.length){missing.push(need);continue;}const p=choices[0];picked.push(p);total+=p.priceCentavos;balance-=p.priceCentavos;}
     reply.cards=picked;reply.text=say('Sample shopping list: one listed selling unit of each item. Quantities are suggestions, not a guarantee of meals or nutrition for a whole week.','Halimbawang listahan: tig-isang nakalistang selling unit ng bawat item. Mungkahi lang ang dami; hindi garantiyang sapat ito sa pagkain o nutrisyon sa buong linggo.','Sample list: tig-isang listed selling unit. Suggested quantities lang; hindi guaranteed na pang-isang linggong meals.');reply.text+=' '+say(`Subtotal: ${pesos(total)}.`,`Subtotal: ${pesos(total)}.`);if(q.amount!=null)reply.text+=' '+say(`Remaining from ${pesos(q.amount)}: ${pesos(q.amount-total)}.`,`Matitira sa ${pesos(q.amount)}: ${pesos(q.amount-total)}.`);if(missing.length)reply.text+=' '+say('Not included (no matching item within this budget): ','Hindi naisama (walang katugmang pasok sa budget): ')+missing.join(', ')+'.';reply.table={kind:'plan',totalCentavos:total,remainingCentavos:q.amount==null?null:q.amount-total,rows:picked.map(p=>({id:p.id,name:p.name,quantity:1,priceCentavos:p.priceCentavos,subtotalCentavos:p.priceCentavos}))};
    }
   }
@@ -107,10 +114,11 @@ export class ChatEngine{
    rows=(rows.length?rows:this.products).filter(p=>Number.isSafeInteger(p.promoCentavos)&&p.promoCentavos>=0&&p.promoCentavos<p.priceCentavos&&p.promoStart<=day&&p.promoEnd>=day);reply.cards=rows.slice(0,q.count);reply.text=rows.length?say('These records have a dated promotion active on the selected day.','May nakatalang promo ang mga ito na sakop ng petsa ngayon.'):say('No verified active promotions are saved. Ask staff about current offers; I won’t invent a sale.','Walang naka-save na beripikadong aktibong promo. Magtanong sa staff para sa kasalukuyang alok; hindi ako gagawa ng pekeng sale.');
   }
   else if(q.intent==='LOCATION'){reply.cards=rows.slice(0,5);reply.text=rows.some(p=>p.aisle)?rows.slice(0,5).map(p=>p.name+': '+(p.aisle||say('aisle not listed','walang aisle'))).join('\n'):say('Aisle locations are not supplied in this catalog. The matching departments/categories are shown below; please ask staff for the exact shelf.','Walang aisle location sa catalog. Nasa ibaba ang department/category ng mga katugma; itanong sa staff ang eksaktong puwesto.');}
+  else if(q.intent==='WHY'){reply.cards=(this.focus.ids||[]).map(id=>this.byId.get(id)).filter(Boolean);reply.text=reply.cards.length?say(`I matched the saved search “${this.focus.lastQuery}”. Pack prices come directly from these catalog records; unit costs divide that price by a clear label size. Price rankings use the displayed numeric cost, with SKU as a tie-breaker. Flagged prices need confirmation and sizes from titles are estimates.`,`Itinugma ko ang na-save na paghahanap na “${this.focus.lastQuery}”. Mula sa mga rekord na ito ang pack price; hinahati iyon sa malinaw na sukat sa pangalan para sa unit cost. Numero ng presyo ang batayan ng ranggo, at SKU kapag tabla. Tiyakin ang flagged na presyo at tantiyang sukat.`):say('Ask about an item or plan first, then I can explain the records and calculation used.','Magtanong muna ng item o plano, saka ko maipapaliwanag ang rekord at kuwenta.');}
   else if(q.intent==='COMPARE'){
-   const parts=q.text.replace(/^.*?\b(?:compare|ikumpara|kumpara)\b/,'').split(/\s+(?:vs|versus|o|against|kumpara sa)\s+/).map(s=>s.trim());
+   const parts=q.text.replace(/^.*?\b(?:compare|ikumpara|kumpara|mas mura ba ang)\b/,'').replace(/\bper\s*100\s*(?:g|grams?|ml)\b/g,'').split(/\s+(?:vs|versus|o|against|kumpara sa)\s+/).map(s=>s.trim());
    if(parts.length>=2){const groups=parts.slice(0,2).map(part=>this.search(part).rows.filter(p=>p.priceCentavos!=null).sort((a,b)=>a.priceCentavos-b.priceCentavos||a.sku.localeCompare(b.sku)));rows=groups.flatMap(g=>g.slice(0,3));reply.text=groups.every(g=>g.length)?say('Lowest listed pack prices for each search are shown below. Different sizes are not automatically equivalent.','Nasa ibaba ang pinakamababang pack price ng bawat hinanap. Hindi awtomatikong magkapareho ang magkaibang sukat.'):say('I could not match both sides. These are the exact matches I found; try the full names or SKUs.','Hindi nagtugma ang dalawang panig. Ito lang ang eksaktong nakita; subukan ang buong pangalan o SKU.');}else reply.text=say('Compare these matching items below. Give two names with “vs” for a narrower comparison.','Ihambing ang mga katugma sa ibaba. Gumamit ng dalawang pangalan na may “vs” para mas tiyak.');
-   reply.cards=rows.slice(0,10);
+   reply.cards=rows.slice(0,10);const basis=q.text.match(/\bper\s*100\s*(g|grams?|ml)\b/);if(basis){const unit=basis[1]==='ml'?'ml':'g';reply.cards=reply.cards.map(p=>p.unitPrice?.unit===unit?{...p,unitPrice:{...p.unitPrice,displayCentavos:p.unitPrice.centavos,displayUnit:'100 '+unit}}:p);}
   }
   else if(q.intent==='UNKNOWN')reply.text=say('I can help with the saved Hypermart items, prices and your shopping budget. I don’t have an answer for that. Try “cheapest rice” or choose a question below.','Tungkol lang po sa naka-save na Hypermart items, presyo at budget ang kaya ko. Wala akong sagot diyan. Subukan ang “pinakamurang bigas” o ang mga tanong sa ibaba.');
   else{
@@ -142,13 +150,7 @@ export class ChatEngine{
   }
   if(found.corrections.length){reply.corrections=found.corrections;reply.confidence=Math.min(...found.corrections.map(c=>c.confidence));reply.text=say(reply.confidence<.8?'Did you mean ':'Matched spelling: ',reply.confidence<.8?'Ang ibig mo ba ay ':'Katugmang baybay: ')+found.corrections.map(c=>c.from+' → '+c.to).join(', ')+(reply.confidence<.8?'?\n':'.\n')+reply.text;if(reply.confidence<.8)reply.actions=reply.actions.filter(a=>!a.auto);}
   const intro=opening(reply.intent,lang,raw+'|'+this.turns.length);if(intro)reply.text=intro+'\n'+reply.text;
-  const nameTokens=fold(raw).split(' '),nicknames=this.jokes.nicknames||['julian','julyan','hulyan','julz','jul','julien'];const named=nameTokens.some(token=>nicknames.includes(token)||token.length>=6&&distance(token,'julian')<=1);
-  if(named&&julian&&this.config.enableJulian!==false&&!serious.has(reply.intent)){
-   this.mentions++;let key=/late|oras|huli/.test(q.text)?'late':/sino|who/.test(q.text)?'who':/love|crush|jowa/.test(q.text)?'crush':/pogi|ganda|handsome|compliment/.test(q.text)?'compliment':['BUDGET_PLAN','BASKET_QUERY'].includes(q.intent)?'budget':found.topic==='rice'?'rice':q.intent==='MOST_EXPENSIVE'?'premium':/shampoo|beauty|lotion/.test(q.text)?'beauty':/beer|alak|drink|juice|water/.test(q.text)?'drinks':q.intent==='SMALLTALK'?'greetings':['PRICE_OF','CHEAPEST'].includes(q.intent)?'price':'generic';
-   const pool=(this.jokes.pools?.[key]||[]).filter(line=>line.lang===lang||lang==='taglish');const all=pool.length?pool:(this.jokes.pools?.generic||[]);let line=all[(this.mentions*7+raw.length)%Math.max(1,all.length)]?.text||'Julian brought the dramatic entrance again. Friendly joke lang!';if(line===this.previousJoke)line=all[(all.findIndex(x=>x.text===line)+1)%all.length]?.text||line;this.previousJoke=line;
-   if(this.mentions===2)line+=say(' Julian is back in the spotlight!',' Si Julian na naman ang bida!');if(this.mentions===5)line+=say(' Fifth cameo—confetti for Julian! 🎉',' Ikalimang cameo—confetti para kay Julian! 🎉');
-   reply.text=line+(reply.intent==='UNKNOWN'?'':'\n\n'+reply.text);reply.julian=true;
-  }
+  if(reply.cards.length||reply.table||['BASKET_QUERY','BUDGET_PLAN','PRICE_OF','CHEAPEST','COMPARE','BEST_VALUE','UNDER_BUDGET'].includes(reply.intent)){reply.provenance=provenance(lang,this.config.metadata?.effectiveDate||null);reply.text+='\n'+reply.provenance;const flagged=reply.cards.filter(p=>p.anomalyFlags?.length);if(flagged.length)reply.text+='\n'+priceCaveat(flagged[0],lang);}
   reply.context={...this.focus};this.turns.push({question:raw,intent:reply.intent});this.turns=this.turns.slice(-20);return reply;
  }
 }

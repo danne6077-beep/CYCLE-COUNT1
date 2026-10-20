@@ -1,0 +1,1 @@
+export const hydrateSnapshot=snapshot=>snapshot.rows.map(r=>({sku:r[0],name:r[1],category:r[2],subcategory:r[3],department:r[4],priceCentavos:r[5],brand:r[6],size:r[7],unit:r[8],aisle:r[9],inStock:r[10],barcodes:r[11],promoCentavos:r[12],promoStart:r[13],promoEnd:r[14],anomalyFlags:r[15]||[],priceAsOf:snapshot.effectiveDate||snapshot.priceAsOf}));

@@ -1,0 +1,206 @@
+{
+  "schemaVersion": 1,
+  "id": "emergency",
+  "names": {
+    "en": "Three-day household supplies",
+    "tl": "Tatlong araw na gamit sa bahay",
+    "taglish": "Three-day household supplies"
+  },
+  "triggers": [
+    "typhoon",
+    "bagyo",
+    "emergency kit",
+    "storm",
+    "disaster",
+    "stock up",
+    "stock",
+    "emergency"
+  ],
+  "season": null,
+  "defaults": {
+    "people": 4,
+    "days": 3
+  },
+  "groups": [
+    {
+      "id": "essentials",
+      "name": {
+        "en": "Essentials",
+        "tl": "Pangunahing items",
+        "taglish": "Essentials"
+      }
+    },
+    {
+      "id": "extras",
+      "name": {
+        "en": "Nice to have",
+        "tl": "Maaaring idagdag",
+        "taglish": "Extras"
+      }
+    }
+  ],
+  "tradition": null,
+  "items": [
+    {
+      "id": "water",
+      "group": "essentials",
+      "concept": "water",
+      "terms": [
+        "water",
+        "tubig"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.5,
+        "unit": null,
+        "approxUnits": 0.5
+      },
+      "priority": "essential",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "rice",
+      "group": "essentials",
+      "concept": "rice",
+      "terms": [
+        "rice",
+        "bigas"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 150,
+        "unit": "g",
+        "approxUnits": 0.15
+      },
+      "priority": "essential",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "canned",
+      "group": "essentials",
+      "concept": "canned",
+      "terms": [
+        "sardines",
+        "tuna"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.125
+      },
+      "priority": "essential",
+      "substitutes": [],
+      "tags": [
+        "meat",
+        "seafood"
+      ],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "biscuit",
+      "group": "essentials",
+      "concept": "biscuit",
+      "terms": [
+        "biscuit",
+        "biskwit"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.125
+      },
+      "priority": "essential",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "tissue",
+      "group": "extras",
+      "concept": "tissue",
+      "terms": [
+        "tissue"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.1,
+        "unit": null,
+        "approxUnits": 0.1
+      },
+      "priority": "nice",
+      "substitutes": [],
+      "tags": [
+        "nonfood"
+      ],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "battery",
+      "group": "extras",
+      "concept": "battery",
+      "terms": [
+        "battery",
+        "baterya"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.1,
+        "unit": null,
+        "approxUnits": 0.1
+      },
+      "priority": "nice",
+      "substitutes": [],
+      "tags": [
+        "nonfood"
+      ],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "flashlight",
+      "group": "extras",
+      "concept": "flashlight",
+      "terms": [
+        "flashlight"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.1,
+        "unit": null,
+        "approxUnits": 0.1
+      },
+      "priority": "nice",
+      "substitutes": [],
+      "tags": [
+        "nonfood"
+      ],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "soap",
+      "group": "extras",
+      "concept": "soap",
+      "terms": [
+        "soap",
+        "sabon"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.1,
+        "unit": null,
+        "approxUnits": 0.1
+      },
+      "priority": "nice",
+      "substitutes": [],
+      "tags": [
+        "nonfood"
+      ],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    }
+  ]
+}

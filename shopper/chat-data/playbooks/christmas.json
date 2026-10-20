@@ -1,0 +1,260 @@
+{
+  "schemaVersion": 1,
+  "id": "christmas",
+  "names": {
+    "en": "Christmas / Noche Buena",
+    "tl": "Pasko / Noche Buena",
+    "taglish": "Christmas / Noche Buena"
+  },
+  "triggers": [
+    "christmas",
+    "noche buena",
+    "pasko",
+    "xmas",
+    "holiday dinner",
+    "krismas"
+  ],
+  "season": {
+    "months": [
+      11,
+      12
+    ]
+  },
+  "defaults": {
+    "people": 8,
+    "days": 1
+  },
+  "groups": [
+    {
+      "id": "essentials",
+      "name": {
+        "en": "Essentials",
+        "tl": "Pangunahing items",
+        "taglish": "Essentials"
+      }
+    },
+    {
+      "id": "extras",
+      "name": {
+        "en": "Nice to have",
+        "tl": "Maaaring idagdag",
+        "taglish": "Extras"
+      }
+    }
+  ],
+  "tradition": null,
+  "items": [
+    {
+      "id": "rice",
+      "group": "essentials",
+      "concept": "rice",
+      "terms": [
+        "rice",
+        "bigas"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 150,
+        "unit": "g",
+        "approxUnits": 0.15
+      },
+      "priority": "essential",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "chicken",
+      "group": "essentials",
+      "concept": "chicken",
+      "terms": [
+        "chicken",
+        "manok"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.25
+      },
+      "priority": "essential",
+      "substitutes": [
+        "egg"
+      ],
+      "tags": [
+        "meat"
+      ],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "spaghetti",
+      "group": "essentials",
+      "concept": "spaghetti",
+      "terms": [
+        "spaghetti"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.25
+      },
+      "priority": "essential",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "sauce",
+      "group": "essentials",
+      "concept": "sauce",
+      "terms": [
+        "spaghetti sauce",
+        "tomato sauce"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.125
+      },
+      "priority": "essential",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "cheese",
+      "group": "essentials",
+      "concept": "cheese",
+      "terms": [
+        "cheese",
+        "keso"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.125
+      },
+      "priority": "essential",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "ham",
+      "group": "essentials",
+      "concept": "ham",
+      "terms": [
+        "ham"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.125
+      },
+      "priority": "essential",
+      "substitutes": [],
+      "tags": [
+        "meat",
+        "pork"
+      ],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "fruit",
+      "group": "essentials",
+      "concept": "fruit",
+      "terms": [
+        "fruit",
+        "prutas"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.125
+      },
+      "priority": "essential",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "juice",
+      "group": "essentials",
+      "concept": "juice",
+      "terms": [
+        "juice"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.125
+      },
+      "priority": "essential",
+      "substitutes": [
+        "water"
+      ],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "cream",
+      "group": "extras",
+      "concept": "cream",
+      "terms": [
+        "cream"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.125
+      },
+      "priority": "nice",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "condensed",
+      "group": "extras",
+      "concept": "condensed",
+      "terms": [
+        "condensed"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.125
+      },
+      "priority": "nice",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    },
+    {
+      "id": "cocktail",
+      "group": "extras",
+      "concept": "cocktail",
+      "terms": [
+        "fruit cocktail"
+      ],
+      "quantityRule": {
+        "basis": "person-day",
+        "quantity": 0.125,
+        "unit": null,
+        "approxUnits": 0.125
+      },
+      "priority": "nice",
+      "substitutes": [],
+      "tags": [],
+      "notes": "Sample suggestion, not verified advice; check pack quantities and ingredient labels."
+    }
+  ]
+}

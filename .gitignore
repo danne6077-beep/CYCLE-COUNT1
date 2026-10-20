@@ -11,6 +11,7 @@ shopper/dist/
 shopper/vendor/
 shopper/chat-data/catalog.json
 shopper/chat-data/config.json
+shopper/chat-data/scan-index.json
 qa/shopper/
 shopper/.npmrc
 .toolchains/

@@ -1,3 +1,4 @@
+import {normalizeScannedBarcode} from './core.js';
 const FORMATS=['ean_13','ean_8','upc_a','upc_e','code_128','qr_code'];
 export const CAMERA_MESSAGES={
   opening:'Opening camera… Tap Allow when your browser asks.',
@@ -85,7 +86,7 @@ export class Scanner {
     }
     if(this.active&&session===this.session)this.timer=setTimeout(()=>this.loop(session),100);
   }
-  emit(value){if(!this.active)return;const now=Date.now();if(value===this.last&&now-this.lastAt<1200)return;this.last=value;this.lastAt=now;this.onRead(value);}
+  emit(value){if(!this.active)return;const key=normalizeScannedBarcode(value)||value,now=Date.now();if(key===this.last&&now-this.lastAt<1200)return;this.last=key;this.lastAt=now;this.onRead(value);}
   async torch(on){const track=this.stream?.getVideoTracks()[0];if(track)await track.applyConstraints({advanced:[{torch:on}]});}
   async focus(){const track=this.stream?.getVideoTracks()[0];try{await track?.applyConstraints({advanced:[{focusMode:'single-shot'}]});}catch{}}
   stop(){
@@ -108,4 +109,4 @@ export async function decodePhoto(file){
     catch{throw new Error('No readable barcode found. Take a sharp, close photo with the whole barcode visible, or type the code below.');}
   }finally{URL.revokeObjectURL(url);}
 }
-export function feedback(){navigator.vibrate?.(60);try{const context=new (window.AudioContext||window.webkitAudioContext)(),oscillator=context.createOscillator(),gain=context.createGain();gain.gain.value=.035;oscillator.frequency.value=880;oscillator.connect(gain);gain.connect(context.destination);oscillator.start();oscillator.stop(context.currentTime+.08);oscillator.onended=()=>context.close();}catch{}}
+export function feedback({haptics=false,sound=false}={}){if(haptics)navigator.vibrate?.(60);if(!sound)return;try{const context=new (window.AudioContext||window.webkitAudioContext)(),oscillator=context.createOscillator(),gain=context.createGain();gain.gain.value=.035;oscillator.frequency.value=880;oscillator.connect(gain);gain.connect(context.destination);oscillator.start();oscillator.stop(context.currentTime+.08);oscillator.onended=()=>context.close();}catch{}}
