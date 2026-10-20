@@ -1,0 +1,9 @@
+# Ingredient matching correction found during public release verification
+
+The first production release of the planner was commit 86ea06c2e546935586c957165be15d16cc8e87fa (2026-10-20). Both exact-commit Shopper checks jobs passed. A public Noche Buena question then exposed a semantic gap not caught by the arithmetic/slot fixtures: broad search aliases selected spaghetti packaging, cheese-flavored wafers, ham-flavored snacks and chicken seasoning as ingredients.
+
+Planner candidates now also require a compatible shelf category for recipe concepts. Fresh meat/produce, pasta, dairy/baking ingredients, bread, staples and drinks each use the saved catalog taxonomy. Configured alternatives are checked against the substitute concept and retain their substitution label. An absent compatible item stays in the missing list. Source products, prices, flags, aliases, quantities, budget rules and normal product-search results are unchanged. The same planner code runs offline and behind Smart tools/verifiers.
+
+Local evidence: `node --test` passes 110 tests, including realistic category-collision cases and a disclosed egg-substitution case. Syntax/type checks pass. Initial JS is 50,562 B gzip; worker 23,985 B; lazy playbooks 14,282 B. The follow-up PR and exact production commit must pass the unchanged browser, zero-network, accessibility, timing and Lighthouse gates before closeout. Release CI/public verification results are recorded in the PR and release response.
+
+This is a category guard, not a general natural-language accuracy claim. Product categorization and packaged ingredient suitability still require owner review; quantities remain approximate selling units and saved prices must be confirmed at the cashier. Older saved plans retain their historical lines; use a new question or restore/recalculate a saved plan to use the corrected matches. No user history is erased to hide the issue.
