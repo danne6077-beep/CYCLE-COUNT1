@@ -4,6 +4,25 @@ const tr=(lang,en,tl,mixed=tl)=>lang==='en'?en:lang==='tl'?tl:mixed;
 const restricted=/\b(pork|baboy|ham|bacon|hotdog|longganisa|sausage)\b/;
 const seafood=/\b(fish|seafood|shrimp|prawn|tuna|sardine|sardines|bangus|tilapia|isda|patis|oyster)\b/;
 const flesh=/\b(chicken|ckn|chkn|pork|beef|fish|ham|bacon|meat|hotdog|manok|baboy|baka|tuna|sardine|seafood|shrimp|sausage)\b/;
+// Search includes flavor words and category aliases. Recipe ingredients also need a compatible shelf category.
+function ingredientMatch(p,concept){
+ const category=fold(p.category).replace(/\band\b/g,'').replace(/\s+/g,' ').trim(),sub=fold(p.subcategory),name=fold(p.name),fresh=p.department==='FRESH & STAPLE';
+ const dairy=category==='milk dairy',baking=category==='baking salad aids',cooking=category==='cooking essentials',staple=category==='staple';
+ if(['chicken','pork','fish','ham','hotdog'].includes(concept))return fresh&&category==='fresh frozen'&&!/ice cream|wrapper/.test(sub);
+ if(concept==='egg')return fresh&&/egg/.test(sub+' '+name)&&!/(?:flavor|crack|noodle|biscuit)/.test(sub+' '+name);
+ if(['garlic','onion','ginger','tomato','vegetable','fruit'].includes(concept))return fresh&&category==='fresh frozen'&&!/ice cream/.test(sub);
+ if(concept==='spaghetti'||concept==='noodle')return category==='pasta noodles';
+ if(concept==='cheese')return (dairy||baking)&&/cheese/.test(sub);
+ if(concept==='cream')return (dairy||baking)&&/^(?:all purpose |cooking |thick |whipping )?cream$/.test(sub);
+ if(concept==='milk')return dairy&&!/condensed|cheese|butter|creamer/.test(sub)&&/milk|yoghurt|yogurt|evaporated|fresh|fortified|powder/.test(sub+' '+name);
+ if(concept==='condensed')return dairy&&/condensed|condens/.test(sub+' '+name);
+ if(concept==='bread')return category==='bakery delicacies'&&/bread|loaf|bun|pandesal/.test(sub+' '+name)&&!/crack|biscuit|crumb|breading/.test(sub+' '+name);
+ if(concept==='rice')return staple&&/plain|rice|bigas/.test(sub+' '+name);
+ if(concept==='sugar')return (staple||cooking)&&/sugar|asukal/.test(name);
+ if(concept==='salt'||concept==='oil'||concept==='soy'||concept==='vinegar'||concept==='sauce')return staple||cooking;
+ if(['water','juice','coffee'].includes(concept))return category==='non alcoholic beverages';
+ return true;
+}
 export function extractSlots(raw,previous={},defaults={people:4,days:1}){
  const n=normalizeNumbers(raw).replace(/(\d+(?:\.\d+)?)\s*k\b/g,(_,v)=>String(Number(v)*1000));
  const people=n.match(/(?:for|para sa|pang)\s+(\d+)\b(?!\s*(?:days?|araw|weeks?|linggo|budget|pesos?|piso))|\b(\d+)\s*(?:people|persons?|pax|guests?|kids?|children|adults?|tao|kami|tayo|bata)\b|(?:headcount|tao)\s+(\d+)/);
@@ -27,8 +46,8 @@ export class Planner{
  candidates(item,slots,includeFlagged=false){
   const key=JSON.stringify([item.concept,item.tags,item.terms,item.substitutes,slots.exclusions,includeFlagged]);if(this.cache.has(key))return this.cache.get(key);
   const allowed=p=>p.priceCentavos>0&&(includeFlagged||!p.anomalyFlags?.length)&&(item.tags.includes('nonfood')||['FMCG','FRESH & STAPLE'].includes(p.department)&&!/(?:CARE|COSMETIC|INFANT|OTC MED)/.test(p.category)&&p.category!=='ALCOHOLIC BEVERAGES')&&(!['fruit','vegetable'].includes(item.concept)||p.department==='FRESH & STAPLE')&&(!slots.exclusions.includes('pork')||!restricted.test(p.searchText))&&(!slots.exclusions.includes('seafood')||!seafood.test(p.searchText))&&(!slots.exclusions.includes('vegetarian')||!flesh.test(p.searchText))&&(!slots.exclusions.includes('alcohol')||p.category!=='ALCOHOLIC BEVERAGES');
-  const matches=terms=>[...new Map(terms.flatMap(term=>this.engine.search(term).rows).filter(allowed).map(p=>[p.sku,p])).values()].sort((a,b)=>a.priceCentavos-b.priceCentavos||a.sku.localeCompare(b.sku));
-  let choices=matches(item.terms),substitute=false;if(!choices.length){choices=matches(item.substitutes);substitute=choices.length>0;}const result={choices,substitute};this.cache.set(key,result);return result;
+  const matches=(terms,substitute=false)=>[...new Map(terms.flatMap(term=>this.engine.search(term).rows.filter(p=>allowed(p)&&ingredientMatch(p,substitute?term:item.concept))).map(p=>[p.sku,p])).values()].sort((a,b)=>a.priceCentavos-b.priceCentavos||a.sku.localeCompare(b.sku));
+  let choices=matches(item.terms),substitute=false;if(!choices.length){choices=matches(item.substitutes,true);substitute=choices.length>0;}const result={choices,substitute};this.cache.set(key,result);return result;
  }
  plan(raw,options={},previous=null){
   const lang=/ulitin.*tagalog|sa tagalog/.test(fold(raw))?'tl':options.language&&options.language!=='auto'?options.language:detectLanguage(raw),day=options.day||new Date().toISOString().slice(0,10);
