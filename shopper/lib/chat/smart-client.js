@@ -1,0 +1,9 @@
+import {extractSlots} from './planner.js';import {smartRequest,smartRoute} from './smart-shared.js';
+export function makeSmartRequest(question,offline,language,budget){const slots=extractSlots(question),a=offline.plan?.assumptions;return smartRequest({mode:'smart',consent:true,question,language,people:slots.explicitPeople?slots.people:a?.people??null,days:slots.explicitDays?slots.days:a?.days??null,budgetCentavos:slots.explicitBudget?slots.budgetCentavos:a?.budgetCentavos??budget??null,exclusions:a?.exclusions||slots.exclusions,includeFlagged:/include flagged|include unusual prices/i.test(question)});}
+export async function attemptSmart({question,offline,language='auto',budget=null,enabled=false,forced=false,signal,verify,timeoutMs=14500},fetcher=fetch){
+ const route=smartRoute(question,offline,{enabled,forced});if(!route.escalate)return {route};
+ const controller=new AbortController(),abort=()=>controller.abort();if(signal?.aborted)abort();signal?.addEventListener('abort',abort,{once:true});const timer=setTimeout(abort,Math.min(14500,timeoutMs));
+ try{if(typeof navigator!=='undefined'&&navigator.onLine===false)throw Error('Offline');const request=makeSmartRequest(question,offline,language,budget),r=await fetcher('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(request),credentials:'omit',cache:'no-store',redirect:'error',referrerPolicy:'no-referrer',signal:controller.signal});if(!r.ok)throw Error('Unavailable');const data=await r.json();if(data.status!=='verified')throw Error('Unverified');const response=await verify(data.candidate,request);if(controller.signal.aborted)throw Error('Cancelled');return {route,response};}
+ catch{return {route,fallback:true,notice:'Smart mode is unavailable; using the offline answer. / Hindi magamit ang Smart mode; offline na sagot muna.'};}
+ finally{clearTimeout(timer);signal?.removeEventListener('abort',abort);}
+}

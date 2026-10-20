@@ -1,6 +1,7 @@
 import {ChatEngine} from './engine.js';
 import {hydrateSnapshot} from './snapshot.js';
 import {read,write,storageStatus} from '../storage.js';
+import {smartRequest,verifySmart} from './smart-shared.js';
 const version=typeof __CHAT_VERSION__==='undefined'?'local':__CHAT_VERSION__;
 let engine,initializing,metrics,packageInfo;
 const digest=async text=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text)))].map(n=>n.toString(16).padStart(2,'0')).join('').slice(0,20);
@@ -28,6 +29,7 @@ self.onmessage=async event=>{
  const {id,type,...payload}=event.data;
  try{const bot=await initialize();if(type==='init'){if(payload.context)bot.restore(payload.context);self.postMessage({id,ready:true,count:bot.products.length,packageInfo,...(payload.debug&&/^(localhost|127\.0\.0\.1)$/.test(self.location.hostname)?{metrics}:{})});}
   else if(type==='games-data'){const pool=bot.products.filter(p=>p.priceCentavos>0&&!p.anomalyFlags?.length),step=Math.max(1,Math.floor(pool.length/40));self.postMessage({id,pool:pool.filter((_,i)=>i%step===0).slice(0,40),scenario:bot.planner.plan('weekly for 1 people 1 days budget 500',{language:'en',day:new Date().toISOString().slice(0,10)})?.plan});}
+  else if(type==='verify-smart'){const response=verifySmart(payload.candidate,bot,smartRequest(payload.request),{version:packageInfo.version,day:payload.day});self.postMessage({id,response});}
   else if(type==='query'){if(payload.context)bot.restore(payload.context);const started=performance.now(),response=bot.respond(payload.question,payload.options);self.postMessage({id,response,elapsedMs:performance.now()-started});}}
  catch(error){self.postMessage({id,error:error.message||'Offline assistant could not start.'});}
 };
