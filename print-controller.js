@@ -35,6 +35,7 @@ function getSelectedGroupsForPrint(){
 
 function prepareCountSheetPrint(){
   if(document.body.classList.contains('print-shelftag'))return;
+  if(activeCountSheetMode==='spr'&&!$('countSheetPanel').hidden){window.prepareSprCountSheetPrint?.();return}
   if(!$('shelfTagPanel')?.hidden&&!$('shelfStep5')?.hidden&&typeof shelfPreparePrint==='function'){
     shelfPreparePrint();
     return;
@@ -50,6 +51,7 @@ function prepareCountSheetPrint(){
 }
 function finishCountSheetPrint(){
   if(!document.body.classList.contains('print-count-sheet'))return;
+  if(document.body.classList.contains('print-spr-count-sheet')){document.body.classList.remove('print-spr-count-sheet','print-count-sheet');return}
   document.body.classList.remove('print-count-sheet');
   document.body.classList.remove('print-imported-count-sheet');
   if(importedCountSheetPrintActive){
@@ -291,6 +293,7 @@ function renderImportedCountSheet(){
   $('manualCountSheetPages').replaceChildren();
   $('manualCountSheetPages').hidden=true;
   importedCountSheetPreviewReady=false;
+  $('generateImportedCountSheetPreviewBtn').disabled=!importedCountSheetRows.length||!selectedImportedCountSheetGroups.size;
 }
 
 const manualCountSheetFileInput=$('manualCountSheetFileInput');

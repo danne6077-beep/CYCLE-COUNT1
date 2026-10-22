@@ -10,6 +10,10 @@ An optional `ON HAND`, `EXPECTED QTY`, or `QUANTITY` column becomes the expected
 
 Choose supplier, department, or category groupings, then set paper size, orientation, margins, rows per page, and optional columns. Preview the sheet before printing. Browser print preview always uses light paper colors. The yellow PP shelf tag stock is 85 × 38 mm; white shelf tags use the regular price and barcode-first layout. Print a small sample first to confirm printer scaling.
 
+## FOR SPR
+
+Open Count Sheet → **FOR SPR**, then upload an Excel or CSV file with `SKU`, `BARCODE` (or `UPC`), and `DESCRIPTION` columns. The preview preserves every uploaded row and its order, including duplicate SKUs. Format SKU and barcode cells as text to keep leading zeroes. The sheet has a blank count column and prints on Letter paper in portrait, with 14 rows per page. Choose **Export PDF** and select Save as PDF in the browser print dialog. SPR requires no CCD, supplier, or locator data. The upload is kept in memory for this page and does not replace saved inventory; keep your source workbook.
+
 ## Product lookup and masterlist
 
 Search by SKU, UPC, description, or locator. The Masterlist module imports catalog workbooks and stores the active parsed catalog in this device's IndexedDB. Use Settings to export a JSON backup before changing devices or clearing browser data.

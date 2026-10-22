@@ -18,7 +18,8 @@ function setCountSheetMode(mode){
 	$('countSheetModeBar').hidden=mode==='selection';
 	$('standardCountSheetMode').hidden=mode!=='standard';
 	$('manualCountSheetMode').hidden=mode!=='manual';
-	$('countSheetModeStatus').textContent=mode==='standard'?'Standard Count Sheet':mode==='manual'?'Manual Excel / CSV':'';
+	$('sprCountSheetMode').hidden=mode!=='spr';
+	$('countSheetModeStatus').textContent=mode==='standard'?'Standard Count Sheet':mode==='manual'?'Manual Excel / CSV':mode==='spr'?'FOR SPR · Portrait':'';
 	$('countSheetPages').replaceChildren();
 	if(mode!=='standard'){
 		$('supplierSelectionList').replaceChildren();
@@ -55,9 +56,9 @@ async function selectCountSheetMode(mode){
 		setCountSheetMode('selection');
 		return;
 	}
-	if(mode==='manual'){
-		setCountSheetMode('manual');
-		toast('Manual Excel / CSV mode ready');
+	if(mode==='manual'||mode==='spr'){
+		setCountSheetMode(mode);
+		toast(mode==='spr'?'FOR SPR ready. Upload your SKU, barcode, and description file.':'Manual Excel / CSV mode ready');
 		return;
 	}
 	if(mode!=='standard')throw new Error(`Unknown count sheet mode: ${mode}`);
@@ -95,6 +96,7 @@ async function selectCountSheetMode(mode){
 
 $('chooseStandardCountSheetMode').addEventListener('click',()=>selectCountSheetMode('standard'));
 $('chooseManualCountSheetMode').addEventListener('click',()=>selectCountSheetMode('manual'));
+$('chooseSprCountSheetMode').addEventListener('click',()=>selectCountSheetMode('spr'));
 $('changeCountSheetMode').addEventListener('click',()=>selectCountSheetMode('selection'));
 $('importCountSheetInventory').addEventListener('click',()=>{
 	$('countSheetPanel').hidden=true;

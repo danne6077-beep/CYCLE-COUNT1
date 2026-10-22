@@ -22,6 +22,10 @@ The PWA caches the shell, local assets, and pinned public UI libraries. It does 
 
 Physical counts are saved as separate sessions in IndexedDB. Import inventory, choose **Start physical count**, then enter counted quantities and review variances. Expected quantities are optional import columns (for example `ON HAND` or `QTY`). Each count edit, variance decision, and completion is recorded in the session audit trail. Export a count CSV or include sessions in the Settings data backup before changing devices; sessions are not synced to Firebase.
 
+## FOR SPR
+
+**FOR SPR:** In Count Sheet → Choose Mode, select FOR SPR and upload an Excel or CSV file containing SKU, BARCODE, and DESCRIPTION. It prints a Letter portrait sheet with a count column and no CCD/locator fields. Rows retain their uploaded order and duplicates; the upload stays in memory and does not overwrite the inventory workspace. `npm run test:e2e:spr` checks a real XLSX upload, generated barcodes, two portrait PDF pages, invalid upload handling, and the existing manual mode. Cache the app's pinned official SheetJS and JsBarcode scripts locally and set `FUJI_SHEETJS_TEST_PATH` and `FUJI_JSBARCODE_TEST_PATH` to their absolute paths before running this check.
+
 ## Vercel deployment
 
 `vercel.json` builds the static site into `dist/`, exposes `/api/chat`, and applies CSP, MIME, framing, and referrer headers. Vercel Preview deployments are created when the linked repository receives a non-production branch push. Production deploys from the project’s configured production branch; this repo cannot verify or change the Vercel project’s branch, plan, or environment configuration.

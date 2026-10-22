@@ -11,6 +11,7 @@
     "serve": "node scripts/serve-static.js",
     "test:visual": "npm run build:pages && node scripts/phase10-visual-regression.js",
     "test:e2e:count-entry": "npm run build:pages && node scripts/count-entry-e2e.js",
+    "test:e2e:spr": "npm run build:pages && node scripts/spr-count-sheet-e2e.js",
     "check": "npm run lint && npm test && npm run build"
   },
   "repository": {

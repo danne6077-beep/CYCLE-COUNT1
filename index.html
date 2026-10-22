@@ -176,6 +176,7 @@
   <link rel="stylesheet" href="app-shell.css">
   <link rel="stylesheet" href="tokens.css">
   <link rel="stylesheet" href="count-entry.css">
+  <link rel="stylesheet" href="spr-count-sheet.css">
 </head>
 <body class="auth-logged-out">
   <a class="skip-link" href="#loginTitle">Skip to content</a>
@@ -544,6 +545,11 @@
             <span><strong>Upload Manual Excel / CSV File</strong><small>Print rows directly from a spreadsheet without loading standard filters.</small></span>
             <span class="count-sheet-mode-arrow" aria-hidden="true">→</span>
           </button>
+          <button class="count-sheet-mode-option" id="chooseSprCountSheetMode" type="button">
+            <span class="count-sheet-mode-icon" aria-hidden="true">▤</span>
+            <span><strong>FOR SPR</strong><small>Upload SKU, barcode, and description. Print a portrait count sheet.</small></span>
+            <span class="count-sheet-mode-arrow" aria-hidden="true">→</span>
+          </button>
         </div>
       </section>
       <div id="countSheetModeBar" class="count-sheet-mode-bar" hidden>
@@ -573,6 +579,17 @@
           </div>
         </div>
         <div id="countSheetPages"></div>
+      </div>
+      <div id="sprCountSheetMode" hidden aria-labelledby="sprCountSheetHeading">
+        <header class="spr-heading"><div><p class="section-kicker">PORTRAIT COUNT SHEET</p><h2 id="sprCountSheetHeading">FOR SPR</h2><p>Upload your SKU, BARCODE, and DESCRIPTION columns. Review the sheet before printing.</p></div><span class="status-pill">Letter · Portrait</span></header>
+        <div class="manual-import-controls" aria-label="SPR spreadsheet upload and printing">
+          <input id="sprCountSheetFile" type="file" accept=".xlsx,.xls,.xlsm,.csv" hidden>
+          <button id="uploadSprCountSheet" class="primary-button" type="button">Upload Excel / CSV</button>
+          <button id="printSprCountSheet" class="secondary-button" type="button" disabled>Print FOR SPR</button>
+          <button id="exportSprCountSheet" class="secondary-button" type="button" disabled>Export PDF</button>
+        </div>
+        <p id="sprCountSheetStatus" role="status" aria-live="polite">Choose a file to preview your SPR sheet.</p>
+        <div id="sprCountSheetPages" class="spr-pages"></div>
       </div>
       <div id="manualCountSheetMode" hidden>
         <div class="manual-count-sheet-tools" aria-label="Manual count-sheet filters and generation">
@@ -885,6 +902,7 @@
   <script src="count-sheet-reference.js"></script>
   <script src="layout-persistence.js"></script>
   <script src="print-controller.js"></script>
+  <script src="spr-count-sheet.js"></script>
   <script src="product-lookup.js"></script>
   <script src="cigar-expiry-utils.js"></script>
   <script src="cigar-monitor-utils.js"></script>

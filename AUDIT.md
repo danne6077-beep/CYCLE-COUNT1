@@ -170,6 +170,10 @@ Do not describe the application as cross-device synchronized: inventory and acti
 
 ## Count-session follow-up (2026-10-19)
 
+### FOR SPR addition (2026-10-22)
+
+Count Sheet now includes a separate FOR SPR Excel/CSV upload mode. It accepts SKU, BARCODE, and DESCRIPTION, preserves every uploaded row in order, and prints a blank count column on Letter portrait pages with no CCD or locator fields. A real SheetJS XLSX upload and JsBarcode browser run passed: leading-zero preservation, 16 rows across two 612 × 792 pt PDF pages, safe text rendering, invalid upload recovery, no mobile overflow, and existing manual-mode regression. Syntax checks pass for 40 JavaScript files, the 34 unit tests pass, and the saved-count browser flow still passes. SPR uploads stay in memory and do not replace saved inventory.
+
 The status table above is the earlier Phase 2–7 implementation checkpoint. Since then, the physical count workflow has been connected to imported inventory and local persistence:
 
 - CSV/XLSX import mapping recognizes optional expected quantity columns (including `ON HAND` and `QTY`). Count Entry snapshots imported rows and expected quantities into a separate IndexedDB session store, preserving the existing inventory store.

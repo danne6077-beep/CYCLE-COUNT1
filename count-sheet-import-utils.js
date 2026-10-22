@@ -47,9 +47,9 @@
   const headerAliases={
     supplier:['supplier','supplier name','vendor','vendor name','principal'],
     locator:['locator','locator code','locator no','locator number','location','bin location','selling locator'],
-    sku:['sku','sku no','sku number','item code','item no','item number','product code','product'],
-    barcode:['upc','upc code','upc number','upc barcode','upc barcode number','barcode','barcode number','ean','gtin'],
-    description:['description','item description','product description','product name','item name','name'],
+    sku:['sku','skus','sku s','sku no','sku number','item code','item no','item number','product code','product'],
+    barcode:['upc','upc code','upc number','upc barcode','upc barcode number','barcode','barcodes','barcode number','ean','gtin'],
+    description:['description','descriptions','item description','product description','product name','item name','name'],
     ccdNo:['ccd','ccd no','ccd number','ccdno'],
     departmentCode:['department code','dept code','department number','dept no'],
     department:['department','department name','dept name'],
