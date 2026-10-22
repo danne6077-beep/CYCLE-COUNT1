@@ -3,7 +3,6 @@
   const root = document.documentElement;
   const themeKey = 'fuji-color-theme-v1';
   const cookieKey = 'fuji-cookie-choice-v1';
-  const newsletterKey = 'fuji-newsletter-interest-v1';
 
   function setTheme(theme) {
     const dark = theme === 'dark';
@@ -34,13 +33,10 @@
     $('appShell')?.classList.remove('nav-open');
   }));
 
-  const progress = $('scrollProgress');
   const backTop = $('backToTop');
   const updateScrollTools = () => {
     const max = Math.max(1, document.documentElement.scrollHeight - innerHeight);
     const value = Math.min(100, Math.round(scrollY / max * 100));
-    progress?.style.setProperty('--scroll-progress', `${value}%`);
-    progress?.setAttribute('aria-valuenow', String(value));
     backTop?.classList.toggle('is-visible', scrollY > 500);
   };
   addEventListener('scroll', updateScrollTools, { passive: true });
@@ -62,7 +58,7 @@
     ['hotlistNav', 'Hotlist', 'milk liquor cigarettes shift inventory'],
     ['creditsBtn', 'About Fuji', 'about values team contact workflow notes careers']
   ];
-  const panelNavigation = { homePanel: 'homeNav', aboutPanel: 'creditsBtn', countSheetPanel: 'countSheetNav', cigarsPanel: 'cigarsNav', shelfTagPanel: 'shelfTagNav', productLookupPanel: 'productLookupNav', masterlistPanel: 'masterlistNav', announcementsPanel: 'announcementsNav', hotlistPanel: 'hotlistNav' };
+  const panelNavigation = { homePanel: 'homeNav', aboutPanel: 'creditsBtn', countSheetPanel: 'countSheetNav', countEntryPanel: 'countSheetNav', cigarsPanel: 'cigarsNav', shelfTagPanel: 'shelfTagNav', productLookupPanel: 'productLookupNav', masterlistPanel: 'masterlistNav', announcementsPanel: 'announcementsNav', hotlistPanel: 'hotlistNav' };
   const staticEntries = [...document.querySelectorAll('#mainContent h1,#mainContent h2,#mainContent h3,#mainContent h4,#mainContent summary')].map(node => {
     let panel = node; while (panel.parentElement && panel.parentElement !== $('mainContent')) panel = panel.parentElement;
     const navId = panelNavigation[panel?.id] || 'creditsBtn';
@@ -125,18 +121,6 @@
   $('cookieAccept').addEventListener('click', () => saveCookieChoice('accepted'));
   $('cookieEssential').addEventListener('click', () => saveCookieChoice('essential-only'));
 
-  $('newsletterForm')?.addEventListener('submit', event => {
-    event.preventDefault();
-    const email = $('newsletterEmail').value.trim().toLowerCase();
-    let saved = [];
-    try { saved = JSON.parse(localStorage.getItem(newsletterKey) || '[]'); } catch {}
-    if (!saved.includes(email)) saved.push(email);
-    try { localStorage.setItem(newsletterKey, JSON.stringify(saved)); } catch {}
-    $('newsletterStatus').textContent = 'Thanks! Your interest is saved in this browser. No email is sent.';
-    $('newsletterForm').classList.add('is-subscribed');
-    $('newsletterForm').querySelector('button[type="submit"]').textContent = 'Signed up';
-    $('newsletterForm').querySelector('button[type="submit"]').disabled = true;
-  });
 
   function addCopyButtons(scope = document) {
     scope.querySelectorAll('pre code').forEach(code => {
@@ -174,10 +158,6 @@
   }));
   enteringObserver.observe($('mainContent'), { attributes: true, subtree: true, attributeFilter: ['hidden'] });
 
-  document.addEventListener('click', event => {
-    const contact = event.target.closest('#floatingContact');
-    if (contact) { event.preventDefault(); $('creditsBtn')?.click(); setTimeout(() => $('about-contact')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 120); }
-  });
   document.addEventListener('authchange', () => { document.querySelector('.skip-link')?.setAttribute('href', document.body.classList.contains('auth-logged-out') ? '#loginTitle' : '#mainContent'); });
   addEventListener('load', () => document.body.classList.add('site-loaded'), { once: true });
 })();

@@ -1,42 +1,52 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    function signedIn() {
-      return request.auth != null;
-    }
-
-    function isAdmin() {
-      return signedIn()
-        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
-        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
-    }
-
+    function signedIn() { return request.auth != null; }
+    function role() { return signedIn() ? request.auth.token.get('role', 'viewer') : 'anonymous'; }
+    function storeId() { return signedIn() ? request.auth.token.get('storeId', request.auth.uid) : ''; }
+    function canEditStore(id) { return signedIn() && storeId() == id && role() in ['admin', 'editor']; }
+    function isAdmin() { return signedIn() && role() == 'admin'; }
     function validAnnouncement(data) {
       return data.keys().hasOnly(['title', 'message', 'authorId', 'authorName', 'createdAt'])
-        && data.title is string
-        && data.title.size() > 0
-        && data.title.size() <= 100
-        && data.message is string
-        && data.message.size() > 0
-        && data.message.size() <= 2000;
+        && data.title is string && data.title.size() > 0 && data.title.size() <= 100
+        && data.message is string && data.message.size() > 0 && data.message.size() <= 2000;
     }
 
     match /users/{userId} {
-      allow read: if signedIn() && (request.auth.uid == userId || isAdmin());
-      allow create, update, delete: if false;
+      allow read: if signedIn() && request.auth.uid == userId;
+      allow write: if false;
     }
-
     match /announcements/{announcementId} {
-      allow read: if signedIn();
-      allow create: if isAdmin()
-        && validAnnouncement(request.resource.data)
+      allow read: if true;
+      allow create: if isAdmin() && validAnnouncement(request.resource.data)
         && request.resource.data.authorId == request.auth.uid
         && request.resource.data.createdAt == request.time;
-      allow update: if isAdmin()
-        && validAnnouncement(request.resource.data)
+      allow update: if isAdmin() && validAnnouncement(request.resource.data)
         && request.resource.data.authorId == resource.data.authorId
         && request.resource.data.createdAt == resource.data.createdAt;
       allow delete: if isAdmin();
     }
+    match /stores/{id}/inventory/{documentId} {
+      allow read: if signedIn() && storeId() == id;
+      allow create, update: if canEditStore(id)
+        && request.resource.data.keys().hasOnly(['schemaVersion', 'updatedAt', 'items', 'store', 'date'])
+        && request.resource.data.items is list && request.resource.data.items.size() <= 10000;
+      allow delete: if canEditStore(id);
+    }
+    match /stores/{id}/sessions/{documentId} {
+      allow read: if signedIn() && storeId() == id;
+      allow create, update: if canEditStore(id)
+        && request.resource.data.keys().hasOnly(['schemaVersion', 'updatedAt', 'counts', 'status'])
+        && request.resource.data.counts is list && request.resource.data.counts.size() <= 10000;
+      allow delete: if canEditStore(id);
+    }
+    match /stores/{id}/masterlist/{documentId} {
+      allow read: if signedIn() && storeId() == id;
+      allow create, update: if canEditStore(id)
+        && request.resource.data.keys().hasOnly(['schemaVersion', 'updatedAt', 'items'])
+        && request.resource.data.items is list && request.resource.data.items.size() <= 10000;
+      allow delete: if canEditStore(id);
+    }
+    match /{document=**} { allow read, write: if false; }
   }
 }

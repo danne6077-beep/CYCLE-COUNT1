@@ -1,45 +1,39 @@
-# Firebase Online Login Setup
+# Firebase setup
 
-The provided Firebase web configuration is in `firebase-config.js`. Its API key and project identifiers are public browser configuration, not service credentials. Do not add a Firebase Admin SDK private key or service account JSON to this repository.
+The browser config in `firebase-config.js` identifies the existing project `fuji-d3292`; it is public client configuration. It is not an authorization credential. Never commit a Firebase service-account JSON or provider key.
 
-## Enable Online Login
+## Authentication
 
-1. Open the Firebase Console project `fuji-d3292`.
-2. In **Authentication → Sign-in method**, enable **Email/Password**.
-3. In **Firestore Database**, create a production database.
-4. In **Authentication → Users**, add the first user with an email and password.
-5. Copy that user's UID. In Firestore, create `users/{uid}` with fields:
+In Firebase Console → Authentication, enable Email/Password and Google sign-in. Add `localhost`, `fujisupersystem.vercel.app`, and the exact Preview domains used by the Vercel project to Authorized domains. Email/password sign-up sends a verification email; unverified users cannot enter the online workspace. Password reset is available on the login form.
 
-```json
-{
-  "name": "FUJI Administrator",
-  "role": "admin"
-}
-```
+The project owner must enable Firebase App Check and enforce it for Firestore in the console. Select a supported web attestation provider and add production/preview domains. Restrict the public Firebase API key to the real production, preview, and localhost domains without blocking the server-side Auth/Firestore APIs. Those project-console settings cannot be deployed from this repo.
 
-For every other online account, create the Firebase Auth user in the console and add `users/{uid}` with `role` set to `user` or `admin`. The browser never creates or edits online role documents.
+## Firestore rules and custom claims
 
-## Secure the Database
+Publish `firestore.rules` in Firebase Console or using Firebase CLI. The rules deny writes by default; public announcements are read-only, announcement writes require an `admin` claim, and store records are isolated by the `storeId` claim. Editors can edit only their own store. Viewers can read only their claimed store. The app does not yet sync browser inventory to Firestore; those rules are prepared for a future opt-in sync and do not enable it by themselves.
 
-Publish the contents of `firestore.rules` in **Firestore Database → Rules**. The rules allow signed-in users to read announcements and their own profile, but only an admin profile can create, update, or delete announcements. Client writes to every user role document are denied. Create the initial admin role document in the Firebase Console, which has privileged administrative access.
-
-Do not leave Firestore in test mode. Review the rules simulator with both an admin and a standard user before using real inventory announcements.
-
-## Local Offline Mode
-
-The login page defaults to **Local Machine Login**. On first use it seeds local test accounts `admin` / `admin123` and `user` / `user123`. A local admin can create more local accounts in the account menu. Local roles, sessions, and announcements are stored only in that browser profile and can be changed by anyone with access to that computer; this mode is for a trusted master machine, not a server security boundary.
-
-The local flow does not load Firebase SDK scripts. Online mode downloads Firebase's public compat SDK from `gstatic.com` when selected, so local login remains usable with no network connection.
-
-## Build and Publish
-
-The static build copies `firebase-config.js` and excludes server-only configuration. GitHub Pages uses the repository's Actions workflow; set **Settings → Pages → Build and deployment → Source** to **GitHub Actions**, then trigger a workflow run or push to `main`. No Firebase service-account secret is required for this static build.
-
-For a local preview, run:
+New online sign-ups receive the least-privileged `viewer` role in the app when no role claim is present. Promote users through a trusted project administrator shell with the service-account JSON stored in an environment variable, never in a file committed to Git:
 
 ```sh
-npm run build:pages
-python3 -m http.server --directory dist 4173
+node scripts/set-user-claims.js FIREBASE_UID viewer STORE_ID
+node scripts/set-user-claims.js FIREBASE_UID editor STORE_ID
+node scripts/set-user-claims.js FIREBASE_UID admin STORE_ID
 ```
 
-Open `http://localhost:4173`. Firebase Auth requires an authorized domain; `localhost` and the published `fujitzu25.github.io` domain should be listed in **Authentication → Settings → Authorized domains**.
+The script merges `role` and `storeId` into the account’s existing custom attributes. It requires IAM permission `firebaseauth.users.get` and `firebaseauth.users.update`, and service-account access to Firestore for AI rate limiting. Have an authorized Firebase project administrator apply rules, enable App Check, and provision the first admin claim. The repository contains no admin private key.
+
+The existing `users/{uid}` role documents are not trusted for authorization anymore. Existing administrators need a server-managed `admin` claim before they can publish announcements. User profiles remain client read-only; the app does not expose a user-management console.
+
+## Device-only workspace and backups
+
+Choose **Open this device workspace** to use offline mode. No password is stored or required. Inventory, preferences, and history stay in the current browser profile. The one-time local migration strips legacy account hashes and leaves inventory, IndexedDB, settings, and backup JSON intact. Treat local controls as trusted-device convenience only.
+
+## AI function secrets
+
+The `/api/chat` function verifies Firebase ID tokens against Google’s public signing certificates, uses the service-account OAuth token for a transactional Firestore rate limit, and calls Gemini with optional Groq fallback. Set `FIREBASE_PROJECT_ID`, `FIREBASE_SERVICE_ACCOUNT_JSON`, `GEMINI_API_KEY`, and optional Groq variables as Vercel server-only environment variables for Preview and Production. AI Studio quotas vary by model and project; keep a strict no-billing project if free-only operation is required. With no configuration, Ask FUJI returns an unavailable state and offline search still works.
+
+The rate-limit data lives in Firestore `aiRateLimits/{uid}` and is managed by the Admin REST API, which bypasses Firestore client rules. Do not log request bodies or provider keys. Store only minimal counters and rotate service-account/provider keys if they are exposed.
+
+## Emulator and deployment verification
+
+The current machine has no Firebase CLI or Firebase emulator installed and package-registry access was denied. Therefore the rules have not been exercised against the emulator here. Before using cloud inventory or announcing an online production launch, run the Firebase rules emulator with authenticated admin/editor/viewer contexts, then verify claims, domain authorization, App Check enforcement, and Vercel Preview/Production secrets in their consoles.

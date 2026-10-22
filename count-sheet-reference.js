@@ -24,9 +24,11 @@ function buildCountSheetRows(items){
     if(!row.barcode&&barcode)row.barcode=barcode;
     if(!row.description&&description)row.description=description;
     splitLocatorValues(item.locator).forEach(locator=>{
-      if(/^SA-/i.test(locator))row.selling.push(locator);
-      else if(/^BA-/i.test(locator))row.buffer.push(locator);
-      else if(/^WH-/i.test(locator))row.warehouse.push(locator);
+      const prefixes=window.fujiWorkspaceSettings?.locatorPrefixes||{sa:'SA-',ba:'BA-',wh:'WH-'};
+      const area=CountSheetImport.recognizeLocatorArea(locator,prefixes);
+      if(area==='sa')row.selling.push(locator);
+      else if(area==='ba')row.buffer.push(locator);
+      else if(area==='wh')row.warehouse.push(locator);
       else row.selling.push(locator);
     });
   });
@@ -216,8 +218,8 @@ function renderCountSheet(previewOnly=false,renderOptions={}){
     <article class="count-sheet-page reference-sheet">
       <header class="reference-sheet-header">
         <div class="reference-title">COUNT SHEET <span>PHYSICAL INVENTORY</span><strong>${escapeSheetText(groupName)}</strong></div>
-        <div class="reference-meta"><b>STORE:</b> ${storeName} <b>BRANCH:</b> Prince Cauayan <b>CCD NO.:</b> ${escapeSheetText(selectedCcd==='all'?'ALL':selectedCcd)}</div>
-        <div class="reference-meta"><b>${groupMode==='supplier-category'?'SUPPLIER + CATEGORY':printMode==='category'?'CATEGORY':'SUPPLIER'}:</b> ${escapeSheetText(groupName)} <b>DATE:</b> ${$('dateField').value||'2026-09-14'} <b>PREPARED BY:</b> ${editorName}</div>
+        <div class="reference-meta"><b>STORE:</b> ${escapeSheetText(storeName)} <b>BRANCH:</b> Prince Cauayan <b>CCD NO.:</b> ${escapeSheetText(selectedCcd==='all'?'ALL':selectedCcd)}</div>
+        <div class="reference-meta"><b>${groupMode==='supplier-category'?'SUPPLIER + CATEGORY':printMode==='category'?'CATEGORY':'SUPPLIER'}:</b> ${escapeSheetText(groupName)} <b>DATE:</b> ${escapeSheetText($('dateField').value||'2026-09-14')} <b>PREPARED BY:</b> ${escapeSheetText(editorName)}</div>
       </header>
       <table class="count-sheet-table reference-table">
         <thead><tr><th>#</th><th>SKU</th><th>BARCODE</th><th>DESCRIPTION</th><th>SELLING LOCATOR</th><th>COUNT</th><th>BUFFER LOCATOR</th><th>COUNT</th><th>WAREHOUSE LOCATOR</th><th>COUNT</th></tr></thead>

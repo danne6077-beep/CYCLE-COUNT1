@@ -57,3 +57,10 @@ test('quotes CSV values only when needed and escapes embedded quotes',()=>{
   assert.equal(escapeCsv('Plain value'),'Plain value');
   assert.equal(escapeCsv('A, "B"'),'\"A, \"\"B\"\"\"');
 });
+
+test('neutralizes spreadsheet formulas in untrusted CSV text but preserves numeric negatives',()=>{
+  assert.equal(escapeCsv('=1+1'),"'=1+1");
+  assert.equal(escapeCsv('  @SUM(A1:A2)'),"'  @SUM(A1:A2)");
+  assert.equal(escapeCsv('-5'),"'-5");
+  assert.equal(escapeCsv(-5),'-5');
+});

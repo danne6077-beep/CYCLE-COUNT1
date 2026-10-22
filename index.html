@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FUJI CYCLE COUNT SHEET GENERATOR</title>
   <meta name="description" content="FUJI CYCLE COUNT SHEET GENERATOR">
+  <meta name="theme-color" content="#08785b">
+  <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="logo.jpg" type="image/jpeg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -57,7 +59,7 @@
     .layout-controls{background:#f7faf8;border:1px solid #e1e9e3;border-radius:8px;padding:16px}.layout-control-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px}.layout-control-grid label{color:#536158}.layout-control-grid output{float:right;color:var(--accent);font-weight:700}.layout-control-grid input[type=range]{padding:0;border:0;accent-color:var(--accent);margin-top:10px}.layout-toggles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:15px}.layout-toggles .toggle-row{background:#fff}.layout-preview-note{display:flex;align-items:center;gap:9px;color:#6d7971;font-size:11px;margin-top:14px}.count-sheet-table td{height:var(--sheet-row-height,50px);font-size:var(--sheet-font-size,11px)}.count-sheet-table td:nth-child(3) .small-barcode{width:var(--sheet-barcode-width,110px)}.count-line{width:var(--sheet-count-width,88%)}.sheet-hide-barcode .count-sheet-table td:nth-child(3)>*{visibility:hidden}.sheet-hide-locator .count-sheet-table th:nth-child(5),.sheet-hide-locator .count-sheet-table td:nth-child(5){display:none}@media print{@page{size:var(--print-paper,Letter) var(--print-orientation,portrait);margin:var(--print-margin,.28in)}}@media(max-width:800px){.layout-control-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.layout-toggles{grid-template-columns:1fr}} 
   </style>
   <style>
-    #goGenerate{display:none!important}.print-count-sheet .page-shell>section#countSheetPanel{display:block!important;visibility:visible!important}.print-count-sheet .page-shell>section:not(#countSheetPanel){display:none!important}
+    .print-count-sheet .page-shell>section#countSheetPanel{display:block!important;visibility:visible!important}.print-count-sheet .page-shell>section:not(#countSheetPanel){display:none!important}
     .layout-live-preview{margin-top:18px;border:1px solid #dce5df;border-radius:8px;background:#eef2ef;padding:12px}.live-preview-heading{display:flex;justify-content:space-between;align-items:center;color:#526158;font-size:10px;letter-spacing:.7px;margin:0 3px 9px}.live-preview-heading span{font-weight:400;letter-spacing:0;color:#87928a}.layout-live-preview #countSheetLivePreview{max-height:430px;overflow:auto;background:#dfe5e1;padding:12px}.layout-live-preview .count-sheet-page{width:100%!important;max-width:100%!important;min-width:0!important;margin:0 auto!important;overflow:hidden}.layout-live-preview .count-sheet-page+.count-sheet-page{display:none}.layout-live-preview .reference-sheet-label{display:none}.layout-live-preview .reference-sheet-header{min-height:58px;padding-bottom:7px}.layout-live-preview .reference-title{font-size:16px}.layout-live-preview .reference-title span{font-size:9px}.layout-live-preview .reference-meta{font-size:8px;margin-top:3px;white-space:nowrap;overflow:hidden}.layout-live-preview .reference-table{width:100%!important;min-width:0!important;table-layout:fixed}.layout-live-preview .reference-table th,.layout-live-preview .reference-table td{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.layout-live-preview .reference-table th:nth-child(1){width:3%!important}.layout-live-preview .reference-table th:nth-child(2){width:7%!important}.layout-live-preview .reference-table th:nth-child(3){width:12%!important}.layout-live-preview .reference-table th:nth-child(4){width:25%!important}.layout-live-preview .reference-table th:nth-child(5){width:10%!important}.layout-live-preview .reference-table th:nth-child(6){width:6%!important}.layout-live-preview .reference-table th:nth-child(7){width:10%!important}.layout-live-preview .reference-table th:nth-child(8){width:6%!important}.layout-live-preview .reference-table th:nth-child(9){width:15%!important}.layout-live-preview .reference-table th:nth-child(10){width:6%!important}.layout-live-preview .reference-table th{font-size:8px!important;padding:3px 2px!important}.layout-live-preview .reference-table td{font-size:8px!important;height:var(--sheet-row-height,50px);padding:3px 2px!important}.layout-live-preview .small-barcode{width:100%!important;height:17px}.layout-live-preview .reference-table td:nth-child(3) small{font-size:6px}.layout-live-preview .reference-signoff{font-size:8px;margin-top:10px}.live-empty{padding:45px;text-align:center;color:#87928a;font-size:12px;background:#fff;border:1px dashed #cbd8cf}
   </style>
   <style>
@@ -172,10 +174,12 @@
   </style>
   <link rel="stylesheet" href="redesign.css">
   <link rel="stylesheet" href="app-shell.css">
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="count-entry.css">
+  <link rel="stylesheet" href="spr-count-sheet.css">
 </head>
 <body class="auth-logged-out">
   <a class="skip-link" href="#loginTitle">Skip to content</a>
-  <div class="scroll-progress" id="scrollProgress" role="progressbar" aria-label="Page scroll progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span></span></div>
   <main class="login-page" id="loginPage">
     <section class="login-card" aria-labelledby="loginTitle">
       <div class="login-visual">
@@ -192,12 +196,15 @@
         <p class="login-mode-status" id="loginModeStatus">OFFLINE · THIS COMPUTER</p>
         <form id="loginForm" class="login-form" novalidate>
           <label id="loginUsernameLabel" for="loginUsername">Username</label>
-          <input id="loginUsername" name="username" type="text" autocomplete="username" placeholder="Enter username" required>
+          <input id="loginUsername" name="username" type="text" autocomplete="username" placeholder="Enter username">
           <label for="loginPassword">Password</label>
-          <div class="password-field"><input id="loginPassword" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" required><button class="password-toggle" type="button" data-password-toggle="loginPassword" aria-label="Show password" aria-pressed="false">Show</button></div>
+          <div class="password-field"><input id="loginPassword" name="password" type="password" autocomplete="current-password" placeholder="Enter your password"><button class="password-toggle" type="button" data-password-toggle="loginPassword" aria-label="Show password" aria-pressed="false">Show</button></div>
           <p class="login-error" id="loginError" role="alert" aria-live="polite"></p>
           <button class="login-submit" id="loginSubmit" type="submit"><span id="loginSubmitLabel">Sign In Locally</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button>
+          <div class="online-auth-actions" id="onlineAuthActions" hidden><button type="button" id="createOnlineAccount">Create account</button><button type="button" id="resetOnlinePassword">Forgot password?</button><button type="button" id="googleOnlineLogin">Continue with Google</button></div>
         </form>
+        <button class="secondary-button device-workspace-button" id="openDeviceWorkspace" type="button">Open this device workspace</button>
+        <p class="device-workspace-note">Offline mode · Data stays on this device</p>
         <p class="login-footnote">FUJI CYCLE COUNT SYSTEM <span>·</span> <span id="loginFootnoteMode">LOCAL WORKSPACE</span></p>
       </div>
     </section>
@@ -241,7 +248,7 @@
       </header>
       <div class="home-stat-strip" aria-label="Workspace status">
         <div class="home-stat"><span class="home-stat-icon" aria-hidden="true">▦</span><div><small>Inventory records</small><strong id="homeItemCount">0</strong></div></div>
-        <div class="home-stat"><span class="home-stat-icon home-stat-icon-yellow" aria-hidden="true">▤</span><div><small>Count workflows</small><strong>Cycle count + shelf tags</strong></div></div>
+        <div class="home-stat"><span class="home-stat-icon home-stat-icon-yellow" aria-hidden="true">▤</span><div><small>Physical count progress</small><strong id="homeCountProgress">No active session</strong></div></div>
         <div class="home-stat"><span class="home-stat-icon home-stat-icon-blue" aria-hidden="true">◷</span><div><small>Workspace updated</small><strong id="homeLastUpdated">Checking date</strong></div></div>
       </div>
       <section class="home-operations-grid" aria-label="Inventory activity overview">
@@ -411,10 +418,6 @@
         <details><summary>Can I use this on a phone?</summary><p>Yes. Navigation and workspace panels adapt to smaller screens. Spreadsheet importing and printing work best on a desktop browser.</p></details>
         <details><summary>How do I publish an update?</summary><p>Administrators can use the Updates workspace after signing in. Website code changes are published from the main branch.</p></details>
       </section>
-      <section class="newsletter-card" aria-labelledby="newsletterHeading">
-        <div><p class="about-eyebrow">PRODUCT NOTES</p><h2 id="newsletterHeading">Get occasional workflow updates</h2><p>Save your interest on this device. This static site does not send email or share your address.</p></div>
-        <form id="newsletterForm"><label for="newsletterEmail">Email address</label><div class="newsletter-form-row"><input id="newsletterEmail" type="email" autocomplete="email" placeholder="you@example.com" required><button class="primary-button" type="submit">Sign up</button></div><p id="newsletterStatus" role="status" aria-live="polite"></p></form>
-      </section>
     </section>
     <section id="cigarsPanel" class="cigars-workspace" hidden aria-labelledby="cigarsHeading">
       <header class="cigars-heading">
@@ -503,17 +506,28 @@
         <div class="session-copy"><span class="mini-icon">⌁</span><div><h3>Inventory session details</h3><p>Optional store and session header metadata printed on the tags</p></div></div>
         <div class="fields-row"><label>Store / location<input id="storeField" placeholder="e.g. Store 014 · Main Floor"></label><label>Inventory date<input id="dateField" type="date"></label></div>
       </div>
-      <div class="format-note"><div class="note-icon">i</div><div><strong>Recommended Excel format <span>5 columns</span></strong><p>Your file should include <b>SUPPLIER</b>, <b>LOCATOR</b>, <b>SKU</b>, <b>UPC</b>, and <b>DESCRIPTION</b>. Locators beginning with SA-, BA-, or WH- are placed into the matching count-sheet area.</p></div></div>
+      <div class="format-note"><div class="note-icon">i</div><div><strong>Recommended Excel format <span>5 required columns</span></strong><p>Include <b>SUPPLIER</b>, <b>LOCATOR</b>, <b>SKU</b>, <b>UPC</b>, and <b>DESCRIPTION</b>. An optional <b>ON HAND</b> or <b>EXPECTED QTY</b> column pre-fills expected quantities for physical counts. Locators beginning with SA-, BA-, or WH- are placed into the matching count-sheet area.</p></div></div>
     </section>
 
     <section id="dataPanel" class="panel" hidden>
       <div class="panel-heading data-heading"><div><p class="section-kicker">STEP 02</p><h2>Validate & edit inventory</h2><p id="dataSummary">Review imported rows before generating the count sheet.</p></div><div class="heading-actions"><button class="secondary-button" id="reuploadBtn">↥ Re-upload</button><button class="secondary-button" id="addItemBtn">＋ Add item</button><button class="primary-button" id="countSheetBtn">▦ Generate Count Sheet</button></div></div>
       <div class="data-toolbar"><label class="search-box">⌕<input id="searchInput" placeholder="Search SKU, Locator, Description, Barcode..."></label><div class="toolbar-meta"><span id="rowCount">0 rows</span><select id="sortSelect"><option value="locator">Sort: Locator</option><option value="sku">Sort: SKU</option><option value="description">Sort: Description</option></select></div></div>
+      <section id="importIssueReport" class="import-issue-report" aria-live="polite" hidden><strong id="importIssueHeading"></strong><ul id="importIssueList"></ul></section>
       <div class="table-wrap"><table><thead><tr><th>LOCATOR</th><th>SKU</th><th>UPC / BARCODE</th><th>DESCRIPTION</th><th class="align-right">ACTIONS</th></tr></thead><tbody id="inventoryBody"></tbody></table><div class="empty-state" id="emptyState" hidden>No inventory rows match your search.</div></div>
-      <div class="bottom-actions"><button class="secondary-button" id="backImport">← Back to import</button><button class="primary-button" id="configureSheetBtn">Configure Count Sheet →</button></div>
+      <div class="bottom-actions"><button class="secondary-button" id="backImport">← Back to import</button><div class="heading-actions"><button class="secondary-button" id="startPhysicalCount" type="button">Start physical count</button><button class="primary-button" id="configureSheetBtn">Configure Count Sheet →</button></div></div>
     </section>
 
     <section id="configurePanel" class="panel" hidden><div class="panel-heading"><div><p class="section-kicker">STEP 03</p><h2>Configure layout</h2><p>Set the count sheet dimensions and choose what appears when printing.</p></div><span class="status-pill"><span class="status-dot"></span> Live preview</span></div><div class="layout-controls"><div class="layout-control-grid"><label>Paper size<select id="paperSize"><option value="letter">Letter · Bond paper</option><option value="a4">A4</option><option value="legal">Legal</option></select></label><label>Orientation<select id="orientation"><option value="portrait">Portrait</option><option value="landscape">Landscape</option></select></label><label>Page margins<select id="pageMargins"><option value="compact">Compact · 0.28 in</option><option value="standard">Standard · 0.5 in</option><option value="wide">Wide · 0.75 in</option></select></label><label>Rows per page<select id="rowsPerPage"><option value="8">8 rows</option><option value="9">9 rows</option><option value="10">10 rows</option><option value="12">12 rows</option></select></label><label>Row height <output id="rowHeightValue">50 px</output><input id="rowHeight" type="range" min="38" max="82" value="50"></label><label>Table font size <output id="fontSizeValue">11 px</output><input id="fontSize" type="range" min="9" max="16" value="11"></label><label>Barcode width <output id="barcodeWidthValue">110 px</output><input id="barcodeWidth" type="range" min="70" max="170" value="110"></label><label>Count line width <output id="countLineValue">88%</output><input id="countLineWidth" type="range" min="55" max="100" value="88"></label></div><div class="layout-toggles"><div class="toggle-row"><span><b>Show barcode</b><small>Print the barcode in each row</small></span><input id="showSheetBarcode" type="checkbox" checked></div><div class="toggle-row"><span><b>Show locator column</b><small>Keep the locator beside each item</small></span><input id="showSheetLocator" type="checkbox" checked></div><div class="toggle-row"><span><b>Show supplier header</b><small>Start each supplier group with its name</small></span><input id="showSupplierHeader" type="checkbox" checked></div></div></div><div class="layout-preview-note"><span class="note-icon">i</span><span>These settings apply to the supplier-grouped count sheet and are preserved while you move between steps.</span></div><div class="layout-live-preview"><div class="live-preview-heading"><b>COUNT SHEET PREVIEW</b><span>Updates as you change settings</span></div><div id="countSheetLivePreview"><div class="live-empty">Import inventory to preview your count sheet.</div></div></div><div class="bottom-actions"><button class="secondary-button" id="backData">← Back to validation</button><div class="heading-actions"><button class="secondary-button" id="goCountSheet">▦ Generate Count Sheet</button><button class="primary-button" id="goGenerate">Generate Count Tags →</button></div></div></section>
+
+    <section id="countEntryPanel" class="count-entry-page" hidden aria-labelledby="countEntryHeading">
+      <header class="count-entry-header"><div><p class="section-kicker">PHYSICAL INVENTORY</p><h1 id="countEntryHeading">Count entry</h1><p id="countEntrySessionMeta">Start a session from a reviewed inventory file. Counts save on this device as you work.</p></div><div class="count-entry-header-actions"><button class="secondary-button" id="backCountEntry" type="button">← Inventory</button><button class="secondary-button" id="startAnotherCount" type="button">＋ New session</button></div></header>
+      <section class="count-entry-session-toolbar" aria-label="Count session controls"><label>Saved session<select id="countSessionSelect"><option value="">No saved sessions</option></select></label><button class="secondary-button" id="resumeCountSession" type="button" disabled>Open selected</button><label>Variance tolerance<input id="countTolerance" type="number" min="0" step="1" value="0" inputmode="numeric"><small>Absolute unit difference. Default is exact match.</small></label><label>Find item<input id="countEntrySearch" type="search" placeholder="SKU, UPC, locator, or description"></label><label>Show<select id="countEntryFilter"><option value="all">All items</option><option value="pending">Not counted</option><option value="recount">Needs review</option><option value="done">Counted</option></select></label></section>
+      <section class="count-entry-summary" aria-live="polite" aria-label="Count progress"><strong id="countEntryProgress">No count session selected</strong><span id="countEntryReviewSummary"></span><span id="countEntrySaveStatus" role="status">Saved locally</span></section>
+      <div class="count-entry-table-wrap"><table class="count-entry-table"><thead><tr><th>Item</th><th>Expected</th><th>Counted</th><th>Variance</th><th>Status</th><th>Reason / note</th><th>Review</th></tr></thead><tbody id="countEntryRows"></tbody></table><div id="countEntryEmpty" class="count-entry-empty" hidden>No items match this view.</div></div>
+      <nav class="count-entry-pagination" aria-label="Count entry pages"><button class="secondary-button" id="countEntryPrevious" type="button">← Previous</button><span id="countEntryPageLabel">Page 1 of 1</span><button class="secondary-button" id="countEntryNext" type="button">Next →</button></nav>
+      <footer class="count-entry-footer"><button class="secondary-button" id="exportCountReport" type="button" disabled>↓ Export CSV</button><button class="secondary-button" id="printCountReport" type="button" disabled>⎙ Print variance report</button><button class="primary-button" id="completeCountSession" type="button" disabled>Complete session</button></footer>
+      <details class="count-entry-audit"><summary>Session audit trail</summary><ol id="countEntryAuditList"><li>Start a count to record item changes here.</li></ol></details>
+    </section>
 
     <section id="countSheetPanel" class="count-sheet-workspace" hidden>
       <section id="countSheetModeSelection" class="count-sheet-mode-selection" aria-labelledby="countSheetModeHeading">
@@ -529,6 +543,11 @@
           <button class="count-sheet-mode-option" id="chooseManualCountSheetMode" type="button">
             <span class="count-sheet-mode-icon" aria-hidden="true">↑</span>
             <span><strong>Upload Manual Excel / CSV File</strong><small>Print rows directly from a spreadsheet without loading standard filters.</small></span>
+            <span class="count-sheet-mode-arrow" aria-hidden="true">→</span>
+          </button>
+          <button class="count-sheet-mode-option" id="chooseSprCountSheetMode" type="button">
+            <span class="count-sheet-mode-icon" aria-hidden="true">▤</span>
+            <span><strong>FOR SPR</strong><small>Upload SKU, barcode, and description. Print a portrait count sheet.</small></span>
             <span class="count-sheet-mode-arrow" aria-hidden="true">→</span>
           </button>
         </div>
@@ -560,6 +579,17 @@
           </div>
         </div>
         <div id="countSheetPages"></div>
+      </div>
+      <div id="sprCountSheetMode" hidden aria-labelledby="sprCountSheetHeading">
+        <header class="spr-heading"><div><p class="section-kicker">PORTRAIT COUNT SHEET</p><h2 id="sprCountSheetHeading">FOR SPR</h2><p>Upload your SKU, BARCODE, and DESCRIPTION columns. Review the sheet before printing.</p></div><span class="status-pill">Letter · Portrait</span></header>
+        <div class="manual-import-controls" aria-label="SPR spreadsheet upload and printing">
+          <input id="sprCountSheetFile" type="file" accept=".xlsx,.xls,.xlsm,.csv" hidden>
+          <button id="uploadSprCountSheet" class="primary-button" type="button">Upload Excel / CSV</button>
+          <button id="printSprCountSheet" class="secondary-button" type="button" disabled>Print FOR SPR</button>
+          <button id="exportSprCountSheet" class="secondary-button" type="button" disabled>Export PDF</button>
+        </div>
+        <p id="sprCountSheetStatus" role="status" aria-live="polite">Choose a file to preview your SPR sheet.</p>
+        <div id="sprCountSheetPages" class="spr-pages"></div>
       </div>
       <div id="manualCountSheetMode" hidden>
         <div class="manual-count-sheet-tools" aria-label="Manual count-sheet filters and generation">
@@ -778,7 +808,6 @@
     <div id="siteSearchResults" class="site-search-results" role="listbox" aria-label="Search results"></div>
   </dialog>
   <dialog class="confirm-dialog" id="confirmDialog" aria-labelledby="confirmHeading"><p class="section-kicker">PLEASE CONFIRM</p><h2 id="confirmHeading">Are you sure?</h2><p id="confirmMessage"></p><div class="confirm-actions"><button class="secondary-button" id="confirmCancel" type="button">Cancel</button><button class="danger-button" id="confirmAccept" type="button">Continue</button></div></dialog>
-  <a class="floating-contact" id="floatingContact" href="#about-contact" aria-label="Contact the workspace team">✉ <span>Contact</span></a>
   <button class="back-to-top" id="backToTop" type="button" aria-label="Back to top" title="Back to top">↑</button>
   <div class="cookie-banner" id="cookieBanner" role="region" aria-label="Cookie preferences" hidden><div><strong>Your browser, your choice</strong><p>This site uses essential local storage for sign-in, preferences, and saved inventory.</p></div><div class="cookie-actions"><button class="secondary-button" id="cookieEssential" type="button">Essential only</button><button class="primary-button" id="cookieAccept" type="button">Accept</button></div></div>
 
@@ -806,7 +835,7 @@
   </div>
 
   <div class="toast" id="toast" role="status"></div>
-  <div hidden><button id="generateBtn"></button><button id="goGenerate"></button><button id="backConfigure"></button><button id="printBtn"></button><button id="pdfBtn"></button><div id="tagSheet"></div><div id="generatedSummary"></div></div>
+  <div hidden><button id="generateBtn"></button><button id="backConfigure"></button><button id="printBtn"></button><button id="pdfBtn"></button><div id="tagSheet"></div><div id="generatedSummary"></div></div>
   <div class="modal-backdrop settings-backdrop" id="modalBackdrop" hidden>
     <section class="settings-hub" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
       <header class="settings-hub-header">
@@ -830,6 +859,8 @@
             <label>System name<input id="systemNameField" type="text" maxlength="70" placeholder="FUJI CYCLE COUNT SHEET GENERATOR"></label>
             <label>Editor name<input id="editorName" type="text" maxlength="70" placeholder="Name shown on count sheets"></label>
             <label class="settings-field-wide">Store name<input id="settingsStoreName" type="text" maxlength="100" placeholder="Store or branch name"></label>
+            <fieldset class="locator-prefix-settings settings-field-wide"><legend>Locator area prefixes</legend><label>SA area prefix<input id="prefixSA" maxlength="12" value="SA-" autocomplete="off"></label><label>BA area prefix<input id="prefixBA" maxlength="12" value="BA-" autocomplete="off"></label><label>WH area prefix<input id="prefixWH" maxlength="12" value="WH-" autocomplete="off"></label><small>Used to recognize locator areas when reviewing imported inventory. Keep prefixes distinct.</small></fieldset>
+            <label class="settings-field-wide ai-consent-setting"><input id="aiSharingConsent" type="checkbox"> Allow Ask FUJI to send my questions to the configured AI provider after I press Ask. Inventory is not sent.</label>
           </div>
         </section>
         <section class="settings-view" role="tabpanel" data-settings-view="palette" hidden>
@@ -857,16 +888,21 @@
     </section>
   </div>
   <div id="printToast" class="print-toast" aria-live="polite" aria-atomic="true" hidden><div class="print-toast__content"><span class="print-toast__icon">✓</span><div><strong>Print status</strong><p>Count sheet sent to printer successfully.</p></div><button type="button" class="print-toast__close" aria-label="Close notification">×</button></div></div>
-  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" crossorigin="anonymous"></script>
+  <script src="safe-text-utils.js"></script>
+  <script src="count-session-utils.js"></script>
+  <script src="count-entry-utils.js"></script>
+  <script src="count-sheet-import-utils.js"></script>
   <script src="count-sheet-filter-utils.js"></script>
   <script src="app.js"></script>
+  <script src="count-entry.js"></script>
   <script src="count-sheet-reference.js"></script>
   <script src="layout-persistence.js"></script>
-  <script src="count-sheet-import-utils.js"></script>
   <script src="print-controller.js"></script>
+  <script src="spr-count-sheet.js"></script>
   <script src="product-lookup.js"></script>
   <script src="cigar-expiry-utils.js"></script>
   <script src="cigar-monitor-utils.js"></script>

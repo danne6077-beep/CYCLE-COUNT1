@@ -15,12 +15,25 @@ test('light and dark theme token pairs meet WCAG AA contrast', () => {
     ['light body text', '#19211e', '#f4f6f4', 4.5],
     ['light muted text', '#56645d', '#ffffff', 4.5],
     ['light accent action', '#ffffff', '#08785b', 4.5],
-    ['dark body text', '#e6ede9', '#101713', 4.5],
-    ['dark muted text', '#b0bdb6', '#17201b', 4.5],
-    ['dark active accent', '#55c6a0', '#101713', 4.5],
+    ['dark body text', '#e8f0ec', '#0c1512', 4.5],
+    ['dark muted text', '#9db0a7', '#121d19', 4.5],
+    ['dark active accent', '#34d399', '#0c1512', 4.5],
     ['dark primary action', '#ffffff', '#08785b', 4.5]
   ];
   for (const [name, foreground, background, minimum] of pairs) {
     assert.ok(contrast(foreground, background) >= minimum, `${name} contrast ${contrast(foreground, background).toFixed(2)} is below ${minimum}:1`);
   }
+});
+
+test('the phase 10 semantic text and action token pairs pass WCAG AA', () => {
+  const pairs = [
+    ['light text/background','#17201d','#f7faf8'],['light muted/surface','#536158','#ffffff'],
+    ['light text/secondary surface','#17201d','#eef2ef'],['brand text/light panel','#08785b','#ffffff'],
+    ['white primary button/light brand','#ffffff','#08785b'],['sapphire preset/white','#1d4ed8','#ffffff'],
+    ['amber preset/white','#b45309','#ffffff'],['rose preset/white','#be123c','#ffffff'],
+    ['dark text/background','#e8f0ec','#0c1512'],['dark muted/surface','#9db0a7','#121d19'],
+    ['dark text/raised surface','#e8f0ec','#17231e'],['dark brand/background','#34d399','#0c1512'],
+    ['dark button text/brand','#0c1512','#34d399']
+  ];
+  for (const [name, foreground, background] of pairs) assert.ok(contrast(foreground, background) >= 4.5, `${name}: ${contrast(foreground, background).toFixed(2)}:1`);
 });
