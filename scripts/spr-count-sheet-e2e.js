@@ -1,71 +1,44 @@
-const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const http = require('node:http');
-const os = require('node:os');
-const path = require('node:path');
-const {chromium} = require('playwright');
-
-// Use the same official pinned libraries as the app, cached locally for deterministic browser runs.
-const xlsxFile = process.env.FUJI_SHEETJS_TEST_PATH || path.join(os.tmpdir(), 'fuji-sheetjs-0.20.3.js');
-const barcodeFile = process.env.FUJI_JSBARCODE_TEST_PATH || path.join(os.tmpdir(), 'fuji-jsbarcode-3.11.6.js');
-const XLSX = require(xlsxFile);
-const root = path.resolve(__dirname, '..', 'dist');
-const output = path.join(os.tmpdir(), 'fuji-spr-qa');
-const mime = {'.html':'text/html', '.js':'text/javascript', '.css':'text/css', '.json':'application/json', '.jpg':'image/jpeg', '.svg':'image/svg+xml', '.webmanifest':'application/manifest+json'};
-const server = http.createServer((req, res) => {
-  const pathname = new URL(req.url, 'http://localhost').pathname;
-  const file = path.resolve(root, pathname === '/' ? 'index.html' : pathname.replace(/^\/+/, ''));
-  if (!file.startsWith(root + path.sep)) {res.writeHead(403).end(); return;}
-  fs.readFile(file, (error, body) => {if(error)res.writeHead(404).end(); else res.writeHead(200, {'content-type':mime[path.extname(file)] || 'application/octet-stream'}).end(body);});
-});
-
-(async () => {
-  fs.mkdirSync(output, {recursive:true});
-  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
-  const browser = await chromium.launch({headless:true, ...(process.platform==='win32' ? {executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe'} : {})});
-  const page = await browser.newPage({viewport:{width:1366, height:1000}});
-  const errors = []; page.on('pageerror', error => errors.push(error.message));
-  try {
-    await page.route('https://cdn.sheetjs.com/**', route => route.fulfill({path:xlsxFile, contentType:'text/javascript'}));
-    await page.route('https://cdn.jsdelivr.net/npm/jsbarcode@*/**', route => route.fulfill({path:barcodeFile, contentType:'text/javascript'}));
-    await page.goto(`http://127.0.0.1:${server.address().port}/`, {waitUntil:'domcontentloaded'});
-    await page.locator('#openDeviceWorkspace').click();
-    await page.evaluate(() => loadItems([{supplier:'Original',sku:'SAVED',description:'Saved inventory'}]));
-    await page.locator('#countSheetNav').click();
-    await page.locator('#chooseSprCountSheetMode').click();
-    assert.equal(await page.locator('#sprCountSheetMode').isVisible(), true);
-    const data = [["SKU'S",'BARCODE','DESCRIPTION'], ...Array.from({length:16}, (_,i) => [i===15?'00000':String(i).padStart(5,'0'), '036000291452', i===0?'<img src=x onerror=alert(1)>':`SPR product ${i}`])];
-    const book = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(book, XLSX.utils.aoa_to_sheet(data), 'SPR');
-    await page.locator('#sprCountSheetFile').setInputFiles({name:'spr.xlsx',mimeType:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',buffer:Buffer.from(XLSX.write(book,{bookType:'xlsx',type:'buffer'}))});
-    await page.waitForFunction(() => document.querySelector('#sprCountSheetStatus').textContent.includes('Ready to print'));
-    assert.equal(await page.locator('#sprCountSheetPages .spr-sheet').count(), 2);
-    assert.equal(await page.locator('#sprCountSheetPages tbody tr').count(), 16);
-    assert.equal(await page.locator('#sprCountSheetPages tbody tr').first().locator('td').nth(1).innerText(), '00000');
-    assert.equal(await page.locator('#sprCountSheetPages img').count(), 0);
-    assert.ok(await page.locator('#sprCountSheetPages svg rect').count() > 0);
-    assert.deepEqual(await page.locator('#sprCountSheetPages thead').first().locator('th').allTextContents(), ['#','SKU','BARCODE','DESCRIPTION','COUNT']);
-    assert.equal(await page.evaluate(() => items[0].sku), 'SAVED');
-    const originalLayout = await page.evaluate(() => ({orientation:document.querySelector('#orientation').value,size:document.documentElement.style.getPropertyValue('--print-page-size')}));
-    await page.screenshot({path:path.join(output,'spr-desktop.png'),fullPage:true});
-    const pdf = await page.pdf({path:path.join(output,'spr-portrait.pdf'),preferCSSPageSize:true,printBackground:true});
-    const source = pdf.toString('latin1');
-    const mediaBoxes = [...source.matchAll(/\/MediaBox\s*\[\s*0\s+0\s+([\d.]+)\s+([\d.]+)\s*\]/g)];
-    assert.equal(mediaBoxes.length, 2, 'Two PDF pages for 16 spreadsheet rows');
-    mediaBoxes.forEach(match => {assert.equal(Number(match[1]),612);assert.equal(Number(match[2]),792);});
-    assert.deepEqual(await page.evaluate(() => ({orientation:document.querySelector('#orientation').value,size:document.documentElement.style.getPropertyValue('--print-page-size')})), originalLayout);
-    await page.locator('#sprCountSheetFile').setInputFiles({name:'invalid.csv',mimeType:'text/csv',buffer:Buffer.from('WRONG,HEADER\nno,sku')});
-    await page.waitForFunction(() => document.querySelector('#sprCountSheetStatus').textContent.includes('Could not load file'));
-    assert.equal(await page.locator('#sprCountSheetPages tbody tr').count(),16);
-    await page.setViewportSize({width:360,height:900});
-    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), 'No mobile page overflow');
-    await page.screenshot({path:path.join(output,'spr-mobile.png'),fullPage:true});
-    await page.setViewportSize({width:1366,height:1000});
-    await page.locator('#changeCountSheetMode').click(); await page.locator('#chooseManualCountSheetMode').click();
-    await page.locator('#manualCountSheetFileInput').setInputFiles({name:'manual.csv',mimeType:'text/csv',buffer:Buffer.from('SKU,BARCODE,DESCRIPTION\n12,036000291452,Standard manual product')});
-    await page.waitForFunction(() => document.querySelector('#manualCountSheetFileName').textContent.includes('Loaded:'));
-    await page.locator('#generateImportedCountSheetPreviewBtn').click();
-    assert.equal(await page.locator('#manualCountSheetPages thead th').count(),10,'Existing manual layout retains locator columns');
-    assert.deepEqual(errors, []);
-    console.log(JSON.stringify({result:'passed',realExcelUpload:true,leadingZeros:true,rowsPreserved:16,noCcdOrLocators:true,realBarcodes:true,pdfPages:2,pdfSize:'612 × 792 pt (Letter portrait)',savedInventoryUnchanged:true,layoutSettingsUnchanged:true,invalidUploadPreservesPrevious:true,mobileOverflow:false,manualModeRegression:'passed',pageErrors:errors,artifacts:output},null,2));
-  } finally {await browser.close();await new Promise(resolve => server.close(resolve));}
-})().catch(error => {console.error(error);process.exitCode=1;});
+const assert=require('node:assert/strict'),fs=require('node:fs'),http=require('node:http'),os=require('node:os'),path=require('node:path');
+const {chromium}=require('playwright');
+const root=path.resolve(__dirname,'..','dist'),out=path.join(os.tmpdir(),'fuji-spr-layout-qa');
+const XLSX=require('../spr-vendor/xlsx.full.min.js');
+const barcodeFile=process.env.FUJI_JSBARCODE_TEST_PATH||path.join(os.tmpdir(),'fuji-jsbarcode-3.11.6.js');
+const mime={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.jpg':'image/jpeg','.svg':'image/svg+xml'};
+const server=http.createServer((req,res)=>{const relative=new URL(req.url,'http://local').pathname;const file=path.resolve(root,relative==='/'?'index.html':relative.replace(/^\//,''));if(!file.startsWith(root+path.sep)){res.writeHead(403).end();return}fs.readFile(file,(error,body)=>{if(error)res.writeHead(404).end();else res.writeHead(200,{'content-type':mime[path.extname(file)]||'application/octet-stream'}).end(body)})});
+function book(count,type='xlsx') {const workbook=XLSX.utils.book_new();const data=[["SKU'S",'BARCODE','DESCRIPTION'],...Array.from({length:count},(_,i)=>[String(i).padStart(6,'0'),'036000291452',`Synthetic SPR product ${i}`])];XLSX.utils.book_append_sheet(workbook,XLSX.utils.aoa_to_sheet(data),'FOR SPR');return Buffer.from(XLSX.write(workbook,{bookType:type,type:'buffer'}))}
+(async()=>{fs.mkdirSync(out,{recursive:true});await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));const browser=await chromium.launch({headless:true,...(process.platform==='win32'?{executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe'}:{})});const context=await browser.newContext({viewport:{width:1440,height:1000},serviceWorkers:'block',reducedMotion:'reduce'});const page=await context.newPage(),errors=[];page.on('pageerror',error=>errors.push(error.message));
+try{
+ await page.route('https://cdn.sheetjs.com/**',route=>route.abort());
+ if(fs.existsSync(barcodeFile))await page.route('https://cdn.jsdelivr.net/npm/jsbarcode@*/**',route=>route.fulfill({path:barcodeFile,contentType:'text/javascript'}));
+ await page.goto(process.env.FUJI_SPR_TEST_URL||`http://127.0.0.1:${server.address().port}/`,{waitUntil:'domcontentloaded'});await page.locator('#openDeviceWorkspace').click();await page.evaluate(()=>loadItems([{supplier:'Synthetic',sku:'SAVED',description:'Saved inventory'}]));await page.locator('#countSheetNav').click();await page.locator('#chooseSprCountSheetMode').click();
+ assert.equal(await page.evaluate(()=>typeof window.XLSX),'undefined','CDN failure is reproduced');
+ const csvDownload=page.waitForEvent('download');await page.locator('#downloadSprCsvTemplate').click();const csv=await csvDownload;await csv.saveAs(path.join(out,'template.csv'));assert.ok(fs.readFileSync(path.join(out,'template.csv'),'utf8').includes('"SKU","BARCODE","DESCRIPTION"'));
+ const excelDownload=page.waitForEvent('download');await page.locator('#downloadSprExcelTemplate').click();const excel=await excelDownload;await excel.saveAs(path.join(out,'template.xlsx'));const template=XLSX.read(fs.readFileSync(path.join(out,'template.xlsx')),{cellNF:true});assert.equal(template.Sheets['FOR SPR'].A2.t,'s');assert.equal(template.Sheets['FOR SPR'].A2.v,'000001');assert.equal(template.Sheets['FOR SPR'].A2.z,'@');
+ async function upload(count,type='xlsx'){await page.locator('#sprCountSheetFile').setInputFiles({name:`synthetic.${type}`,mimeType:'application/octet-stream',buffer:book(count,type)});await page.waitForFunction(()=>!document.querySelector('#sprCountSheetMode').hasAttribute('aria-busy'));assert.match(await page.locator('#sprCountSheetStatus').innerText(),/Ready to print/);assert.equal(await page.locator('[data-spr-row]').count(),count)}
+ async function change(key,value){await page.locator(`[data-spr-setting="${key}"]`).selectOption(value)}
+ const pagination=[];
+ for(const count of [5,30,120]){await upload(count);const pages=await page.locator('.spr-sheet').count();console.log(count,'rows',pages,'pages',await page.locator('#sprCountSheetStatus').innerText());assert.equal(pages,Math.ceil(count/15));for(let i=0;i<pages;i++)assert.equal(await page.locator('.spr-sheet-footer').nth(i).locator('span').last().innerText(),`Page ${i+1} of ${pages}`);pagination.push({count,pages})}
+ for(const type of ['xls','xlsm']){await upload(5,type);assert.equal(await page.locator('[data-spr-cell="sku"]').first().innerText(),'000000')}
+ await page.locator('#sprCountSheetFile').setInputFiles(path.join(out,'template.csv'));await page.waitForFunction(()=>!document.querySelector('#sprCountSheetMode').hasAttribute('aria-busy'));assert.equal(await page.locator('[data-spr-row]').count(),2);
+ await page.locator('#sprCountSheetFile').setInputFiles(path.join(out,'template.xlsx'));await page.waitForFunction(()=>!document.querySelector('#sprCountSheetMode').hasAttribute('aria-busy'));assert.equal(await page.locator('[data-spr-cell="sku"]').first().innerText(),'000001');
+ await upload(30);assert.deepEqual(await page.locator('.spr-table thead').first().locator('th').allTextContents(),['SKU','Barcode','Description','Final Count']);
+ assert.equal(await page.locator('.spr-table [data-spr-cell="count"]').first().innerText(),'');
+ const originalLayout=await page.evaluate(()=>({paper:document.querySelector('#paperSize').value,orientation:document.querySelector('#orientation').value,page:document.documentElement.style.getPropertyValue('--print-page-size')}));
+ const pdfChecks=[];
+ for(const paper of ['a4','letter'])for(const orientation of ['portrait','landscape']){
+  await change('paper',paper);await change('orientation',orientation);assert.equal(await page.locator('#printSprCountSheet').isEnabled(),true);const previewPages=await page.locator('.spr-sheet').count();
+  const pdf=await page.pdf({path:path.join(out,`${paper}-${orientation}.pdf`),preferCSSPageSize:true,printBackground:true});const boxes=[...pdf.toString('latin1').matchAll(/\/MediaBox\s*\[\s*0\s+0\s+([\d.]+)\s+([\d.]+)\s*\]/g)];console.log(paper,orientation,'preview',previewPages,'pdf',boxes.length,boxes.map(x=>x.slice(1)));
+  assert.equal(boxes.length,previewPages,'Each preview page fits one printed page');for(const box of boxes){const [w,h]=box.slice(1).map(Number);const expected=paper==='a4'?[595.28,841.89]:[612,792];if(orientation==='landscape')expected.reverse();assert.ok(Math.abs(w-expected[0])<1&&Math.abs(h-expected[1])<1)}pdfChecks.push({paper,orientation,pages:boxes.length});
+ }
+ await page.locator('#sprPresetName').fill('My SPR');await page.locator('#sprSavePreset').click();await page.locator('#sprResetLayout').click();assert.equal(await page.locator('[data-spr-setting="paper"]').inputValue(),'a4');await page.locator('#sprSavedPreset').selectOption('0');await page.locator('#sprLoadPreset').click();assert.equal(await page.locator('[data-spr-setting="paper"]').inputValue(),'letter');
+ await page.locator('#sprResetLayout').click();for(const column of ['sku','barcode','description'])await page.locator(`[data-spr-column="${column}"]`).uncheck();await page.locator('[data-spr-column="count"]').click();assert.ok(await page.locator('[data-spr-column="count"]').isChecked());
+ await page.locator('#sprResetLayout').click();await change('density','roomy');await change('font','large');await change('barcode','large');await change('margins','wide');await change('paper','legal');for(const key of ['fields','bands','footer'])await page.locator(`[data-spr-setting="${key}"]`).uncheck();assert.equal(await page.locator('.spr-header-fields,.spr-department-band,.spr-sheet-footer').count(),0);
+ await page.reload({waitUntil:'domcontentloaded'});await page.locator('#countSheetNav').click();await page.locator('#chooseSprCountSheetMode').click();assert.equal(await page.locator('[data-spr-setting="paper"]').inputValue(),'legal');assert.equal(await page.locator('[data-spr-setting="density"]').inputValue(),'roomy');
+ await page.locator('#sprSavedPreset').selectOption('0');await page.locator('#sprDeletePreset').click();await page.locator('#confirmAccept').click();assert.equal(await page.locator('#sprSavedPreset option').count(),1);
+ await page.locator('#sprResetLayout').click();await upload(5);await page.locator('#sprCountSheetFile').setInputFiles({name:'bad.csv',mimeType:'text/csv',buffer:Buffer.from('WRONG,HEADINGS\nno,sku')});await page.waitForFunction(()=>document.querySelector('#sprCountSheetStatus').textContent.includes('Could not load file'));assert.equal(await page.locator('[data-spr-row]').count(),5);assert.equal(await page.locator('#printSprCountSheet').isEnabled(),true);
+ await page.setViewportSize({width:390,height:844});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Phone has no page overflow');await page.screenshot({path:path.join(out,'phone.png'),fullPage:true});await page.setViewportSize({width:1440,height:1000});await page.screenshot({path:path.join(out,'desktop.png'),fullPage:true});
+ assert.deepEqual(await page.evaluate(()=>({paper:document.querySelector('#paperSize').value,orientation:document.querySelector('#orientation').value,page:document.documentElement.style.getPropertyValue('--print-page-size')})),originalLayout);assert.equal(await page.evaluate(()=>items[0].sku),'SAVED');
+ await page.locator('#changeCountSheetMode').click();await page.locator('#chooseManualCountSheetMode').click();await page.locator('#manualCountSheetFileInput').setInputFiles({name:'manual.csv',mimeType:'text/csv',buffer:Buffer.from('SKU,BARCODE,DESCRIPTION\n12,036000291452,Synthetic manual product')});await page.waitForFunction(()=>document.querySelector('#manualCountSheetFileName').textContent.includes('Loaded:'));await page.locator('#generateImportedCountSheetPreviewBtn').click();assert.equal(await page.locator('#manualCountSheetPages thead th').count(),10);
+ assert.deepEqual(errors,[]);console.log(JSON.stringify({passed:true,cdnFailureRecovered:true,excelFormats:['xlsx','xls','xlsm'],templates:['xlsx','csv'],pagination,pdfChecks,presets:true,persistence:true,mobile:true,otherModeUnchanged:true,output:out},null,2));
+}finally{await context.close();await browser.close();await new Promise(resolve=>server.close(resolve))}
+})().catch(error=>{console.error(error);process.exitCode=1});
