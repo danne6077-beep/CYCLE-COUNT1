@@ -13,3 +13,13 @@
   th, td { border: 1px solid #777 !important; print-color-adjust: exact; }
   * { text-shadow: none !important; }
 }
+/* Screen-only presentation additions do not change the count report output. */
+@media print { .ui-count-metrics,.ui-workflow-progress,.ui-status-visual,.count-entry-status .ui-icon { display:none!important; } }
+@media print {
+  body.print-spr-count-sheet #sprCountSheetPages .spr-sheet-heading h3 { color:#172033!important; }
+  body.print-spr-count-sheet #sprCountSheetPages .spr-table th { background:#eee!important; }
+  body.print-spr-count-sheet #sprCountSheetPages .spr-table :is(thead,tbody,tr,colgroup,col) { background:transparent!important; color:#172033!important; }
+  body.print-spr-count-sheet #sprCountSheetPages .spr-table :is(th,td) { border-color:#777!important; }
+  body.print-spr-count-sheet #sprCountSheetPages .spr-table td { background:#fff!important; }
+  body.print-spr-count-sheet #sprCountSheetPages .spr-table .spr-department-band td { background:#eee!important; }
+}

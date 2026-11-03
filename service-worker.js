@@ -1,7 +1,7 @@
-const CACHE = 'fuji-shell-v3-spr-layout-settings';
+const CACHE = 'fuji-shell-v4-redesign-ui';
 const SHELL = [
   '/', '/index.html', '/404.html', '/manifest.webmanifest', '/logo.jpg', '/tokens.css',
-  '/styles.css', '/app-shell.css', '/count-entry.css', '/spr-count-sheet.css', '/count-sheet.css', '/count-sheet-reference.css',
+  '/styles.css', '/app-shell.css', '/ui-polish.css', '/ui-polish.js', '/ui-vendor/lucide-icons.js', '/spr-vendor/JsBarcode.all.min.js', '/count-entry.css', '/spr-count-sheet.css', '/count-sheet.css', '/count-sheet-reference.css',
   '/print.css', '/print-tags.css', '/shelftag.css', '/home-dashboard.css', '/auth.css',
   '/settings-hub.css', '/cigars.css', '/announcements.css', '/masterlist.css', '/site-extras.css', '/about-us.css', '/redesign.css',
   '/safe-text-utils.js', '/count-session-utils.js', '/count-entry-utils.js', '/count-sheet-import-utils.js',

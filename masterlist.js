@@ -232,7 +232,7 @@
     document.querySelectorAll('[data-master-sort]').forEach(button=>{
       const direction=button.querySelector('span');
       direction.textContent=button.dataset.masterSort===state.sortKey?(state.sortDirection===1?'↑':'↓'):'';
-      button.setAttribute('aria-sort',button.dataset.masterSort===state.sortKey?(state.sortDirection===1?'ascending':'descending'):'none');
+      button.closest('th').setAttribute('aria-sort',button.dataset.masterSort===state.sortKey?(state.sortDirection===1?'ascending':'descending'):'none');
     });
   }
   function populateCcdOptions(){

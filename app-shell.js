@@ -19,7 +19,11 @@
 
   const brand = document.createElement('div');
   brand.className = 'sidebar-brand';
-  brand.innerHTML = '<img src="logo.jpg" alt="" width="32" height="32"><span><strong>FUJI</strong><small>Inventory workspace</small></span>';
+  brand.innerHTML = '<span class="sidebar-brand-copy"><small>Cycle Count System</small></span>';
+  const existingBrand = oldHeader.querySelector('.brand-mark');
+  const existingName = oldHeader.querySelector('.brand-name');
+  if (existingBrand) brand.prepend(existingBrand);
+  if (existingName) brand.querySelector('.sidebar-brand-copy').prepend(existingName);
   const store = document.createElement('button');
   store.className = 'store-switcher';
   store.type = 'button';
@@ -34,11 +38,14 @@
   sidebar.append(collapse);
   const primary = $('primaryNavigation');
   if (primary) { primary.className = 'sidebar-primary'; sidebar.append(primary); }
+  const hotlist = $('hotlistNav');
+  if (hotlist && primary) { hotlist.className = 'nav-button'; primary.append(hotlist); }
   const utility = $('utilityNavigation');
   const divider = document.createElement('div'); divider.className = 'sidebar-divider'; divider.setAttribute('role', 'separator'); sidebar.append(divider);
   const footerNav = document.createElement('nav'); footerNav.className = 'sidebar-footer'; footerNav.setAttribute('aria-label', 'Account and help');
   const profile = $('authProfileBtn'); const logout = $('authHeaderLogoutBtn'); const updates = $('announcementsNav'); const settings = $('settingsBtn'); const about = $('creditsBtn'); const reset = $('resetBtn'); const theme = $('themeToggle'); const search = $('siteSearchTrigger');
-  [updates, about, settings, theme, profile, logout].forEach(button => { if (button) footerNav.append(button); });
+  if (updates && primary) primary.append(updates);
+  [settings, theme, about, profile, logout].forEach(button => { if (button) footerNav.append(button); });
   const designLink = document.createElement('a'); designLink.className = 'nav-button design-link'; designLink.href = 'design/'; designLink.title = 'Open design system'; designLink.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4zM8 8h8M8 12h8M8 16h4"/></svg><span>Design system</span>'; footerNav.append(designLink);
   sidebar.append(footerNav);
   const tools = document.createElement('div'); tools.className = 'topbar-tools';

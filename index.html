@@ -10,7 +10,7 @@
   <link rel="icon" href="logo.jpg" type="image/jpeg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="settings-hub.css">
   <link rel="stylesheet" href="print-tags.css">
@@ -177,21 +177,21 @@
   <link rel="stylesheet" href="tokens.css">
   <link rel="stylesheet" href="count-entry.css">
   <link rel="stylesheet" href="spr-count-sheet.css">
+  <link rel="stylesheet" href="ui-polish.css" media="screen">
 </head>
 <body class="auth-logged-out">
   <a class="skip-link" href="#loginTitle">Skip to content</a>
   <main class="login-page" id="loginPage">
     <section class="login-card" aria-labelledby="loginTitle">
       <div class="login-visual">
-        <img src="logo.jpg" alt="Fuji Cycle Count System Operations Desk" class="login-brand-image">
-        <div class="login-visual-caption"><span>FUJI CYCLE COUNT SYSTEM</span><strong>Operations, counted on.</strong></div>
+        <div class="login-visual-caption"><strong>Operations,<br>counted on.</strong><p>Import a workbook, check every variance, and print clean count sheets.</p><span>OPERATIONS DESK</span></div>
       </div>
       <div class="login-content">
         <a class="login-brand" href="#" aria-label="Fuji Cycle Count System"><img src="logo.jpg" alt="" width="40" height="40"><span>FUJI CYCLE COUNT SYSTEM</span></a>
         <div class="login-heading"><p class="login-eyebrow">OPERATIONS DESK</p><h1 id="loginTitle" tabindex="-1">Welcome back</h1><p>Sign in to continue to your inventory workspace.</p></div>
         <div class="login-mode-switch" role="tablist" aria-label="Login mode">
-          <button class="login-mode-option is-active" type="button" role="tab" id="localLoginTab" data-login-mode="local" aria-selected="true">Local Machine Login</button>
-          <button class="login-mode-option" type="button" role="tab" id="onlineLoginTab" data-login-mode="online" aria-selected="false">Online Cloud Login</button>
+          <button class="login-mode-option is-active" type="button" role="tab" id="localLoginTab" data-login-mode="local" aria-selected="true">This device</button>
+          <button class="login-mode-option" type="button" role="tab" id="onlineLoginTab" data-login-mode="online" aria-selected="false">Cloud account</button>
         </div>
         <p class="login-mode-status" id="loginModeStatus">OFFLINE · THIS COMPUTER</p>
         <form id="loginForm" class="login-form" novalidate>
@@ -203,7 +203,7 @@
           <button class="login-submit" id="loginSubmit" type="submit"><span id="loginSubmitLabel">Sign In Locally</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button>
           <div class="online-auth-actions" id="onlineAuthActions" hidden><button type="button" id="createOnlineAccount">Create account</button><button type="button" id="resetOnlinePassword">Forgot password?</button><button type="button" id="googleOnlineLogin">Continue with Google</button></div>
         </form>
-        <button class="secondary-button device-workspace-button" id="openDeviceWorkspace" type="button">Open this device workspace</button>
+        <button class="secondary-button device-workspace-button" id="openDeviceWorkspace" type="button">Sign in on this device</button>
         <p class="device-workspace-note">Offline mode · Data stays on this device</p>
         <p class="login-footnote">FUJI CYCLE COUNT SYSTEM <span>·</span> <span id="loginFootnoteMode">LOCAL WORKSPACE</span></p>
       </div>
@@ -243,7 +243,7 @@
   <main class="page-shell" id="mainContent" tabindex="-1">
     <section id="homePanel" class="home-dashboard" hidden aria-labelledby="homeHeading">
       <header class="home-hero">
-        <div><p class="home-eyebrow">FUJI INVENTORY WORKSPACE · OPERATIONS DESK</p><h1 id="homeHeading">Inventory, at a glance.</h1><p>Prepare accurate counts, create shelf-ready price tags, and look up product details from one place.</p></div>
+        <div><p class="home-eyebrow">WORKSPACE</p><h1 id="homeHeading">Choose a workflow</h1><p>Start a count, print tags, or look up an item.</p></div>
         <div class="home-health" id="homeHealth"><span class="home-health-dot"></span><span id="homeSystemHealth">Checking system</span><small>LOCAL WORKSPACE</small></div>
       </header>
       <div class="home-stat-strip" aria-label="Workspace status">
@@ -257,7 +257,6 @@
         <article class="home-operation-card"><span class="home-operation-label">OPEN SESSION</span><strong id="homeOpenSessions">No active session</strong><p id="homeOpenSessionsDetail">Store and date details are kept in this browser.</p></article>
         <article class="home-operation-card"><span class="home-operation-label">ANNOUNCEMENTS</span><strong id="homeAnnouncements">Checking updates…</strong><p id="homeAnnouncementsDetail">Workspace notices from your administrator.</p><button type="button" data-home-open="announcementsNav">View updates</button></article>
       </section>
-      <div class="home-section-heading"><div><p class="home-eyebrow">QUICK ACCESS</p><h2>Choose a workflow</h2></div><span>01 / 07</span></div>
       <div class="home-feature-grid">
         <article class="home-feature home-feature-count"><div class="home-feature-top"><span class="home-feature-icon" aria-hidden="true">▦</span><span class="home-feature-index">01</span></div><h3>Count Sheet</h3><p>Import inventory, review SKU records, organize suppliers, and prepare physical count sheets.</p><button type="button" data-home-open="countSheetNav">Open count sheet <span aria-hidden="true">→</span></button></article>
         <article class="home-feature home-feature-cigars"><div class="home-feature-top"><span class="home-feature-icon" aria-hidden="true">◉</span><span class="home-feature-index">02</span></div><h3>Cigarette monitoring</h3><p>Import the SELLING sheet, record daily cigarette counts, and look up batch expiry dates.</p><button type="button" data-home-open="cigarsNav">Open monitoring <span aria-hidden="true">→</span></button></article>
@@ -471,8 +470,8 @@
     </section>
     <section id="introRow" class="intro-row">
       <div>
-        <p class="eyebrow">DANNE MODULE 01</p>
-        <h1>CYCLE COUNT</h1>
+        <p class="eyebrow">WORKSPACE</p>
+        <h1>Count Sheet</h1>
         <p class="intro-copy">Physical inventory count tags and sheets for efficient store operations.</p>
       </div>
       <div class="module-switcher" role="tablist" aria-label="Generator type">
@@ -888,7 +887,7 @@
     </section>
   </div>
   <div id="printToast" class="print-toast" aria-live="polite" aria-atomic="true" hidden><div class="print-toast__content"><span class="print-toast__icon">✓</span><div><strong>Print status</strong><p>Count sheet sent to printer successfully.</p></div><button type="button" class="print-toast__close" aria-label="Close notification">×</button></div></div>
-  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js" crossorigin="anonymous"></script>
+  <script src="spr-vendor/JsBarcode.all.min.js"></script>
   <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" crossorigin="anonymous"></script>
@@ -915,5 +914,7 @@
   <script src="firebase-auth.js"></script>
   <script src="site-extras.js"></script>
   <script src="app-shell.js"></script>
+  <script src="ui-vendor/lucide-icons.js"></script>
+  <script src="ui-polish.js"></script>
 </body>
 </html>
