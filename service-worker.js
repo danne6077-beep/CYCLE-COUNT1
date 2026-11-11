@@ -1,4 +1,4 @@
-const CACHE = 'fuji-shell-v9-spr-category-selection';
+const CACHE = 'fuji-shell-v10-count-dates';
 const SHELL = [
   '/', '/index.html', '/404.html', '/manifest.webmanifest', '/logo.jpg', '/tokens.css',
   '/styles.css', '/app-shell.css', '/ui-polish.css', '/ui-polish.js', '/ui-vendor/lucide-icons.js', '/spr-vendor/JsBarcode.all.min.js', '/count-entry.css', '/spr-count-sheet.css?v=9', '/count-sheet.css', '/count-sheet-reference.css',
@@ -7,8 +7,8 @@ const SHELL = [
   '/safe-text-utils.js', '/count-session-utils.js', '/count-entry-utils.js', '/count-sheet-import-utils.js',
   '/count-sheet-filter-utils.js', '/cigar-monitor-utils.js', '/cigar-expiry-utils.js',
   '/app.js', '/count-entry.js', '/firebase-config.js', '/firebase-auth.js', '/app-shell.js', '/site-extras.js',
-  '/print-controller.js', '/spr-count-sheet.js?v=9', '/spr-vendor/xlsx.full.min.js', '/product-lookup.js', '/shelftag.js', '/cigar-monitor.js',
-  '/cigar-expiry.js', '/masterlist.js', '/announcements.js', '/layout-persistence.js'
+  '/print-controller.js', '/spr-count-sheet.js?v=10', '/spr-vendor/xlsx.full.min.js', '/product-lookup.js', '/shelftag.js', '/cigar-monitor.js',
+  '/cigar-expiry.js', '/masterlist.js', '/announcements.js', '/count-sheet-reference.js?v=10', '/layout-persistence.js?v=10'
 ];
 const LIBS = [
   'https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js',

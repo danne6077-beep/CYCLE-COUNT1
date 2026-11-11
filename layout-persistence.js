@@ -19,6 +19,7 @@ function setCountSheetMode(mode){
 	$('standardCountSheetMode').hidden=mode!=='standard';
 	$('manualCountSheetMode').hidden=mode!=='manual';
 	$('sprCountSheetMode').hidden=mode!=='spr';
+	if(mode==='standard'||mode==='spr')$(`${mode}CountDate`).value ||= $('dateField').value;
 	$('countSheetModeStatus').textContent=mode==='standard'?'Standard Count Sheet':mode==='manual'?'Manual Excel / CSV':mode==='spr'?'FOR SPR · Portrait':'';
 	$('countSheetPages').replaceChildren();
 	if(mode!=='standard'){
@@ -367,6 +368,10 @@ $('supplierFilter').addEventListener('change',()=>{
 	if(!isStandardCountSheetMode())return;
 	updateCountSheetCategoryFilter();
 	if(countSheetPreviewRequested)queueCountSheetPreview();
+});
+$('standardCountDate').addEventListener('change',event=>{
+	event.target.value ||= $('dateField').value;
+	if(isStandardCountSheetMode()&&countSheetPreviewRequested)queueCountSheetPreview();
 });
 $('countSheetPrintMode')?.addEventListener('change',()=>{
 	if(!isStandardCountSheetMode())return;

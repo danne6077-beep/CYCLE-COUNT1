@@ -97,6 +97,7 @@ function paginateCombinedSupplierRows(groups,suppliers,maxSkuRows){
 
 function renderCountSheet(previewOnly=false,renderOptions={}){
   const sourceItems=renderOptions.items||items;
+  const countDate = (renderOptions.imported ? '' : $('standardCountDate').value) || $('dateField').value || '2026-09-14';
   const storeName=escapeSheetText($('storeField').value||'Store #14014 - Retail');
   const editorName=escapeSheetText($('editorName')?.value||'Danne Lozana');
   const selectedCcd=renderOptions.ccd??$('countSheetCcdFilter')?.value??'all';
@@ -225,7 +226,7 @@ function renderCountSheet(previewOnly=false,renderOptions={}){
       <header class="reference-sheet-header">
         <div class="reference-title">COUNT SHEET <span>PHYSICAL INVENTORY</span><strong>${escapeSheetText(groupName)}</strong></div>
         <div class="reference-meta"><b>STORE:</b> ${escapeSheetText(storeName)} <b>BRANCH:</b> Prince Cauayan <b>CCD NO.:</b> ${escapeSheetText(selectedCcd==='all'?'ALL':selectedCcd)}</div>
-        <div class="reference-meta"><b>${groupMode==='supplier-category'?'SUPPLIER + CATEGORY':printMode==='category'?'CATEGORY':'SUPPLIER'}:</b> ${escapeSheetText(groupName)} <b>DATE:</b> ${escapeSheetText($('dateField').value||'2026-09-14')} <b>PREPARED BY:</b> ${escapeSheetText(editorName)}</div>
+        <div class="reference-meta"><b>${groupMode==='supplier-category'?'SUPPLIER + CATEGORY':printMode==='category'?'CATEGORY':'SUPPLIER'}:</b> ${escapeSheetText(groupName)} <b>DATE:</b> ${escapeSheetText(countDate)} <b>PREPARED BY:</b> ${escapeSheetText(editorName)}</div>
       </header>
       <table class="count-sheet-table reference-table">
         <thead><tr><th>#</th><th>SKU</th><th>BARCODE</th><th>DESCRIPTION</th><th>SELLING LOCATOR</th><th>COUNT</th><th>BUFFER LOCATOR</th><th>COUNT</th><th>WAREHOUSE LOCATOR</th><th>COUNT</th></tr></thead>

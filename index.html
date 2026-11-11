@@ -78,7 +78,7 @@
     #countSheetPanel .print-toolbar>div:first-child{min-width:220px;max-width:280px}
     #countSheetPanel .generated-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:end;justify-content:stretch;gap:8px;width:100%;min-width:0;margin-top:0}
     #countSheetPanel .supplier-filter{display:grid;grid-template-rows:auto 40px;gap:5px;min-width:0;width:auto;margin:0;font-size:11px}
-    #countSheetPanel .supplier-filter select{width:100%;min-width:0;height:40px}
+    #countSheetPanel .supplier-filter :is(select,input[type="date"]){width:100%;min-width:0;height:40px}
     #countSheetPanel .generated-actions>#backCountData,#countSheetPanel .generated-actions>#printSheetBtn,#countSheetPanel .generated-actions>#exportSheetBtn{width:100%;min-width:0;height:40px;min-height:40px}
     .supplier-selection-list{grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(180px,100%),1fr));align-content:start;gap:6px;width:100%;max-width:none;min-width:0;max-height:190px;overflow:auto;margin-top:0;padding:8px;border:1px solid #dce5df;border-radius:8px;background:#f8faf9}
     .supplier-selection-list[hidden]{display:none!important}
@@ -564,6 +564,7 @@
             <label class="supplier-filter">Print mode<select id="countSheetPrintMode"><option value="category">Print by Category</option><option value="supplier">Print by Supplier</option></select></label>
             <label class="supplier-filter">Group sheets<select id="countSheetGroupMode"></select></label>
             <label class="supplier-filter">Sort rows<select id="countSheetSortOrder"><option value="department-ccd">Department, then CCD</option><option value="department">Department</option><option value="ccd">CCD number</option><option value="workbook">Workbook order</option></select></label>
+            <label class="supplier-filter">Count date<input id="standardCountDate" type="date"></label>
             <label class="supplier-filter" hidden aria-hidden="true">Print supplier<select id="supplierFilter"><option value="all">All suppliers</option></select></label>
             <label class="supplier-filter" hidden aria-hidden="true">Print category<select id="countSheetCategoryFilter"><option value="all">All categories</option></select></label>
             <select id="supplierGroupingMode" hidden aria-hidden="true"><option value="all">Combine all</option><option value="supplier">One supplier per sheet</option><option value="category">One category per sheet</option><option value="supplier-category">Group by Supplier + Category</option></select>
@@ -599,6 +600,7 @@
                 <option value="combined">Combine into single continuous sheet</option>
               </select>
             </label>
+            <label class="supplier-filter">Count date<input id="sprCountDate" type="date"></label>
             <div id="sprCategorySelectionList" class="supplier-selection-list" role="group" aria-label="Select categories to print" hidden>
               <div class="supplier-selection-actions">
                 <button id="sprSelectAllCategories" class="supplier-selection-action" type="button">Select All Categories</button>
@@ -927,10 +929,10 @@
   <script src="count-sheet-filter-utils.js"></script>
   <script src="app.js"></script>
   <script src="count-entry.js"></script>
-  <script src="count-sheet-reference.js"></script>
-  <script src="layout-persistence.js"></script>
+  <script src="count-sheet-reference.js?v=10"></script>
+  <script src="layout-persistence.js?v=10"></script>
   <script src="print-controller.js"></script>
-  <script src="spr-count-sheet.js?v=9"></script>
+  <script src="spr-count-sheet.js?v=10"></script>
   <script src="product-lookup.js"></script>
   <script src="cigar-expiry-utils.js"></script>
   <script src="cigar-monitor-utils.js"></script>

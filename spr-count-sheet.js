@@ -7,6 +7,9 @@
   const pages = $('sprCountSheetPages');
   const generatePreview = $('sprGeneratePreview');
   const groupSheets = $('sprGroupSheets');
+  const countDate = $('sprCountDate');
+  const store = '14014';
+  const branch = 'Cauayan';
   const categoryList = $('sprCategorySelectionList');
   const categoryActions = categoryList.firstElementChild;
   const selectAllCategories = $('sprSelectAllCategories');
@@ -116,7 +119,6 @@
     Object.entries(values).forEach(([key,value])=>pages.style.setProperty(`--spr-${key}`,value));
     document.querySelector('#sprCountSheetMode .status-pill').textContent=`${settings.paper.toUpperCase()} · ${settings.orientation==='portrait'?'Portrait':'Landscape'}`;
   }
-  function metadataValue(row,names) {const key=Object.keys(row||{}).find(key=>names.includes(key.toLowerCase().replace(/[^a-z0-9]/g,'')));return key?String(row[key]??'').trim():'';}
   function updateCategorySelection() {
     const selected = new Set(selectedCategories);
     for (const button of categoryList.querySelectorAll('[data-category]')) {
@@ -224,30 +226,30 @@
       status.textContent = `${rows.length.toLocaleString()} rows loaded from ${fileName}. Select categories and generate a preview.`;
     }
   }
-  function sheetHeader(scopeRows, branch, category) {
-    const store = $('storeField').value.trim() || '—';
-    const ccdNumbers = [...new Set(scopeRows.map(row => row.ccdNo).filter(Boolean))].join(', ') || '—';
-    const fields=[['Store',store],['Branch',branch||'—'],['CCD No.',ccdNumbers],['Category',category],['Date',$('dateField').value||new Date().toLocaleDateString()],['Prepared by',$('editorName')?.value||'—']];
-    return `<header class="spr-sheet-heading"><h3>Cycle Count Sheet</h3>${settings.fields?`<div class="spr-header-fields">${fields.map(([label,value])=>`<div><b>${esc(label)}</b><span>${esc(value)}</span></div>`).join('')}</div>`:''}</header>`;
+  function sheetHeader(category) {
+    const fields = [
+      ['Store', store], ['Branch', branch], ['Category', category],
+      ['Count date', countDate.value || $('dateField').value], ['Prepared by', 'Danne Lozana']
+    ];
+    return `<header class="spr-sheet-heading"><h3>SPR (Special Count Request)</h3>${settings.fields?`<div class="spr-header-fields">${fields.map(([label,value])=>`<div><b>${esc(label)}</b><span>${esc(value)}</span></div>`).join('')}</div>`:''}</header>`;
   }
   function group(index, showCategoryBands) {
     const row = rows[index];
     const department = settings.bands ? row.department : '';
-    const ccd = settings.bands ? row.ccdNo : '';
     const category = showCategoryBands ? categoryKey(row) : '';
     const supplier = showCategoryBands ? row.supplier : '';
     const label = showCategoryBands ? [`Category: ${categories.get(category)} · Supplier: ${supplier}`] : [];
-    if (settings.bands) label.push(`Department: ${department || '—'} · CCD No.: ${ccd || '—'}`);
-    return {key: JSON.stringify([category, supplier, department, ccd]), label: label.join(' · ')};
+    if (settings.bands) label.push(`Department: ${department || '—'}`);
+    return {key: JSON.stringify([category, supplier, department]), label: label.join(' · ')};
   }
   function rowMarkup(index) {
     const row=rows[index];const cells={sku:esc(row.sku),barcode:row.barcode?`<svg class="scan-barcode" data-barcode="${esc(row.barcode)}"></svg>`:'<span class="spr-missing-barcode">No barcode</span>',description:esc(row.description),count:'<span class="spr-count-box"></span>'};
     return `<tr data-spr-row="${index}">${columns.filter(([key])=>settings.columns[key]).map(([key])=>`<td data-spr-cell="${key}">${cells[key]}</td>`).join('')}</tr>`;
   }
-  function pageMarkup(indexes, page, total, header, branch, showCategoryBands) {
+  function pageMarkup(indexes, page, total, header, showCategoryBands) {
     const selected=columns.filter(([key])=>settings.columns[key]);let previous='';
     const body=indexes.map(index=>{const current=group(index,showCategoryBands);const band=current.label&&current.key!==previous?`<tr class="spr-department-band" data-spr-band="${index}"><td colspan="${selected.length}">${esc(current.label)}</td></tr>`:'';previous=current.key;return band+rowMarkup(index)}).join('');
-    return `<article class="count-sheet-page spr-sheet">${header}<table class="spr-table"><colgroup>${selected.map(([key])=>`<col data-spr-col="${key}">`).join('')}</colgroup><thead><tr>${selected.map(([,label])=>`<th scope="col">${label}</th>`).join('')}</tr></thead><tbody>${body}</tbody></table>${settings.footer?`<footer class="spr-sheet-footer"><span>${esc([$('storeField').value.trim(),branch].filter(Boolean).join(' · '))}</span><span>Page ${page} of ${total}</span></footer>`:''}</article>`;
+    return `<article class="count-sheet-page spr-sheet">${header}<table class="spr-table"><colgroup>${selected.map(([key])=>`<col data-spr-col="${key}">`).join('')}</colgroup><thead><tr>${selected.map(([,label])=>`<th scope="col">${label}</th>`).join('')}</tr></thead><tbody>${body}</tbody></table>${settings.footer?`<footer class="spr-sheet-footer"><span>${esc(store)} · ${esc(branch)}</span><span>Page ${page} of ${total}</span></footer>`:''}</article>`;
   }
   function sizeBarcodes(root) {
     drawCountSheetBarcodes(root);
@@ -255,12 +257,10 @@
   }
 
   function paginate(indexes, category, showCategoryBands) {
-    const scopeRows = indexes.map(index => rows[index]);
-    const branch = metadataValue(scopeRows[0], ['branch', 'branchname']) || window.fujiWorkspaceSettings?.branchName || '';
-    const header = sheetHeader(scopeRows, branch, category);
+    const header = sheetHeader(category);
     const probe = document.createElement('div');
     probe.className = 'spr-measurement';
-    probe.innerHTML = pageMarkup(indexes, 1, 1, header, branch, showCategoryBands);
+    probe.innerHTML = pageMarkup(indexes, 1, 1, header, showCategoryBands);
     pages.append(probe);
     sizeBarcodes(probe);
 
@@ -295,7 +295,7 @@
       previous = current.key;
     }
     if (chunk.length) chunks.push(chunk);
-    return {chunks, header, branch, tooTall};
+    return {chunks, header, tooTall};
   }
 
   function render() {
@@ -323,9 +323,9 @@
       const result = paginate(section.indexes, section.category, showCategoryBands);
       tooTall ||= result.tooTall;
       minimumPages += Math.ceil(section.indexes.length / settings.perPage);
-      for (const chunk of result.chunks) sheets.push({indexes:chunk, header:result.header, branch:result.branch});
+      for (const chunk of result.chunks) sheets.push({indexes:chunk, header:result.header});
     }
-    pages.innerHTML = sheets.map((sheet, index) => pageMarkup(sheet.indexes, index + 1, sheets.length, sheet.header, sheet.branch, showCategoryBands)).join('');
+    pages.innerHTML = sheets.map((sheet, index) => pageMarkup(sheet.indexes, index + 1, sheets.length, sheet.header, showCategoryBands)).join('');
     sizeBarcodes(pages);
 
     const tooWide = [...pages.querySelectorAll('.scan-barcode')].some(svg => svg.getBoundingClientRect().width > svg.closest('td').clientWidth - 12);
@@ -359,7 +359,10 @@
     printedCategories.clear();
     selectionChanged();
   });
-  ['storeField','dateField','editorName'].forEach(id=>$(id)?.addEventListener('change',()=>{if(rows.length)render()}));
+  countDate.addEventListener('change', () => {
+    countDate.value ||= $('dateField').value;
+    if (previewRequested) render();
+  });
   $('chooseSprCountSheetMode').addEventListener('click',()=>setTimeout(render,0));
 
   upload.addEventListener('click', () => input.click());

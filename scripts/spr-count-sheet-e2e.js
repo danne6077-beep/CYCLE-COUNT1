@@ -80,7 +80,16 @@ try{
  assert.equal(await page.locator('#printSprCountSheet').isDisabled(), true);
  await generate.click();
  assert.deepEqual(await previewSkus(), ['001','003']);
- assert.match(await page.locator('.spr-header-fields').first().innerText(), /CCD No\.\s+1\s+Category\s+Grocery/i);
+ const sprSheet = page.locator('.spr-sheet').first();
+ assert.match(await sprSheet.locator('h3').innerText(), /^SPR \(Special Count Request\)$/i);
+ assert.match(await sprSheet.locator('.spr-header-fields').innerText(), /Store\s+14014\s+Branch\s+Cauayan\s+Category\s+Grocery\s+Count date\s+\d{4}-\d{2}-\d{2}\s+Prepared by\s+Danne Lozana/i);
+ assert.equal(await sprSheet.locator('.spr-sheet-footer span').first().innerText(), '14014 · Cauayan');
+ assert.doesNotMatch(await sprSheet.innerText(), /CCD No\./i);
+ const sprDate = page.locator('#sprCountDate');
+ const inventoryDate = await page.locator('#dateField').inputValue();
+ assert.equal(await sprDate.inputValue(), inventoryDate);
+ await sprDate.fill('2026-12-03');
+ assert.match(await sprSheet.locator('.spr-header-fields').innerText(), /Count date\s+2026-12-03/i);
  assert.match(await page.locator('#sprCountSheetStatus').innerText(), /Grocery · 2 rows/);
  const rowsPerPage = page.locator('[data-spr-setting="perPage"]');
  await rowsPerPage.fill('1');
@@ -158,8 +167,12 @@ try{
  assert.deepEqual(await printOrder.allTextContents(), ['Household','Grocery']);
  assert.equal(await page.locator('.spr-sheet').count(), 2);
  const separateSheets = page.locator('.spr-sheet');
- assert.match(await separateSheets.nth(0).locator('.spr-header-fields').innerText(), /CCD No\.\s+2\s+Category\s+Household/i);
- assert.match(await separateSheets.nth(1).locator('.spr-header-fields').innerText(), /CCD No\.\s+1\s+Category\s+Grocery/i);
+ assert.match(await separateSheets.nth(0).locator('.spr-header-fields').innerText(), /Category\s+Household/i);
+ assert.match(await separateSheets.nth(1).locator('.spr-header-fields').innerText(), /Category\s+Grocery/i);
+ for (const sheet of await separateSheets.all()) {
+  assert.match(await sheet.innerText(), /Count date\s+2026-12-03/i);
+  assert.doesNotMatch(await sheet.innerText(), /CCD No\./i);
+ }
  assert.deepEqual(await separateSheets.nth(0).locator('[data-spr-cell="sku"]').allTextContents(), ['002','005']);
  assert.deepEqual(await separateSheets.nth(1).locator('[data-spr-cell="sku"]').allTextContents(), ['001','003']);
  assert.equal(await separateSheets.nth(1).locator('.spr-sheet-footer span').last().innerText(), 'Page 2 of 2');
@@ -215,6 +228,18 @@ try{
  assert.ok(standardLabels.some(label=>label.includes('CATEGORY: Grocery · SUPPLIER: Tea Co')));
  assert.ok(standardLabels.some(label=>label.includes('CATEGORY: Household · SUPPLIER: Home Supply')));
  assert.doesNotMatch(await page.locator('#countSheetPages').textContent(), /Unsorted item/);
+ const standardDate = page.locator('#standardCountDate');
+ assert.equal(await standardDate.inputValue(), inventoryDate);
+ await standardDate.fill('2026-12-11');
+ await page.waitForFunction(()=>document.querySelector('#countSheetPages .reference-sheet-header').textContent.includes('DATE: 2026-12-11'));
+ assert.equal(await page.locator('#dateField').inputValue(), inventoryDate);
+ await page.evaluate(()=>{
+  window.print=()=>{window.standardPrintedHeader=document.querySelector('#countSheetPages .reference-sheet-header').textContent};
+ });
+ await page.locator('#printSheetBtn').click();
+ await page.waitForFunction(()=>Boolean(window.standardPrintedHeader));
+ assert.match(await page.evaluate(()=>window.standardPrintedHeader), /DATE: 2026-12-11/);
+ await page.evaluate(()=>dispatchEvent(new Event('afterprint')));
 
  assert.deepEqual(errors,[]);console.log(JSON.stringify({passed:true,cdnFailureRecovered:true,excelFormats:['xlsx','xls','xlsm'],templates:['xlsx','csv'],standardCategorySelection:true,categoryPrinting:true,categoryOrder:true,separateCategorySheets:true,printedCategoryStatus:true,pagination,pdfChecks,presets:true,persistence:true,mobile:true,otherModeUnchanged:true,output:out},null,2));
 }finally{await context.close();await browser.close();await new Promise(resolve=>server.close(resolve))}
