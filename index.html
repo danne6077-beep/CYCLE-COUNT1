@@ -176,7 +176,7 @@
   <link rel="stylesheet" href="app-shell.css">
   <link rel="stylesheet" href="tokens.css">
   <link rel="stylesheet" href="count-entry.css">
-  <link rel="stylesheet" href="spr-count-sheet.css">
+  <link rel="stylesheet" href="spr-count-sheet.css?v=9">
   <link rel="stylesheet" href="ui-polish.css" media="screen">
 </head>
 <body class="auth-logged-out">
@@ -580,38 +580,43 @@
         <div id="countSheetPages"></div>
       </div>
       <div id="sprCountSheetMode" hidden aria-labelledby="sprCountSheetHeading">
-        <header class="spr-heading"><div><p class="section-kicker">PORTRAIT COUNT SHEET</p><h2 id="sprCountSheetHeading">FOR SPR</h2><p>Upload your SKU, BARCODE, and DESCRIPTION columns. Add CATEGORY to choose which categories to print and in what order.</p></div><span class="status-pill">Letter · Portrait</span></header>
-        <div class="manual-import-controls" aria-label="SPR spreadsheet upload and printing">
+        <div class="manual-import-controls" aria-label="SPR spreadsheet upload">
           <input id="sprCountSheetFile" type="file" accept=".xlsx,.xls,.xlsm,.csv" hidden>
           <button id="uploadSprCountSheet" class="primary-button" type="button">Upload Excel / CSV</button>
-          <button id="printSprCountSheet" class="secondary-button" type="button" disabled>Print FOR SPR</button>
-          <button id="exportSprCountSheet" class="secondary-button" type="button" disabled>Export PDF</button>
         </div>
-        <div class="spr-category-controls">
-          <label class="spr-category-filter" for="sprCategoryFilter">
-            Print category
-            <select id="sprCategoryFilter" disabled><option value="">All categories</option></select>
-          </label>
-          <label class="spr-category-filter" for="sprGroupSheets">
-            Group sheets
-            <select id="sprGroupSheets" disabled>
-              <option value="separate">One category per sheet</option>
-              <option value="combined" selected>Combine into single continuous sheet</option>
-            </select>
-          </label>
-        </div>
-        <div id="sprCategorySelectionList" class="supplier-selection-list" role="group" aria-label="Select categories to print" hidden>
-          <div class="supplier-selection-actions">
-            <button id="sprSelectAllCategories" class="supplier-selection-action" type="button">Select All Categories</button>
-            <button id="sprClearCategories" class="supplier-selection-action" type="button">Clear All</button>
-            <button id="sprResetPrinted" class="supplier-selection-action reset-printed" type="button">Reset Printed</button>
+        <div class="print-toolbar">
+          <div>
+            <header class="spr-heading">
+              <div><p class="section-kicker">PORTRAIT COUNT SHEET</p><h2 id="sprCountSheetHeading">FOR SPR</h2></div>
+              <span class="status-pill">Letter · Portrait</span>
+            </header>
+            <p id="sprCountSheetStatus" role="status" aria-live="polite">Upload a file to select categories.</p>
+          </div>
+          <div class="generated-actions">
+            <label class="supplier-filter">Group sheets
+              <select id="sprGroupSheets" disabled>
+                <option value="separate">One category per sheet</option>
+                <option value="combined">Combine into single continuous sheet</option>
+              </select>
+            </label>
+            <div id="sprCategorySelectionList" class="supplier-selection-list" role="group" aria-label="Select categories to print" hidden>
+              <div class="supplier-selection-actions">
+                <button id="sprSelectAllCategories" class="supplier-selection-action" type="button">Select All Categories</button>
+                <button id="sprClearCategories" class="supplier-selection-action" type="button">Clear All</button>
+                <button id="sprResetPrinted" class="supplier-selection-action reset-printed" type="button">Reset Printed</button>
+              </div>
+            </div>
+            <div class="count-sheet-actions">
+              <button id="sprGeneratePreview" class="primary-button" type="button" disabled>Generate preview</button>
+              <button id="printSprCountSheet" class="secondary-button" type="button" disabled>Print FOR SPR</button>
+              <button id="exportSprCountSheet" class="secondary-button" type="button" disabled>Export PDF</button>
+            </div>
+            <section id="sprCategoryOrder" class="spr-category-order" aria-labelledby="sprCategoryOrderHeading" hidden>
+              <h3 id="sprCategoryOrderHeading">Print order</h3>
+              <ol id="sprCategoryOrderList"></ol>
+            </section>
           </div>
         </div>
-        <section id="sprCategoryOrder" class="spr-category-order" aria-labelledby="sprCategoryOrderHeading" hidden>
-          <h3 id="sprCategoryOrderHeading">Print order</h3>
-          <ol id="sprCategoryOrderList"></ol>
-        </section>
-        <p id="sprCountSheetStatus" role="status" aria-live="polite">Choose a file to preview your SPR sheet.</p>
         <div id="sprCountSheetPages" class="spr-pages"></div>
       </div>
       <div id="manualCountSheetMode" hidden>
@@ -925,7 +930,7 @@
   <script src="count-sheet-reference.js"></script>
   <script src="layout-persistence.js"></script>
   <script src="print-controller.js"></script>
-  <script src="spr-count-sheet.js"></script>
+  <script src="spr-count-sheet.js?v=9"></script>
   <script src="product-lookup.js"></script>
   <script src="cigar-expiry-utils.js"></script>
   <script src="cigar-monitor-utils.js"></script>

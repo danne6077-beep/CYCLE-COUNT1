@@ -18,25 +18,50 @@ try{
  assert.equal(templateSheet.B2.z, '@');
  assert.equal(templateSheet.D1.v, 'CATEGORY');
  assert.equal(templateSheet.E1.v, 'SUPPLIER');
- async function upload(count,type='xlsx'){await page.locator('#sprCountSheetFile').setInputFiles({name:`synthetic.${type}`,mimeType:'application/octet-stream',buffer:book(count,type)});await page.waitForFunction(()=>!document.querySelector('#sprCountSheetMode').hasAttribute('aria-busy'));assert.match(await page.locator('#sprCountSheetStatus').innerText(),/Ready to print/);assert.equal(await page.locator('[data-spr-row]').count(),count);assert.equal(await page.locator('.spr-pages .scan-barcode').count(),count,'Every barcode renders without its CDN');assert.ok(await page.locator('.spr-pages .scan-barcode rect').count()>count,'Barcodes contain actual bars');assert.equal(await page.locator('.spr-pages .barcode-render-fallback').count(),0)}
+ const groupSheets = page.locator('#sprGroupSheets');
+ const categoryList = page.locator('#sprCategorySelectionList');
+ const resetPrinted = categoryList.getByRole('button', {name:'Reset Printed'});
+ const generate = page.locator('#sprGeneratePreview');
+ const chooseCategory = name => categoryList.getByRole('button', {name:`Select category ${name}`, exact:true}).click();
+ const previewSkus = () => page.locator('[data-spr-cell="sku"]').allTextContents();
+ const selectAllAndGenerate = async () => {
+  await categoryList.getByRole('button', {name:'Select All Categories'}).click();
+  await generate.click();
+ };
+
+ const largeRows = ['SKU,BARCODE,DESCRIPTION,CATEGORY','TARGET1,036000291452,Target one,ACCESSORIES','TARGET2,036000291452,Target two,ALCOHOLIC BEVERAGES'];
+ for(let i=0;i<8286;i++)largeRows.push(`OTHER${i},036000291452,Other item,OTHER`);
+ await page.locator('#sprCountSheetFile').setInputFiles({name:'large-categories.csv',mimeType:'text/csv',buffer:Buffer.from(largeRows.join('\n'))});
+ await page.waitForFunction(()=>!document.querySelector('#sprCountSheetMode').hasAttribute('aria-busy'));
+ assert.match(await page.locator('#sprCountSheetStatus').innerText(), /8,288 rows loaded/);
+ assert.equal(await groupSheets.inputValue(), 'separate');
+ assert.equal(await generate.isEnabled(), true);
+ await generate.click();
+ assert.match(await page.locator('#sprCountSheetStatus').innerText(), /Select at least one category/);
+ assert.equal(await categoryList.locator('[aria-pressed="true"]').count(), 0);
+ assert.deepEqual(await previewSkus(), []);
+ await chooseCategory('ACCESSORIES');
+ const beverages = categoryList.getByRole('button', {name:'Select category ALCOHOLIC BEVERAGES'});
+ await beverages.press('Enter');
+ assert.equal(await categoryList.locator('[aria-pressed="true"]').count(), 2);
+ assert.deepEqual(await previewSkus(), []);
+ await generate.click();
+ assert.deepEqual(await previewSkus(), ['TARGET1','TARGET2']);
+ assert.equal(await page.locator('.spr-sheet').count(), 2);
+ await page.locator('#sprCountSheetMode .print-toolbar').screenshot({path:path.join(out,'category-selection-toolbar.png')});
+
+ async function upload(count,type='xlsx'){await page.locator('#sprCountSheetFile').setInputFiles({name:`synthetic.${type}`,mimeType:'application/octet-stream',buffer:book(count,type)});await page.waitForFunction(()=>!document.querySelector('#sprCountSheetMode').hasAttribute('aria-busy'));await selectAllAndGenerate();assert.match(await page.locator('#sprCountSheetStatus').innerText(),/Ready to print/);assert.equal(await page.locator('[data-spr-row]').count(),count);assert.equal(await page.locator('.spr-pages .scan-barcode').count(),count,'Every barcode renders without its CDN');assert.ok(await page.locator('.spr-pages .scan-barcode rect').count()>count,'Barcodes contain actual bars');assert.equal(await page.locator('.spr-pages .barcode-render-fallback').count(),0)}
  async function change(key,value){await page.locator(`[data-spr-setting="${key}"]`).selectOption(value)}
  const pagination=[];
  for(const count of [5,30,120]){await upload(count);const pages=await page.locator('.spr-sheet').count();console.log(count,'rows',pages,'pages',await page.locator('#sprCountSheetStatus').innerText());assert.equal(pages,Math.ceil(count/15));for(let i=0;i<pages;i++)assert.equal(await page.locator('.spr-sheet-footer').nth(i).locator('span').last().innerText(),`Page ${i+1} of ${pages}`);pagination.push({count,pages})}
  for(const type of ['xls','xlsm']){await upload(5,type);assert.equal(await page.locator('[data-spr-cell="sku"]').first().innerText(),'000000')}
- await page.locator('#sprCountSheetFile').setInputFiles(path.join(out,'template.csv'));await page.waitForFunction(()=>!document.querySelector('#sprCountSheetMode').hasAttribute('aria-busy'));assert.equal(await page.locator('[data-spr-row]').count(),2);
- await page.locator('#sprCountSheetFile').setInputFiles(path.join(out,'template.xlsx'));await page.waitForFunction(()=>!document.querySelector('#sprCountSheetMode').hasAttribute('aria-busy'));assert.equal(await page.locator('[data-spr-cell="sku"]').first().innerText(),'000001');
- const categoryFilter = page.locator('#sprCategoryFilter');
- const groupSheets = page.locator('#sprGroupSheets');
- const categoryList = page.locator('#sprCategorySelectionList');
- const resetPrinted = categoryList.getByRole('button', {name:'Reset Printed'});
- const chooseCategory = name => categoryList.getByRole('button', {name, exact:true}).click();
+ await page.locator('#sprCountSheetFile').setInputFiles(path.join(out,'template.csv'));await page.waitForFunction(()=>!document.querySelector('#sprCountSheetMode').hasAttribute('aria-busy'));await selectAllAndGenerate();assert.equal(await page.locator('[data-spr-row]').count(),2);
+ await page.locator('#sprCountSheetFile').setInputFiles(path.join(out,'template.xlsx'));await page.waitForFunction(()=>!document.querySelector('#sprCountSheetMode').hasAttribute('aria-busy'));
  assert.deepEqual(await groupSheets.locator('option').allTextContents(), ['One category per sheet','Combine into single continuous sheet']);
- const previewSkus = () => page.locator('[data-spr-cell="sku"]').allTextContents();
- await categoryFilter.selectOption({label:'Household'});
+ await chooseCategory('Household');
+ await generate.click();
  assert.deepEqual(await previewSkus(), ['000002']);
  assert.match(await page.locator('.spr-header-fields').first().innerText(), /Category\s+Household/i);
- await categoryFilter.selectOption({label:'All categories'});
- assert.equal(await page.locator('[data-spr-row]').count(), 2);
 
  const categorizedRows = [
   ['SKU','BARCODE','DESCRIPTION','CATEGORY','CCD','SUPPLIER'],
@@ -50,8 +75,10 @@ try{
   name:'categorized.csv', mimeType:'text/csv', buffer:Buffer.from(categorizedRows.map(row=>row.join(',')).join('\n'))
  });
  await page.waitForFunction(()=>!document.querySelector('#sprCountSheetMode').hasAttribute('aria-busy'));
- assert.deepEqual(await categoryFilter.locator('option').allTextContents(), ['All categories','Selected categories','Grocery','Household','Imported Items']);
- await categoryFilter.selectOption({label:'Grocery'});
+ assert.equal(await categoryList.locator('[data-category][aria-pressed="false"]').count(), 3);
+ await chooseCategory('Grocery');
+ assert.equal(await page.locator('#printSprCountSheet').isDisabled(), true);
+ await generate.click();
  assert.deepEqual(await previewSkus(), ['001','003']);
  assert.match(await page.locator('.spr-header-fields').first().innerText(), /CCD No\.\s+1\s+Category\s+Grocery/i);
  assert.match(await page.locator('#sprCountSheetStatus').innerText(), /Grocery · 2 rows/);
@@ -71,38 +98,42 @@ try{
   await page.evaluate(()=>dispatchEvent(new Event('afterprint')));
  }
  await verifyPrint('#printSprCountSheet', ['001','003']);
- const printedGrocery = categoryList.getByRole('button', {name:/Grocery.*PRINTED/});
+ const printedGrocery = categoryList.getByRole('button', {name:/Grocery printed/i});
  assert.equal(await printedGrocery.isEnabled(), false);
- assert.equal(await categoryList.getByRole('button', {name:'Household', exact:true}).isEnabled(), true);
- assert.equal(await categoryFilter.locator('option[value="category:grocery"]').evaluate(option=>option.disabled), true);
+ assert.equal(await categoryList.getByRole('button', {name:'Select category Household', exact:true}).isEnabled(), true);
  await resetPrinted.click();
- assert.equal(await categoryList.getByRole('button', {name:'Grocery', exact:true}).isEnabled(), true);
- await categoryFilter.selectOption({label:'Grocery'});
+ assert.equal(await categoryList.getByRole('button', {name:'Select category Grocery', exact:true}).isEnabled(), true);
+ await chooseCategory('Grocery');
+ await generate.click();
  await verifyPrint('#exportSprCountSheet', ['001','003']);
  assert.equal(await printedGrocery.isEnabled(), false);
  await resetPrinted.click();
- await categoryFilter.selectOption({label:'Imported Items'});
+ await chooseCategory('Imported Items');
+ await generate.click();
  assert.deepEqual(await previewSkus(), ['004']);
 
  await groupSheets.selectOption({label:'Combine into single continuous sheet'});
  await categoryList.getByRole('button', {name:'Clear All'}).click();
  assert.equal(await page.locator('#printSprCountSheet').isEnabled(), false);
  assert.deepEqual(await previewSkus(), []);
- await categoryList.getByRole('button', {name:'Select All Categories'}).click();
+ await selectAllAndGenerate();
  assert.equal(await previewSkus().then(skus=>skus.length), 5);
  await categoryList.getByRole('button', {name:'Clear All'}).click();
  assert.equal(await page.locator('#exportSprCountSheet').isEnabled(), false);
- await categoryList.getByRole('button', {name:'Household', exact:true}).click();
- await categoryList.getByRole('button', {name:'Grocery', exact:true}).click();
+ await chooseCategory('Household');
+ await chooseCategory('Grocery');
+ await generate.click();
  const printOrder = page.locator('#sprCategoryOrderList .spr-category-order-row > span');
  const combinedSkus = ['002','005','001','003'];
  assert.deepEqual(await printOrder.allTextContents(), ['Household','Grocery']);
  assert.deepEqual(await previewSkus(), combinedSkus);
  assert.equal(await page.getByRole('button', {name:'Move Household up'}).isEnabled(), false);
  await page.getByRole('button', {name:'Move Grocery up'}).click();
+ await generate.click();
  assert.deepEqual(await printOrder.allTextContents(), ['Grocery','Household']);
  assert.deepEqual(await previewSkus(), ['001','003','002','005']);
  await page.getByRole('button', {name:'Move Grocery down'}).click();
+ await generate.click();
  assert.deepEqual(await previewSkus(), combinedSkus);
  assert.equal(await page.locator('.spr-sheet').count(), 1, 'Selected categories share one sheet');
  const sprLabels = await page.locator('.spr-department-band').allTextContents();
@@ -118,11 +149,12 @@ try{
  await verifyPrint('#printSprCountSheet', combinedSkus);
  assert.equal(await categoryList.locator('.is-printed').count(), 2);
  await categoryList.screenshot({path:path.join(out,'printed-category-tiles.png')});
- assert.equal(await categoryList.getByRole('button', {name:'Imported Items', exact:true}).isEnabled(), true);
+ assert.equal(await categoryList.getByRole('button', {name:'Select category Imported Items', exact:true}).isEnabled(), true);
  await resetPrinted.click();
  await chooseCategory('Household');
  await chooseCategory('Grocery');
  await groupSheets.selectOption({label:'One category per sheet'});
+ await generate.click();
  assert.deepEqual(await printOrder.allTextContents(), ['Household','Grocery']);
  assert.equal(await page.locator('.spr-sheet').count(), 2);
  const separateSheets = page.locator('.spr-sheet');
@@ -142,11 +174,10 @@ try{
  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1), 'Print order fits on a phone');
  await page.setViewportSize({width:1440,height:1000});
  await groupSheets.selectOption({label:'Combine into single continuous sheet'});
+ await generate.click();
  assert.equal(await page.locator('.spr-sheet').count(), 1);
  assert.deepEqual(await previewSkus(), combinedSkus);
  await upload(30);
- assert.equal(await categoryFilter.inputValue(), '');
- assert.deepEqual(await categoryFilter.locator('option').allTextContents(), ['All categories','Selected categories','Imported Items']);
  assert.deepEqual(await page.locator('.spr-table thead').first().locator('th').allTextContents(),['SKU','Barcode','Description','Final Count']);
  assert.equal(await page.locator('.spr-table [data-spr-cell="count"]').first().innerText(),'');
  const originalLayout=await page.evaluate(()=>({paper:document.querySelector('#paperSize').value,orientation:document.querySelector('#orientation').value,page:document.documentElement.style.getPropertyValue('--print-page-size')}));
@@ -163,7 +194,7 @@ try{
  await page.locator('#sprSavedPreset').selectOption('0');await page.locator('#sprDeletePreset').click();await page.locator('#confirmAccept').click();assert.equal(await page.locator('#sprSavedPreset option').count(),1);
  await page.locator('#sprResetLayout').click();await upload(5);await page.locator('#sprCountSheetFile').setInputFiles({name:'bad.csv',mimeType:'text/csv',buffer:Buffer.from('WRONG,HEADINGS\nno,sku')});await page.waitForFunction(()=>document.querySelector('#sprCountSheetStatus').textContent.includes('Could not load file'));assert.equal(await page.locator('[data-spr-row]').count(),5);assert.equal(await page.locator('#printSprCountSheet').isEnabled(),true);
  await page.evaluate(()=>{window.print=()=>{window.sprPrintCalls=(window.sprPrintCalls||0)+1}});
- for(const id of ['printSprCountSheet','exportSprCountSheet']){const before=await page.evaluate(()=>window.sprPrintCalls||0);await page.locator(`#${id}`).click();await page.waitForFunction(value=>window.sprPrintCalls===value,before+1);assert.equal(await page.evaluate(()=>document.body.classList.contains('print-spr-count-sheet')),true);await page.evaluate(()=>dispatchEvent(new Event('afterprint')));await resetPrinted.click();await categoryList.getByRole('button',{name:'Select All Categories'}).click()}
+ for(const id of ['printSprCountSheet','exportSprCountSheet']){const before=await page.evaluate(()=>window.sprPrintCalls||0);await page.locator(`#${id}`).click();await page.waitForFunction(value=>window.sprPrintCalls===value,before+1);assert.equal(await page.evaluate(()=>document.body.classList.contains('print-spr-count-sheet')),true);await page.evaluate(()=>dispatchEvent(new Event('afterprint')));await resetPrinted.click();await selectAllAndGenerate()}
  const printed=[];for(const theme of ['light','dark']){await page.evaluate(theme=>{document.documentElement.dataset.theme=theme;window.prepareSprCountSheetPrint()},theme);await page.emulateMedia({media:'print'});printed.push(await page.locator('.spr-sheet').first().screenshot());await page.evaluate(()=>dispatchEvent(new Event('afterprint')));await page.emulateMedia({media:'screen'})}assert.ok(printed[0].equals(printed[1]),'Printed SPR sheet is identical in both themes');
  await page.setViewportSize({width:390,height:844});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Phone has no page overflow');await page.screenshot({path:path.join(out,'phone.png'),fullPage:true});await page.setViewportSize({width:1440,height:1000});await page.screenshot({path:path.join(out,'desktop.png'),fullPage:true});
  assert.deepEqual(await page.evaluate(()=>({paper:document.querySelector('#paperSize').value,orientation:document.querySelector('#orientation').value,page:document.documentElement.style.getPropertyValue('--print-page-size')})),originalLayout);assert.equal(await page.evaluate(()=>items[0].sku),'SAVED');
@@ -185,6 +216,6 @@ try{
  assert.ok(standardLabels.some(label=>label.includes('CATEGORY: Household · SUPPLIER: Home Supply')));
  assert.doesNotMatch(await page.locator('#countSheetPages').textContent(), /Unsorted item/);
 
- assert.deepEqual(errors,[]);console.log(JSON.stringify({passed:true,cdnFailureRecovered:true,excelFormats:['xlsx','xls','xlsm'],templates:['xlsx','csv'],categoryPrinting:true,categoryOrder:true,separateCategorySheets:true,printedCategoryStatus:true,pagination,pdfChecks,presets:true,persistence:true,mobile:true,otherModeUnchanged:true,output:out},null,2));
+ assert.deepEqual(errors,[]);console.log(JSON.stringify({passed:true,cdnFailureRecovered:true,excelFormats:['xlsx','xls','xlsm'],templates:['xlsx','csv'],standardCategorySelection:true,categoryPrinting:true,categoryOrder:true,separateCategorySheets:true,printedCategoryStatus:true,pagination,pdfChecks,presets:true,persistence:true,mobile:true,otherModeUnchanged:true,output:out},null,2));
 }finally{await context.close();await browser.close();await new Promise(resolve=>server.close(resolve))}
 })().catch(error=>{console.error(error);process.exitCode=1});

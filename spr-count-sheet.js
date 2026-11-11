@@ -5,7 +5,7 @@
   const pdf = $('exportSprCountSheet');
   const status = $('sprCountSheetStatus');
   const pages = $('sprCountSheetPages');
-  const categoryFilter = $('sprCategoryFilter');
+  const generatePreview = $('sprGeneratePreview');
   const groupSheets = $('sprGroupSheets');
   const categoryList = $('sprCategorySelectionList');
   const categoryActions = categoryList.firstElementChild;
@@ -33,7 +33,7 @@
   const templateExcel=document.createElement('button');templateExcel.id='downloadSprExcelTemplate';templateExcel.type='button';templateExcel.className='secondary-button';templateExcel.textContent='Download Excel template';
   const templateCsv=document.createElement('button');templateCsv.id='downloadSprCsvTemplate';templateCsv.type='button';templateCsv.className='secondary-button';templateCsv.textContent='Download CSV template';
   upload.after(templateExcel,templateCsv);
-  const instructions=document.createElement('p');instructions.className='spr-upload-help';instructions.textContent='Replace the example rows and keep the SKU, BARCODE, DESCRIPTION, CATEGORY, and SUPPLIER headers. Fill in CATEGORY to print by category. SUPPLIER is optional and appears on combined category sheets. Keep SKU and BARCODE as Text to retain leading zeros. No locator or CCD is required. Supported: .xlsx, .xls, .xlsm, .csv.';status.before(instructions);
+  const instructions=document.createElement('p');instructions.className='spr-upload-help';instructions.textContent='Replace the example rows and keep the SKU, BARCODE, DESCRIPTION, CATEGORY, and SUPPLIER headers. Fill in CATEGORY to print by category. SUPPLIER is optional and appears on combined category sheets. Keep SKU and BARCODE as Text to retain leading zeros. No locator or CCD is required. Supported: .xlsx, .xls, .xlsm, .csv.';upload.closest('.manual-import-controls').after(instructions);
   templateCsv.addEventListener('click',()=>{
     const url=URL.createObjectURL(new Blob(['\uFEFF'+templateRows.map(row=>row.map(value=>'"'+String(value).replace(/"/g,'""')+'"').join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'}));
     const link=document.createElement('a');link.href=url;link.download='FOR-SPR-upload-template.csv';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
@@ -48,6 +48,7 @@
   const categoryKey = row => `category:${row.category.toLowerCase()}`;
   let categories = new Map();
   let selectedCategories = [];
+  let previewRequested = false;
   const printedCategories = new Set();
   let pendingPrint;
   const availableCategories = () => [...categories.keys()].filter(key => !printedCategories.has(key));
@@ -126,13 +127,13 @@
       button.classList.toggle('is-printed', printed);
       button.classList.toggle('is-selected', pressed);
       button.setAttribute('aria-pressed', String(pressed));
+      const label = categories.get(key);
+      button.setAttribute('aria-label', printed ? `${label} printed` : `${pressed ? 'Deselect' : 'Select'} category ${label}`);
       button.querySelector('.supplier-printed-tag').hidden = !printed;
-    }
-    for (const option of categoryFilter.options) {
-      option.disabled = printedCategories.has(option.value);
     }
     selectAllCategories.disabled = selected.size === availableCategories().length;
     clearCategories.disabled = selected.size === 0;
+    generatePreview.disabled = !rows.length || upload.disabled;
     resetPrinted.disabled = printedCategories.size === 0;
     categoryList.hidden = categories.size === 0;
     categoryOrder.hidden = selected.size < 2;
@@ -160,9 +161,7 @@
         button.disabled = next < 0 || next >= selectedCategories.length;
         button.addEventListener('click', () => {
           [selectedCategories[index], selectedCategories[next]] = [selectedCategories[next], selectedCategories[index]];
-          categoryFilter.value = 'selected';
-          updateCategorySelection();
-          render();
+          selectionChanged();
           const buttons = categoryOrderList.children[next].querySelectorAll('button');
           const nextButton = buttons[offset === -1 ? 0 : 1];
           (nextButton.disabled ? buttons[offset === -1 ? 1 : 0] : nextButton).focus({preventScroll:true});
@@ -176,7 +175,7 @@
     categoryOrderList.replaceChildren(orderRows);
   }
 
-  function syncCategoryFilter() {
+  function syncCategoryTiles() {
     const labels = new Map();
     for (const row of rows) {
       const key = categoryKey(row);
@@ -184,10 +183,8 @@
     }
     categories = labels;
     const options = [...labels].sort((a, b) => a[1].localeCompare(b[1]));
-    categoryFilter.replaceChildren(new Option('All categories', ''), new Option('Selected categories', 'selected'),
-      ...options.map(([key, label]) => new Option(label, key)));
     printedCategories.clear();
-    selectedCategories = [...labels.keys()];
+    selectedCategories = [];
     const buttons = document.createDocumentFragment();
     for (const [key, label] of options) {
       const button = document.createElement('button');
@@ -205,14 +202,27 @@
         const index = selectedCategories.indexOf(key);
         if (index >= 0) selectedCategories.splice(index, 1);
         else selectedCategories.push(key);
-        categoryFilter.value = 'selected';
-        updateCategorySelection();
-        render();
+        selectionChanged();
       });
       buttons.append(button);
     }
     categoryList.replaceChildren(categoryActions, buttons);
+    selectionChanged();
+  }
+
+  function selectionChanged() {
+    previewRequested = false;
+    pages.replaceChildren();
+    print.disabled = pdf.disabled = true;
     updateCategorySelection();
+    if (printedCategories.size === categories.size) {
+      status.textContent = 'All categories are marked printed. Use Reset Printed to print them again.';
+    } else if (selectedCategories.length) {
+      const count = selectedCategories.length;
+      status.textContent = `${count} ${count === 1 ? 'category' : 'categories'} selected. Generate a preview to print.`;
+    } else {
+      status.textContent = `${rows.length.toLocaleString()} rows loaded from ${fileName}. Select categories and generate a preview.`;
+    }
   }
   function sheetHeader(scopeRows, branch, category) {
     const store = $('storeField').value.trim() || '—';
@@ -290,19 +300,15 @@
 
   function render() {
     applySettings();
-    if (!rows.length || $('sprCountSheetMode').hidden) return;
+    if (!previewRequested || $('sprCountSheetMode').hidden) return;
 
     const separate = groupSheets.value === 'separate';
-    const showCategoryBands = categories.size > 1 && (selectedCategories.length > 1 || categoryFilter.value === 'selected');
+    const showCategoryBands = categories.size > 1;
     const groups = new Map(selectedCategories.map(key => [key, []]));
     rows.forEach((row, index) => groups.get(categoryKey(row))?.push(index));
     const indexes = [...groups.values()].flat();
     if (!indexes.length) {
-      pages.replaceChildren();
-      print.disabled = pdf.disabled = true;
-      status.textContent = printedCategories.size === categories.size
-        ? 'All categories are marked printed. Use Reset Printed to print them again.'
-        : 'Select at least one category to preview and print.';
+      selectionChanged();
       return;
     }
 
@@ -325,35 +331,33 @@
     const tooWide = [...pages.querySelectorAll('.scan-barcode')].some(svg => svg.getBoundingClientRect().width > svg.closest('td').clientWidth - 12);
     print.disabled = pdf.disabled = tooTall || tooWide;
     const missing = indexes.filter(index => !rows[index].barcode).length;
-    status.textContent=`${fileName}${categoryFilter.value || groups.size > 1 ? ` · ${category}` : ''} · ${indexes.length.toLocaleString()} rows · ${sheets.length} ${settings.orientation} page(s)${missing?` · ${missing} row(s) without a barcode`:''}. ${tooTall?'A row is too tall for this paper. Use a smaller font or larger paper.':tooWide?'A barcode is too wide to print at a readable size. Choose larger paper, landscape, or hide another column.':'Ready to print.'}`;
+    status.textContent=`${fileName} · ${category} · ${indexes.length.toLocaleString()} rows · ${sheets.length} ${settings.orientation} page(s)${missing?` · ${missing} row(s) without a barcode`:''}. ${tooTall?'A row is too tall for this paper. Use a smaller font or larger paper.':tooWide?'A barcode is too wide to print at a readable size. Choose larger paper, landscape, or hide another column.':'Ready to print.'}`;
     if (sheets.length > minimumPages) message('SKUs per page is a maximum. Additional pages keep rows and barcodes within the printable area.');
   }
 
   syncControls();syncPresets();applySettings();
-  categoryFilter.addEventListener('change', () => {
-    const scope = categoryFilter.value;
-    if (!scope) selectedCategories = [...new Set([...selectedCategories, ...availableCategories()])];
-    else if (scope !== 'selected') selectedCategories = [scope];
-    updateCategorySelection();
+  generatePreview.addEventListener('click', () => {
+    if (!selectedCategories.length) {
+      if (printedCategories.size < categories.size) status.textContent = 'Select at least one category to generate a preview.';
+      return;
+    }
+    previewRequested = true;
     render();
   });
-  groupSheets.addEventListener('change', render);
+  groupSheets.addEventListener('change', () => {
+    if (previewRequested) render();
+  });
   selectAllCategories.addEventListener('click', () => {
     selectedCategories = [...new Set([...selectedCategories, ...availableCategories()])];
-    categoryFilter.value = 'selected';
-    updateCategorySelection();
-    render();
+    selectionChanged();
   });
   clearCategories.addEventListener('click', () => {
     selectedCategories = [];
-    categoryFilter.value = 'selected';
-    updateCategorySelection();
-    render();
+    selectionChanged();
   });
   resetPrinted.addEventListener('click', () => {
     printedCategories.clear();
-    updateCategorySelection();
-    render();
+    selectionChanged();
   });
   ['storeField','dateField','editorName'].forEach(id=>$(id)?.addEventListener('change',()=>{if(rows.length)render()}));
   $('chooseSprCountSheetMode').addEventListener('click',()=>setTimeout(render,0));
@@ -363,7 +367,7 @@
     const file = input.files?.[0];
     if (!file) return;
     const wasPrintDisabled=print.disabled;
-    upload.disabled = categoryFilter.disabled = groupSheets.disabled = print.disabled = pdf.disabled = true;
+    upload.disabled = groupSheets.disabled = generatePreview.disabled = print.disabled = pdf.disabled = true;
     categoryList.inert = categoryOrder.inert = true;
     $('sprCountSheetMode').setAttribute('aria-busy', 'true');
     status.textContent = `Reading ${file.name}…`;
@@ -378,16 +382,15 @@
         if (!row.sku || !row.description) throw new Error(`Row ${index + 2}: SKU and DESCRIPTION are required. Check your column headings and values.`);
       });
       rows = imported;
-      syncCategoryFilter();
       fileName = file.name;
-      render();
+      syncCategoryTiles();
     } catch (error) {
       print.disabled=pdf.disabled=wasPrintDisabled;
       status.textContent = `Could not load file: ${error.message}${rows.length ? ` Previous file still shown: ${fileName}.` : ''}`;
     } finally {
       upload.disabled = false;
-      categoryFilter.disabled = !rows.length;
       groupSheets.disabled = !rows.length;
+      generatePreview.disabled = !rows.length;
       categoryList.inert = categoryOrder.inert = false;
       if(!rows.length)print.disabled=pdf.disabled=true;
       $('sprCountSheetMode').removeAttribute('aria-busy');
@@ -396,7 +399,7 @@
   });
 
   window.prepareSprCountSheetPrint = () => {
-    if (!rows.length || upload.disabled) return false;
+    if (!previewRequested || upload.disabled) return false;
     render();
     if(print.disabled)return false;
     const {width,height,margin}=geometry();
@@ -418,8 +421,6 @@
     if (!finished || finished.rows !== rows) return;
     for (const key of finished.categories) printedCategories.add(key);
     selectedCategories = selectedCategories.filter(key => !printedCategories.has(key));
-    categoryFilter.value = 'selected';
-    updateCategorySelection();
-    render();
+    selectionChanged();
   });
 })();
