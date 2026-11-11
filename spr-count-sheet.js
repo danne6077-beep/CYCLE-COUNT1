@@ -10,6 +10,8 @@
   const categoryActions = categoryList.firstElementChild;
   const selectAllCategories = $('sprSelectAllCategories');
   const clearCategories = $('sprClearCategories');
+  const categoryOrder = $('sprCategoryOrder');
+  const categoryOrderList = $('sprCategoryOrderList');
   let excelReady;
   function ensureExcel() {
     if(typeof window.XLSX?.read==='function')return Promise.resolve();
@@ -43,7 +45,8 @@
   let fileName = '';
   const categoryKey = row => `category:${row.category.toLowerCase()}`;
   let categories = new Map();
-  const selectedCategories = new Set();
+  let selectedCategories = [];
+  const usesCategoryOrder = () => ['combined', 'separate'].includes(categoryFilter.value);
   const settingsKey = 'fuji-spr-layout-settings-v1';
   const presetsKey = 'fuji-spr-layout-presets-v1';
   const defaults = {perPage:15,orientation:'portrait',paper:'a4',columns:{sku:true,barcode:true,description:true,count:true},density:'normal',font:'medium',barcode:'medium',margins:'normal',fields:true,bands:true,footer:true};
@@ -110,13 +113,53 @@
   }
   function metadataValue(row,names) {const key=Object.keys(row||{}).find(key=>names.includes(key.toLowerCase().replace(/[^a-z0-9]/g,'')));return key?String(row[key]??'').trim():'';}
   function updateCategorySelection() {
+    const selected = new Set(selectedCategories);
     for (const button of categoryList.querySelectorAll('[data-category]')) {
-      const selected = selectedCategories.has(button.dataset.category);
-      button.classList.toggle('is-selected', selected);
-      button.setAttribute('aria-pressed', String(selected));
+      const pressed = selected.has(button.dataset.category);
+      button.classList.toggle('is-selected', pressed);
+      button.setAttribute('aria-pressed', String(pressed));
     }
-    selectAllCategories.disabled = selectedCategories.size === categories.size;
-    clearCategories.disabled = selectedCategories.size === 0;
+    selectAllCategories.disabled = selected.size === categories.size;
+    clearCategories.disabled = selected.size === 0;
+    categoryList.hidden = !usesCategoryOrder();
+    categoryOrder.hidden = categoryList.hidden || selected.size === 0;
+    if (categoryOrder.hidden) {
+      categoryOrderList.replaceChildren();
+      return;
+    }
+
+    const orderRows = document.createDocumentFragment();
+    selectedCategories.forEach((key, index) => {
+      const item = document.createElement('li');
+      const row = document.createElement('div');
+      row.className = 'spr-category-order-row';
+      const label = document.createElement('span');
+      label.textContent = categories.get(key);
+      const actions = document.createElement('div');
+      actions.className = 'spr-category-order-actions';
+      for (const [direction, offset] of [['up', -1], ['down', 1]]) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'secondary-button';
+        button.textContent = `Move ${direction}`;
+        button.setAttribute('aria-label', `Move ${label.textContent} ${direction}`);
+        const next = index + offset;
+        button.disabled = next < 0 || next >= selectedCategories.length;
+        button.addEventListener('click', () => {
+          [selectedCategories[index], selectedCategories[next]] = [selectedCategories[next], selectedCategories[index]];
+          updateCategorySelection();
+          render();
+          const buttons = categoryOrderList.children[next].querySelectorAll('button');
+          const nextButton = buttons[offset === -1 ? 0 : 1];
+          (nextButton.disabled ? buttons[offset === -1 ? 1 : 0] : nextButton).focus({preventScroll:true});
+        });
+        actions.append(button);
+      }
+      row.append(label, actions);
+      item.append(row);
+      orderRows.append(item);
+    });
+    categoryOrderList.replaceChildren(orderRows);
   }
 
   function syncCategoryFilter() {
@@ -127,10 +170,14 @@
     }
     categories = new Map([...labels].sort((a, b) => a[1].localeCompare(b[1])));
     const options = [...categories].map(([key, label]) => new Option(label, key));
-    if (categories.size > 1) options.push(new Option('Combine into single continuous sheet', 'combined'));
+    if (categories.size > 1) {
+      options.push(
+        new Option('Combine into single continuous sheet', 'combined'),
+        new Option('One category per sheet', 'separate')
+      );
+    }
     categoryFilter.replaceChildren(new Option('All categories', ''), ...options);
-    selectedCategories.clear();
-    categoryList.hidden = true;
+    selectedCategories = [];
     categoryList.replaceChildren(categoryActions);
 
     if (categories.size > 1) {
@@ -143,8 +190,9 @@
         button.textContent = label;
         button.title = label;
         button.addEventListener('click', () => {
-          if (selectedCategories.has(key)) selectedCategories.delete(key);
-          else selectedCategories.add(key);
+          const index = selectedCategories.indexOf(key);
+          if (index >= 0) selectedCategories.splice(index, 1);
+          else selectedCategories.push(key);
           updateCategorySelection();
           render();
         });
@@ -160,13 +208,13 @@
     const fields=[['Store',store],['Branch',branch||'—'],['CCD No.',ccdNumbers],['Category',category],['Date',$('dateField').value||new Date().toLocaleDateString()],['Prepared by',$('editorName')?.value||'—']];
     return `<header class="spr-sheet-heading"><h3>Cycle Count Sheet</h3>${settings.fields?`<div class="spr-header-fields">${fields.map(([label,value])=>`<div><b>${esc(label)}</b><span>${esc(value)}</span></div>`).join('')}</div>`:''}</header>`;
   }
-  function group(index, combined) {
+  function group(index, showCategoryBands) {
     const row = rows[index];
     const department = settings.bands ? row.department : '';
     const ccd = settings.bands ? row.ccdNo : '';
-    const category = combined ? categoryKey(row) : '';
-    const supplier = combined ? row.supplier : '';
-    const label = combined ? [`Category: ${categories.get(category)} · Supplier: ${supplier}`] : [];
+    const category = showCategoryBands ? categoryKey(row) : '';
+    const supplier = showCategoryBands ? row.supplier : '';
+    const label = showCategoryBands ? [`Category: ${categories.get(category)} · Supplier: ${supplier}`] : [];
     if (settings.bands) label.push(`Department: ${department || '—'} · CCD No.: ${ccd || '—'}`);
     return {key: JSON.stringify([category, supplier, department, ccd]), label: label.join(' · ')};
   }
@@ -174,9 +222,9 @@
     const row=rows[index];const cells={sku:esc(row.sku),barcode:row.barcode?`<svg class="scan-barcode" data-barcode="${esc(row.barcode)}"></svg>`:'<span class="spr-missing-barcode">No barcode</span>',description:esc(row.description),count:'<span class="spr-count-box"></span>'};
     return `<tr data-spr-row="${index}">${columns.filter(([key])=>settings.columns[key]).map(([key])=>`<td data-spr-cell="${key}">${cells[key]}</td>`).join('')}</tr>`;
   }
-  function pageMarkup(indexes, page, total, header, branch, combined) {
+  function pageMarkup(indexes, page, total, header, branch, showCategoryBands) {
     const selected=columns.filter(([key])=>settings.columns[key]);let previous='';
-    const body=indexes.map(index=>{const current=group(index,combined);const band=current.label&&current.key!==previous?`<tr class="spr-department-band" data-spr-band="${index}"><td colspan="${selected.length}">${esc(current.label)}</td></tr>`:'';previous=current.key;return band+rowMarkup(index)}).join('');
+    const body=indexes.map(index=>{const current=group(index,showCategoryBands);const band=current.label&&current.key!==previous?`<tr class="spr-department-band" data-spr-band="${index}"><td colspan="${selected.length}">${esc(current.label)}</td></tr>`:'';previous=current.key;return band+rowMarkup(index)}).join('');
     return `<article class="count-sheet-page spr-sheet">${header}<table class="spr-table"><colgroup>${selected.map(([key])=>`<col data-spr-col="${key}">`).join('')}</colgroup><thead><tr>${selected.map(([,label])=>`<th scope="col">${label}</th>`).join('')}</tr></thead><tbody>${body}</tbody></table>${settings.footer?`<footer class="spr-sheet-footer"><span>${esc([$('storeField').value.trim(),branch].filter(Boolean).join(' · '))}</span><span>Page ${page} of ${total}</span></footer>`:''}</article>`;
   }
   function sizeBarcodes(root) {
@@ -184,25 +232,65 @@
     root.querySelectorAll('.scan-barcode').forEach(svg=>{const natural=Number(svg.getAttribute('width'))||140;svg.style.width=`${natural*{small:.9,medium:1,large:1.15}[settings.barcode]}px`;});
   }
 
-  function render() {
-    applySettings();if(!rows.length)return;
-    if($('sprCountSheetMode').hidden)return;
-    const selected = categoryFilter.value;
-    const combined = selected === 'combined';
-    const groups = new Map();
-    if (combined) {
-      for (const key of categories.keys()) {
-        if (selectedCategories.has(key)) groups.set(key, []);
-      }
-    }
+  function paginate(indexes, category, showCategoryBands) {
+    const scopeRows = indexes.map(index => rows[index]);
+    const branch = metadataValue(scopeRows[0], ['branch', 'branchname']) || window.fujiWorkspaceSettings?.branchName || '';
+    const header = sheetHeader(scopeRows, branch, category);
+    const probe = document.createElement('div');
+    probe.className = 'spr-measurement';
+    probe.innerHTML = pageMarkup(indexes, 1, 1, header, branch, showCategoryBands);
+    pages.append(probe);
+    sizeBarcodes(probe);
 
-    let indexes = [];
+    const {height, margin} = geometry();
+    const headerHeight = probe.querySelector('.spr-sheet-heading').getBoundingClientRect().height;
+    const tableHeaderHeight = probe.querySelector('thead').getBoundingClientRect().height;
+    const footerHeight = settings.footer ? probe.querySelector('footer').getBoundingClientRect().height + 16 : 0;
+    const available = (height - 2 * margin) * 96 / 25.4 - headerHeight - 12 - tableHeaderHeight - footerHeight - 8;
+    const heights = new Map([...probe.querySelectorAll('[data-spr-row]')].map(row => [Number(row.dataset.sprRow), row.getBoundingClientRect().height]));
+    const bands = new Map([...probe.querySelectorAll('[data-spr-band]')].map(row => [group(Number(row.dataset.sprBand), showCategoryBands).key, row.getBoundingClientRect().height]));
+    probe.remove();
+
+    const chunks = [];
+    let chunk = [];
+    let used = 0;
+    let previous = '';
+    let tooTall = false;
+    for (const index of indexes) {
+      const current = group(index, showCategoryBands);
+      const rowHeight = heights.get(index);
+      const bandHeight = current.label ? bands.get(current.key) || 25 : 0;
+      let band = !chunk.length || previous !== current.key ? bandHeight : 0;
+      if (chunk.length && (chunk.length >= settings.perPage || used + band + rowHeight > available)) {
+        chunks.push(chunk);
+        chunk = [];
+        used = 0;
+        band = bandHeight;
+      }
+      if (band + rowHeight > available) tooTall = true;
+      chunk.push(index);
+      used += band + rowHeight;
+      previous = current.key;
+    }
+    if (chunk.length) chunks.push(chunk);
+    return {chunks, header, branch, tooTall};
+  }
+
+  function render() {
+    applySettings();
+    if (!rows.length || $('sprCountSheetMode').hidden) return;
+
+    const selected = categoryFilter.value;
+    const ordered = usesCategoryOrder();
+    const separate = selected === 'separate';
+    const groups = new Map(selectedCategories.map(key => [key, []]));
+    const ungrouped = [];
     rows.forEach((row, index) => {
       const key = categoryKey(row);
-      if (combined) groups.get(key)?.push(index);
-      else if (!selected || key === selected) indexes.push(index);
+      if (ordered) groups.get(key)?.push(index);
+      else if (!selected || key === selected) ungrouped.push(index);
     });
-    if (combined) indexes = [...groups.values()].flat();
+    const indexes = ordered ? [...groups.values()].flat() : ungrouped;
     if (!indexes.length) {
       pages.replaceChildren();
       print.disabled = pdf.disabled = true;
@@ -210,42 +298,43 @@
       return;
     }
 
-    const scopeRows = indexes.map(index => rows[index]);
     let category = 'All categories';
-    if (combined) category = 'Combined categories';
-    else if (selected || categories.size === 1) category = scopeRows[0].category;
-    const branch = metadataValue(scopeRows[0], ['branch', 'branchname']) || window.fujiWorkspaceSettings?.branchName || '';
-    const header = sheetHeader(scopeRows, branch, category);
-    const probe=document.createElement('div');probe.className='spr-measurement';probe.innerHTML=pageMarkup(indexes,1,1,header,branch,combined);pages.append(probe);sizeBarcodes(probe);
-    const {height,margin}=geometry();
-    const available=(height-2*margin)*96/25.4-probe.querySelector('.spr-sheet-heading').getBoundingClientRect().height-12-probe.querySelector('thead').getBoundingClientRect().height-(settings.footer?probe.querySelector('footer').getBoundingClientRect().height+16:0)-8;
-    const heights = new Map([...probe.querySelectorAll('[data-spr-row]')].map(row => [Number(row.dataset.sprRow), row.getBoundingClientRect().height]));
-    const bands=new Map([...probe.querySelectorAll('[data-spr-band]')].map(row=>[group(Number(row.dataset.sprBand),combined).key,row.getBoundingClientRect().height]));
-    const chunks=[];let chunk=[],used=0,previous='',tooTall=false;
-    indexes.forEach(index=>{const current=group(index,combined);const height=heights.get(index);let band=current.label&&(!chunk.length||previous!==current.key)?bands.get(current.key)||25:0;
-      if(chunk.length&&(chunk.length>=settings.perPage||used+band+height>available)){chunks.push(chunk);chunk=[];used=0;band=current.label?bands.get(current.key)||25:0;}
-      if(band+height>available)tooTall=true;chunk.push(index);used+=band+height;previous=current.key;
-    });if(chunk.length)chunks.push(chunk);
-    probe.remove();pages.innerHTML=chunks.map((chunk,index)=>pageMarkup(chunk,index+1,chunks.length,header,branch,combined)).join('');sizeBarcodes(pages);
-    const tooWide=[...pages.querySelectorAll('.scan-barcode')].some(svg=>svg.getBoundingClientRect().width>svg.closest('td').clientWidth-12);
-    print.disabled=pdf.disabled=tooTall||tooWide;
-    const missing=scopeRows.filter(row=>!row.barcode).length;
-    status.textContent=`${fileName}${selected ? ` · ${category}` : ''} · ${scopeRows.length.toLocaleString()} rows · ${chunks.length} ${settings.orientation} page(s)${missing?` · ${missing} row(s) without a barcode`:''}. ${tooTall?'A row is too tall for this paper. Use a smaller font or larger paper.':tooWide?'A barcode is too wide to print at a readable size. Choose larger paper, landscape, or hide another column.':'Ready to print.'}`;
-    if(chunks.some(chunk=>chunk.length<settings.perPage)&&scopeRows.length>settings.perPage)message('SKUs per page is a maximum. Additional pages keep rows and barcodes within the printable area.');
+    if (ordered) category = separate ? 'Separate categories' : 'Combined categories';
+    else if (selected || categories.size === 1) category = rows[indexes[0]].category;
+    const sections = separate
+      ? [...groups].map(([key, categoryIndexes]) => ({indexes:categoryIndexes, category:categories.get(key)}))
+      : [{indexes, category}];
+    const sheets = [];
+    let minimumPages = 0;
+    let tooTall = false;
+    for (const section of sections) {
+      const result = paginate(section.indexes, section.category, ordered);
+      tooTall ||= result.tooTall;
+      minimumPages += Math.ceil(section.indexes.length / settings.perPage);
+      for (const chunk of result.chunks) sheets.push({indexes:chunk, header:result.header, branch:result.branch});
+    }
+    pages.innerHTML = sheets.map((sheet, index) => pageMarkup(sheet.indexes, index + 1, sheets.length, sheet.header, sheet.branch, ordered)).join('');
+    sizeBarcodes(pages);
+
+    const tooWide = [...pages.querySelectorAll('.scan-barcode')].some(svg => svg.getBoundingClientRect().width > svg.closest('td').clientWidth - 12);
+    print.disabled = pdf.disabled = tooTall || tooWide;
+    const missing = indexes.filter(index => !rows[index].barcode).length;
+    status.textContent=`${fileName}${selected ? ` · ${category}` : ''} · ${indexes.length.toLocaleString()} rows · ${sheets.length} ${settings.orientation} page(s)${missing?` · ${missing} row(s) without a barcode`:''}. ${tooTall?'A row is too tall for this paper. Use a smaller font or larger paper.':tooWide?'A barcode is too wide to print at a readable size. Choose larger paper, landscape, or hide another column.':'Ready to print.'}`;
+    if (sheets.length > minimumPages) message('SKUs per page is a maximum. Additional pages keep rows and barcodes within the printable area.');
   }
 
   syncControls();syncPresets();applySettings();
   categoryFilter.addEventListener('change', () => {
-    categoryList.hidden = categoryFilter.value !== 'combined';
+    updateCategorySelection();
     render();
   });
   selectAllCategories.addEventListener('click', () => {
-    for (const key of categories.keys()) selectedCategories.add(key);
+    selectedCategories = [...new Set([...selectedCategories, ...categories.keys()])];
     updateCategorySelection();
     render();
   });
   clearCategories.addEventListener('click', () => {
-    selectedCategories.clear();
+    selectedCategories = [];
     updateCategorySelection();
     render();
   });
@@ -258,7 +347,7 @@
     if (!file) return;
     const wasPrintDisabled=print.disabled;
     upload.disabled = categoryFilter.disabled = print.disabled = pdf.disabled = true;
-    categoryList.inert = true;
+    categoryList.inert = categoryOrder.inert = true;
     $('sprCountSheetMode').setAttribute('aria-busy', 'true');
     status.textContent = `Reading ${file.name}…`;
     try {
@@ -281,7 +370,7 @@
     } finally {
       upload.disabled = false;
       categoryFilter.disabled = !rows.length;
-      categoryList.inert = false;
+      categoryList.inert = categoryOrder.inert = false;
       if(!rows.length)print.disabled=pdf.disabled=true;
       $('sprCountSheetMode').removeAttribute('aria-busy');
       input.value = '';

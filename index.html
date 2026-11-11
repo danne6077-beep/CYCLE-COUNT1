@@ -580,7 +580,7 @@
         <div id="countSheetPages"></div>
       </div>
       <div id="sprCountSheetMode" hidden aria-labelledby="sprCountSheetHeading">
-        <header class="spr-heading"><div><p class="section-kicker">PORTRAIT COUNT SHEET</p><h2 id="sprCountSheetHeading">FOR SPR</h2><p>Upload your SKU, BARCODE, and DESCRIPTION columns. Add CATEGORY to print or combine selected categories.</p></div><span class="status-pill">Letter · Portrait</span></header>
+        <header class="spr-heading"><div><p class="section-kicker">PORTRAIT COUNT SHEET</p><h2 id="sprCountSheetHeading">FOR SPR</h2><p>Upload your SKU, BARCODE, and DESCRIPTION columns. Add CATEGORY to choose which categories to print and in what order.</p></div><span class="status-pill">Letter · Portrait</span></header>
         <div class="manual-import-controls" aria-label="SPR spreadsheet upload and printing">
           <input id="sprCountSheetFile" type="file" accept=".xlsx,.xls,.xlsm,.csv" hidden>
           <button id="uploadSprCountSheet" class="primary-button" type="button">Upload Excel / CSV</button>
@@ -591,12 +591,16 @@
           Print category
           <select id="sprCategoryFilter" disabled><option value="">All categories</option></select>
         </label>
-        <div id="sprCategorySelectionList" class="supplier-selection-list" role="group" aria-label="Select categories to combine" hidden>
+        <div id="sprCategorySelectionList" class="supplier-selection-list" role="group" aria-label="Select categories to print" hidden>
           <div class="supplier-selection-actions">
             <button id="sprSelectAllCategories" class="supplier-selection-action" type="button">Select All Categories</button>
             <button id="sprClearCategories" class="supplier-selection-action" type="button">Clear All</button>
           </div>
         </div>
+        <section id="sprCategoryOrder" class="spr-category-order" aria-labelledby="sprCategoryOrderHeading" hidden>
+          <h3 id="sprCategoryOrderHeading">Print order</h3>
+          <ol id="sprCategoryOrderList"></ol>
+        </section>
         <p id="sprCountSheetStatus" role="status" aria-live="polite">Choose a file to preview your SPR sheet.</p>
         <div id="sprCountSheetPages" class="spr-pages"></div>
       </div>

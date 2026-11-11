@@ -1,4 +1,4 @@
-const CACHE = 'fuji-shell-v6-spr-combined';
+const CACHE = 'fuji-shell-v7-spr-print-order';
 const SHELL = [
   '/', '/index.html', '/404.html', '/manifest.webmanifest', '/logo.jpg', '/tokens.css',
   '/styles.css', '/app-shell.css', '/ui-polish.css', '/ui-polish.js', '/ui-vendor/lucide-icons.js', '/spr-vendor/JsBarcode.all.min.js', '/count-entry.css', '/spr-count-sheet.css', '/count-sheet.css', '/count-sheet-reference.css',

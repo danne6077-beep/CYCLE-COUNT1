@@ -45,7 +45,7 @@ try{
   name:'categorized.csv', mimeType:'text/csv', buffer:Buffer.from(categorizedRows.map(row=>row.join(',')).join('\n'))
  });
  await page.waitForFunction(()=>!document.querySelector('#sprCountSheetMode').hasAttribute('aria-busy'));
- assert.deepEqual(await categoryFilter.locator('option').allTextContents(), ['All categories','Grocery','Household','Imported Items','Combine into single continuous sheet']);
+ assert.deepEqual(await categoryFilter.locator('option').allTextContents(), ['All categories','Grocery','Household','Imported Items','Combine into single continuous sheet','One category per sheet']);
  await categoryFilter.selectOption({label:'Grocery'});
  assert.deepEqual(await previewSkus(), ['001','003']);
  assert.match(await page.locator('.spr-header-fields').first().innerText(), /CCD No\.\s+1\s+Category\s+Grocery/i);
@@ -76,16 +76,24 @@ try{
  assert.equal(await previewSkus().then(skus=>skus.length), 5);
  await categoryList.getByRole('button', {name:'Clear All'}).click();
  assert.equal(await page.locator('#exportSprCountSheet').isEnabled(), false);
- await categoryList.getByRole('button', {name:'Grocery', exact:true}).click();
  await categoryList.getByRole('button', {name:'Household', exact:true}).click();
- const combinedSkus = ['001','003','002','005'];
+ await categoryList.getByRole('button', {name:'Grocery', exact:true}).click();
+ const printOrder = page.locator('#sprCategoryOrderList .spr-category-order-row > span');
+ const combinedSkus = ['002','005','001','003'];
+ assert.deepEqual(await printOrder.allTextContents(), ['Household','Grocery']);
+ assert.deepEqual(await previewSkus(), combinedSkus);
+ assert.equal(await page.getByRole('button', {name:'Move Household up'}).isEnabled(), false);
+ await page.getByRole('button', {name:'Move Grocery up'}).click();
+ assert.deepEqual(await printOrder.allTextContents(), ['Grocery','Household']);
+ assert.deepEqual(await previewSkus(), ['001','003','002','005']);
+ await page.getByRole('button', {name:'Move Grocery down'}).click();
  assert.deepEqual(await previewSkus(), combinedSkus);
  assert.equal(await page.locator('.spr-sheet').count(), 1, 'Selected categories share one sheet');
  const sprLabels = await page.locator('.spr-department-band').allTextContents();
  assert.equal(sprLabels.length, 3);
- assert.match(sprLabels[0], /Category: Grocery · Supplier: Acme & Sons/);
- assert.match(sprLabels[1], /Category: Grocery · Supplier: Tea Co/);
- assert.match(sprLabels[2], /Category: Household · Supplier: Home Supply/);
+ assert.match(sprLabels[0], /Category: Household · Supplier: Home Supply/);
+ assert.match(sprLabels[1], /Category: Grocery · Supplier: Acme & Sons/);
+ assert.match(sprLabels[2], /Category: Grocery · Supplier: Tea Co/);
  await rowsPerPage.fill('3');
  const combinedPdf = await page.pdf({preferCSSPageSize:true, printBackground:true});
  assert.equal([...combinedPdf.toString('latin1').matchAll(/\/MediaBox\s*\[/g)].length, 2);
@@ -98,6 +106,30 @@ try{
   assert.deepEqual(await page.evaluate(()=>window.sprPrintedSkus), combinedSkus);
   await page.evaluate(()=>dispatchEvent(new Event('afterprint')));
  }
+ await categoryFilter.selectOption({label:'One category per sheet'});
+ assert.deepEqual(await printOrder.allTextContents(), ['Household','Grocery']);
+ assert.equal(await page.locator('.spr-sheet').count(), 2);
+ const separateSheets = page.locator('.spr-sheet');
+ assert.match(await separateSheets.nth(0).locator('.spr-header-fields').innerText(), /CCD No\.\s+2\s+Category\s+Household/i);
+ assert.match(await separateSheets.nth(1).locator('.spr-header-fields').innerText(), /CCD No\.\s+1\s+Category\s+Grocery/i);
+ assert.deepEqual(await separateSheets.nth(0).locator('[data-spr-cell="sku"]').allTextContents(), ['002','005']);
+ assert.deepEqual(await separateSheets.nth(1).locator('[data-spr-cell="sku"]').allTextContents(), ['001','003']);
+ assert.equal(await separateSheets.nth(1).locator('.spr-sheet-footer span').last().innerText(), 'Page 2 of 2');
+ const separatePdf = await page.pdf({preferCSSPageSize:true, printBackground:true});
+ assert.equal([...separatePdf.toString('latin1').matchAll(/\/MediaBox\s*\[/g)].length, 2);
+ for (const button of ['#printSprCountSheet','#exportSprCountSheet']) {
+  await page.evaluate(()=>{window.sprPrintedSkus=null});
+  await page.locator(button).click();
+  await page.waitForFunction(()=>window.sprPrintedSkus!==null);
+  assert.deepEqual(await page.evaluate(()=>window.sprPrintedSkus), combinedSkus);
+  await page.evaluate(()=>dispatchEvent(new Event('afterprint')));
+ }
+ await page.setViewportSize({width:390,height:844});
+ assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1), 'Print order fits on a phone');
+ await page.setViewportSize({width:1440,height:1000});
+ await categoryFilter.selectOption({label:'Combine into single continuous sheet'});
+ assert.equal(await page.locator('.spr-sheet').count(), 1);
+ assert.deepEqual(await previewSkus(), combinedSkus);
  await upload(30);
  assert.equal(await categoryFilter.inputValue(), '');
  assert.deepEqual(await categoryFilter.locator('option').allTextContents(), ['All categories','Imported Items']);
@@ -139,6 +171,6 @@ try{
  assert.ok(standardLabels.some(label=>label.includes('CATEGORY: Household · SUPPLIER: Home Supply')));
  assert.doesNotMatch(await page.locator('#countSheetPages').textContent(), /Unsorted item/);
 
- assert.deepEqual(errors,[]);console.log(JSON.stringify({passed:true,cdnFailureRecovered:true,excelFormats:['xlsx','xls','xlsm'],templates:['xlsx','csv'],categoryPrinting:true,pagination,pdfChecks,presets:true,persistence:true,mobile:true,otherModeUnchanged:true,output:out},null,2));
+ assert.deepEqual(errors,[]);console.log(JSON.stringify({passed:true,cdnFailureRecovered:true,excelFormats:['xlsx','xls','xlsm'],templates:['xlsx','csv'],categoryPrinting:true,categoryOrder:true,separateCategorySheets:true,pagination,pdfChecks,presets:true,persistence:true,mobile:true,otherModeUnchanged:true,output:out},null,2));
 }finally{await context.close();await browser.close();await new Promise(resolve=>server.close(resolve))}
 })().catch(error=>{console.error(error);process.exitCode=1});
