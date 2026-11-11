@@ -11,12 +11,13 @@ try{
  await page.route('https://cdn.jsdelivr.net/npm/jsbarcode@*/**',route=>route.abort());
  await page.goto(process.env.FUJI_SPR_TEST_URL||`http://127.0.0.1:${server.address().port}/`,{waitUntil:'domcontentloaded'});await page.locator('#openDeviceWorkspace').click();await page.evaluate(()=>loadItems([{supplier:'Synthetic',sku:'SAVED',description:'Saved inventory'}]));await page.locator('#countSheetNav').click();await page.locator('#chooseSprCountSheetMode').click();
  assert.equal(await page.evaluate(()=>typeof window.XLSX),'undefined','CDN failure is reproduced');
- const csvDownload=page.waitForEvent('download');await page.locator('#downloadSprCsvTemplate').click();const csv=await csvDownload;await csv.saveAs(path.join(out,'template.csv'));assert.ok(fs.readFileSync(path.join(out,'template.csv'),'utf8').includes('"SKU","BARCODE","DESCRIPTION","CATEGORY"'));
+ const csvDownload=page.waitForEvent('download');await page.locator('#downloadSprCsvTemplate').click();const csv=await csvDownload;await csv.saveAs(path.join(out,'template.csv'));assert.ok(fs.readFileSync(path.join(out,'template.csv'),'utf8').includes('"SKU","BARCODE","DESCRIPTION","CATEGORY","SUPPLIER"'));
  const excelDownload=page.waitForEvent('download');await page.locator('#downloadSprExcelTemplate').click();const excel=await excelDownload;await excel.saveAs(path.join(out,'template.xlsx'));const template=XLSX.read(fs.readFileSync(path.join(out,'template.xlsx')),{cellNF:true});assert.equal(template.Sheets['FOR SPR'].A2.t,'s');assert.equal(template.Sheets['FOR SPR'].A2.v,'000001');assert.equal(template.Sheets['FOR SPR'].A2.z,'@');
  const templateSheet = template.Sheets['FOR SPR'];
  assert.equal(templateSheet.B2.v, '036000291452');
  assert.equal(templateSheet.B2.z, '@');
  assert.equal(templateSheet.D1.v, 'CATEGORY');
+ assert.equal(templateSheet.E1.v, 'SUPPLIER');
  async function upload(count,type='xlsx'){await page.locator('#sprCountSheetFile').setInputFiles({name:`synthetic.${type}`,mimeType:'application/octet-stream',buffer:book(count,type)});await page.waitForFunction(()=>!document.querySelector('#sprCountSheetMode').hasAttribute('aria-busy'));assert.match(await page.locator('#sprCountSheetStatus').innerText(),/Ready to print/);assert.equal(await page.locator('[data-spr-row]').count(),count);assert.equal(await page.locator('.spr-pages .scan-barcode').count(),count,'Every barcode renders without its CDN');assert.ok(await page.locator('.spr-pages .scan-barcode rect').count()>count,'Barcodes contain actual bars');assert.equal(await page.locator('.spr-pages .barcode-render-fallback').count(),0)}
  async function change(key,value){await page.locator(`[data-spr-setting="${key}"]`).selectOption(value)}
  const pagination=[];
@@ -33,18 +34,18 @@ try{
  assert.equal(await page.locator('[data-spr-row]').count(), 2);
 
  const categorizedRows = [
-  ['SKU','BARCODE','DESCRIPTION','CATEGORY','CCD'],
-  ['001','036000291452','Coffee','Grocery','1'],
-  ['002','036000291452','Detergent','Household','2'],
-  ['003','036000291452','Tea',' grocery ','1'],
-  ['004','036000291452','Unsorted item','','3'],
-  ['005','036000291452','Dish soap','HOUSEHOLD','2']
+  ['SKU','BARCODE','DESCRIPTION','CATEGORY','CCD','SUPPLIER'],
+  ['001','036000291452','Coffee','Grocery','1','Acme & Sons'],
+  ['002','036000291452','Detergent','Household','2','Home Supply'],
+  ['003','036000291452','Tea',' grocery ','1','Tea Co'],
+  ['004','036000291452','Unsorted item','','3',''],
+  ['005','036000291452','Dish soap','HOUSEHOLD','2','Home Supply']
  ];
  await page.locator('#sprCountSheetFile').setInputFiles({
   name:'categorized.csv', mimeType:'text/csv', buffer:Buffer.from(categorizedRows.map(row=>row.join(',')).join('\n'))
  });
  await page.waitForFunction(()=>!document.querySelector('#sprCountSheetMode').hasAttribute('aria-busy'));
- assert.deepEqual(await categoryFilter.locator('option').allTextContents(), ['All categories','Grocery','Household','Imported Items']);
+ assert.deepEqual(await categoryFilter.locator('option').allTextContents(), ['All categories','Grocery','Household','Imported Items','Combine into single continuous sheet']);
  await categoryFilter.selectOption({label:'Grocery'});
  assert.deepEqual(await previewSkus(), ['001','003']);
  assert.match(await page.locator('.spr-header-fields').first().innerText(), /CCD No\.\s+1\s+Category\s+Grocery/i);
@@ -66,6 +67,37 @@ try{
  }
  await categoryFilter.selectOption({label:'Imported Items'});
  assert.deepEqual(await previewSkus(), ['004']);
+
+ await categoryFilter.selectOption({label:'Combine into single continuous sheet'});
+ const categoryList = page.locator('#sprCategorySelectionList');
+ assert.equal(await page.locator('#printSprCountSheet').isEnabled(), false);
+ assert.deepEqual(await previewSkus(), []);
+ await categoryList.getByRole('button', {name:'Select All Categories'}).click();
+ assert.equal(await previewSkus().then(skus=>skus.length), 5);
+ await categoryList.getByRole('button', {name:'Clear All'}).click();
+ assert.equal(await page.locator('#exportSprCountSheet').isEnabled(), false);
+ await categoryList.getByRole('button', {name:'Grocery', exact:true}).click();
+ await categoryList.getByRole('button', {name:'Household', exact:true}).click();
+ const combinedSkus = ['001','003','002','005'];
+ assert.deepEqual(await previewSkus(), combinedSkus);
+ assert.equal(await page.locator('.spr-sheet').count(), 1, 'Selected categories share one sheet');
+ const sprLabels = await page.locator('.spr-department-band').allTextContents();
+ assert.equal(sprLabels.length, 3);
+ assert.match(sprLabels[0], /Category: Grocery · Supplier: Acme & Sons/);
+ assert.match(sprLabels[1], /Category: Grocery · Supplier: Tea Co/);
+ assert.match(sprLabels[2], /Category: Household · Supplier: Home Supply/);
+ await rowsPerPage.fill('3');
+ const combinedPdf = await page.pdf({preferCSSPageSize:true, printBackground:true});
+ assert.equal([...combinedPdf.toString('latin1').matchAll(/\/MediaBox\s*\[/g)].length, 2);
+ assert.deepEqual(await page.locator('.spr-sheet').first().locator('[data-spr-cell="sku"]').allTextContents(), combinedSkus.slice(0, 3));
+ await rowsPerPage.fill('15');
+ for (const button of ['#printSprCountSheet','#exportSprCountSheet']) {
+  await page.evaluate(()=>{window.sprPrintedSkus=null});
+  await page.locator(button).click();
+  await page.waitForFunction(()=>window.sprPrintedSkus!==null);
+  assert.deepEqual(await page.evaluate(()=>window.sprPrintedSkus), combinedSkus);
+  await page.evaluate(()=>dispatchEvent(new Event('afterprint')));
+ }
  await upload(30);
  assert.equal(await categoryFilter.inputValue(), '');
  assert.deepEqual(await categoryFilter.locator('option').allTextContents(), ['All categories','Imported Items']);
@@ -90,6 +122,23 @@ try{
  await page.setViewportSize({width:390,height:844});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Phone has no page overflow');await page.screenshot({path:path.join(out,'phone.png'),fullPage:true});await page.setViewportSize({width:1440,height:1000});await page.screenshot({path:path.join(out,'desktop.png'),fullPage:true});
  assert.deepEqual(await page.evaluate(()=>({paper:document.querySelector('#paperSize').value,orientation:document.querySelector('#orientation').value,page:document.documentElement.style.getPropertyValue('--print-page-size')})),originalLayout);assert.equal(await page.evaluate(()=>items[0].sku),'SAVED');
  await page.locator('#changeCountSheetMode').click();await page.locator('#chooseManualCountSheetMode').click();await page.locator('#manualCountSheetFileInput').setInputFiles({name:'manual.csv',mimeType:'text/csv',buffer:Buffer.from('SKU,BARCODE,DESCRIPTION\n12,036000291452,Synthetic manual product')});await page.waitForFunction(()=>document.querySelector('#manualCountSheetFileName').textContent.includes('Loaded:'));await page.locator('#generateImportedCountSheetPreviewBtn').click();assert.equal(await page.locator('#manualCountSheetPages thead th').count(),10);
+ await page.evaluate(items=>loadItems(items), categorizedRows.slice(1).map(([sku,barcode,description,category,ccdNo,supplier])=>({
+  sku, barcode, description, category:category.trim().toLowerCase()==='grocery'?'Grocery':category.trim()?'Household':'Other', ccdNo, supplier
+ })));
+ await page.locator('#countSheetNav').click();
+ await page.locator('#chooseStandardCountSheetMode').click();
+ const standardCategories = page.locator('#supplierSelectionList');
+ await standardCategories.getByRole('button', {name:'Select category Grocery', exact:true}).click();
+ await standardCategories.getByRole('button', {name:'Select category Household', exact:true}).click();
+ await page.locator('#countSheetGroupMode').selectOption('category-combined');
+ await page.locator('#generateCountSheetPreview').click();
+ await page.waitForFunction(()=>document.querySelector('#countSheetPages')?.textContent.includes('SUPPLIER: Tea Co'));
+ const standardLabels = await page.locator('#countSheetPages .department-group-row').allTextContents();
+ assert.ok(standardLabels.some(label=>label.includes('CATEGORY: Grocery · SUPPLIER: Acme & Sons')));
+ assert.ok(standardLabels.some(label=>label.includes('CATEGORY: Grocery · SUPPLIER: Tea Co')));
+ assert.ok(standardLabels.some(label=>label.includes('CATEGORY: Household · SUPPLIER: Home Supply')));
+ assert.doesNotMatch(await page.locator('#countSheetPages').textContent(), /Unsorted item/);
+
  assert.deepEqual(errors,[]);console.log(JSON.stringify({passed:true,cdnFailureRecovered:true,excelFormats:['xlsx','xls','xlsm'],templates:['xlsx','csv'],categoryPrinting:true,pagination,pdfChecks,presets:true,persistence:true,mobile:true,otherModeUnchanged:true,output:out},null,2));
 }finally{await context.close();await browser.close();await new Promise(resolve=>server.close(resolve))}
 })().catch(error=>{console.error(error);process.exitCode=1});

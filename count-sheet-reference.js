@@ -142,6 +142,7 @@ function renderCountSheet(previewOnly=false,renderOptions={}){
   };
   const combinedGroupKey=combinedGroupKeys[groupMode];
   const isCombinedGrouping=combinedMode&&selectedCombinedGroups.includes(combinedGroupKey);
+  const showCombinedSuppliers = isCombinedGrouping && groupMode === 'category' && !renderOptions.imported;
   const groups=mergedRows.reduce((result,item)=>{
     let key='All';
     if(groupMode==='supplier')key=item.supplier||'Unassigned Supplier';
@@ -195,16 +196,21 @@ function renderCountSheet(previewOnly=false,renderOptions={}){
       }
       const departmentKey=`${item.departmentCode} ${item.department}`.trim();
       const ccdKey=item.ccdNo||'Unassigned';
-      const categoryKey=item.category||'Uncategorized';
-      const groupChanged=(sortOrder==='department'?departmentKey!==currentDepartment:sortOrder==='ccd'?ccdKey!==currentCcd:sortOrder==='department-ccd'?departmentKey!==currentDepartment||ccdKey!==currentCcd:false)||(mixedCategories&&categoryKey!==currentCategory);
+      const category=item.category||'Uncategorized';
+      const supplier=item.supplier||'Unassigned Supplier';
+      const categoryKey=showCombinedSuppliers?JSON.stringify([category,supplier]):category;
+      const categoryLabel=showCombinedSuppliers?`CATEGORY: ${category} · SUPPLIER: ${supplier}`:`CATEGORY: ${category}`;
+      const showCategory=mixedCategories||showCombinedSuppliers;
+      const categoryChanged=showCategory&&categoryKey!==currentCategory;
+      const groupChanged=(sortOrder==='department'?departmentKey!==currentDepartment:sortOrder==='ccd'?ccdKey!==currentCcd:sortOrder==='department-ccd'?departmentKey!==currentDepartment||ccdKey!==currentCcd:false)||categoryChanged;
       if(sortOrder!=='workbook'&&groupChanged){
-        const label=[sortOrder==='department'||sortOrder==='department-ccd'?`DEPARTMENT: ${item.department||item.departmentCode||'Unassigned'}`:'',sortOrder==='ccd'||sortOrder==='department-ccd'?`CCD NO.: ${item.ccdNo||'Unassigned'}`:'',mixedCategories?`CATEGORY: ${categoryKey}`:''].filter(Boolean).join(' · ');
+        const label=[sortOrder==='department'||sortOrder==='department-ccd'?`DEPARTMENT: ${item.department||item.departmentCode||'Unassigned'}`:'',sortOrder==='ccd'||sortOrder==='department-ccd'?`CCD NO.: ${item.ccdNo||'Unassigned'}`:'',showCategory?categoryLabel:''].filter(Boolean).join(' · ');
         rowEntries.push(`<tr class="supplier-group-row department-group-row"><td colspan="10"><span class="supplier-group-label">${escapeSheetText(label)}</span></td></tr>`);
         currentDepartment=departmentKey;
         currentCcd=ccdKey;
         currentCategory=categoryKey;
-      }else if(mixedCategories&&categoryKey!==currentCategory){
-        rowEntries.push(`<tr class="supplier-group-row department-group-row"><td colspan="10"><span class="supplier-group-label">CATEGORY: ${escapeSheetText(categoryKey)}</span></td></tr>`);
+      }else if(categoryChanged){
+        rowEntries.push(`<tr class="supplier-group-row department-group-row"><td colspan="10"><span class="supplier-group-label">${escapeSheetText(categoryLabel)}</span></td></tr>`);
         currentCategory=categoryKey;
       }
       const barcode=String(item.barcode||'').trim();

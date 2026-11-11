@@ -6,6 +6,10 @@
   const status = $('sprCountSheetStatus');
   const pages = $('sprCountSheetPages');
   const categoryFilter = $('sprCategoryFilter');
+  const categoryList = $('sprCategorySelectionList');
+  const categoryActions = categoryList.firstElementChild;
+  const selectAllCategories = $('sprSelectAllCategories');
+  const clearCategories = $('sprClearCategories');
   let excelReady;
   function ensureExcel() {
     if(typeof window.XLSX?.read==='function')return Promise.resolve();
@@ -18,26 +22,28 @@
     return excelReady;
   }
   const templateRows = [
-    ['SKU', 'BARCODE', 'DESCRIPTION', 'CATEGORY'],
-    ['000001', '036000291452', 'Example product - replace this row', 'Groceries'],
-    ['000002', '012345678905', 'Another example - replace this row', 'Household']
+    ['SKU', 'BARCODE', 'DESCRIPTION', 'CATEGORY', 'SUPPLIER'],
+    ['000001', '036000291452', 'Example product - replace this row', 'Groceries', 'Example Supplier A'],
+    ['000002', '012345678905', 'Another example - replace this row', 'Household', 'Example Supplier B']
   ];
   const templateExcel=document.createElement('button');templateExcel.id='downloadSprExcelTemplate';templateExcel.type='button';templateExcel.className='secondary-button';templateExcel.textContent='Download Excel template';
   const templateCsv=document.createElement('button');templateCsv.id='downloadSprCsvTemplate';templateCsv.type='button';templateCsv.className='secondary-button';templateCsv.textContent='Download CSV template';
   upload.after(templateExcel,templateCsv);
-  const instructions=document.createElement('p');instructions.className='spr-upload-help';instructions.textContent='Replace the example rows and keep the SKU, BARCODE, DESCRIPTION, and CATEGORY headers. Fill in CATEGORY to print by category. Keep SKU and BARCODE as Text to retain leading zeros. No locator or CCD is required. Supported: .xlsx, .xls, .xlsm, .csv.';status.before(instructions);
+  const instructions=document.createElement('p');instructions.className='spr-upload-help';instructions.textContent='Replace the example rows and keep the SKU, BARCODE, DESCRIPTION, CATEGORY, and SUPPLIER headers. Fill in CATEGORY to print by category. SUPPLIER is optional and appears on combined category sheets. Keep SKU and BARCODE as Text to retain leading zeros. No locator or CCD is required. Supported: .xlsx, .xls, .xlsm, .csv.';status.before(instructions);
   templateCsv.addEventListener('click',()=>{
     const url=URL.createObjectURL(new Blob(['\uFEFF'+templateRows.map(row=>row.map(value=>'"'+String(value).replace(/"/g,'""')+'"').join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'}));
     const link=document.createElement('a');link.href=url;link.download='FOR-SPR-upload-template.csv';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
   });
   templateExcel.addEventListener('click',async()=>{
     templateExcel.disabled=true;
-    try{await ensureExcel();const workbook=XLSX.utils.book_new(),sheet=XLSX.utils.aoa_to_sheet(templateRows);sheet['!cols']=[{wch:18},{wch:24},{wch:60},{wch:24}];for(const address of ['A2','A3','B2','B3'])sheet[address].z='@';XLSX.utils.book_append_sheet(workbook,sheet,'FOR SPR');XLSX.writeFile(workbook,'FOR-SPR-upload-template.xlsx');}
+    try{await ensureExcel();const workbook=XLSX.utils.book_new(),sheet=XLSX.utils.aoa_to_sheet(templateRows);sheet['!cols']=[{wch:18},{wch:24},{wch:60},{wch:24},{wch:30}];for(const address of ['A2','A3','B2','B3'])sheet[address].z='@';XLSX.utils.book_append_sheet(workbook,sheet,'FOR SPR');XLSX.writeFile(workbook,'FOR-SPR-upload-template.xlsx');}
     catch(error){status.textContent=error.message}finally{templateExcel.disabled=false}
   });
   let rows = [];
   let fileName = '';
-  const categoryKey = row => row.category.toLowerCase();
+  const categoryKey = row => `category:${row.category.toLowerCase()}`;
+  let categories = new Map();
+  const selectedCategories = new Set();
   const settingsKey = 'fuji-spr-layout-settings-v1';
   const presetsKey = 'fuji-spr-layout-presets-v1';
   const defaults = {perPage:15,orientation:'portrait',paper:'a4',columns:{sku:true,barcode:true,description:true,count:true},density:'normal',font:'medium',barcode:'medium',margins:'normal',fields:true,bands:true,footer:true};
@@ -103,14 +109,50 @@
     document.querySelector('#sprCountSheetMode .status-pill').textContent=`${settings.paper.toUpperCase()} · ${settings.orientation==='portrait'?'Portrait':'Landscape'}`;
   }
   function metadataValue(row,names) {const key=Object.keys(row||{}).find(key=>names.includes(key.toLowerCase().replace(/[^a-z0-9]/g,'')));return key?String(row[key]??'').trim():'';}
+  function updateCategorySelection() {
+    for (const button of categoryList.querySelectorAll('[data-category]')) {
+      const selected = selectedCategories.has(button.dataset.category);
+      button.classList.toggle('is-selected', selected);
+      button.setAttribute('aria-pressed', String(selected));
+    }
+    selectAllCategories.disabled = selectedCategories.size === categories.size;
+    clearCategories.disabled = selectedCategories.size === 0;
+  }
+
   function syncCategoryFilter() {
     const labels = new Map();
     for (const row of rows) {
       const key = categoryKey(row);
       if (!labels.has(key)) labels.set(key, row.category);
     }
-    const options = [...labels].sort((a, b) => a[1].localeCompare(b[1]));
-    categoryFilter.replaceChildren(new Option('All categories', ''), ...options.map(([key, label]) => new Option(label, key)));
+    categories = new Map([...labels].sort((a, b) => a[1].localeCompare(b[1])));
+    const options = [...categories].map(([key, label]) => new Option(label, key));
+    if (categories.size > 1) options.push(new Option('Combine into single continuous sheet', 'combined'));
+    categoryFilter.replaceChildren(new Option('All categories', ''), ...options);
+    selectedCategories.clear();
+    categoryList.hidden = true;
+    categoryList.replaceChildren(categoryActions);
+
+    if (categories.size > 1) {
+      const buttons = document.createDocumentFragment();
+      for (const [key, label] of categories) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'supplier-combine-option';
+        button.dataset.category = key;
+        button.textContent = label;
+        button.title = label;
+        button.addEventListener('click', () => {
+          if (selectedCategories.has(key)) selectedCategories.delete(key);
+          else selectedCategories.add(key);
+          updateCategorySelection();
+          render();
+        });
+        buttons.append(button);
+      }
+      categoryList.append(buttons);
+    }
+    updateCategorySelection();
   }
   function sheetHeader(scopeRows, branch, category) {
     const store = $('storeField').value.trim() || '—';
@@ -118,14 +160,23 @@
     const fields=[['Store',store],['Branch',branch||'—'],['CCD No.',ccdNumbers],['Category',category],['Date',$('dateField').value||new Date().toLocaleDateString()],['Prepared by',$('editorName')?.value||'—']];
     return `<header class="spr-sheet-heading"><h3>Cycle Count Sheet</h3>${settings.fields?`<div class="spr-header-fields">${fields.map(([label,value])=>`<div><b>${esc(label)}</b><span>${esc(value)}</span></div>`).join('')}</div>`:''}</header>`;
   }
-  function group(index) {const row=rows[index];return {key:JSON.stringify([row.department||'',row.ccdNo||'']),label:`Department: ${row.department||'—'} · CCD No.: ${row.ccdNo||'—'}`};}
+  function group(index, combined) {
+    const row = rows[index];
+    const department = settings.bands ? row.department : '';
+    const ccd = settings.bands ? row.ccdNo : '';
+    const category = combined ? categoryKey(row) : '';
+    const supplier = combined ? row.supplier : '';
+    const label = combined ? [`Category: ${categories.get(category)} · Supplier: ${supplier}`] : [];
+    if (settings.bands) label.push(`Department: ${department || '—'} · CCD No.: ${ccd || '—'}`);
+    return {key: JSON.stringify([category, supplier, department, ccd]), label: label.join(' · ')};
+  }
   function rowMarkup(index) {
     const row=rows[index];const cells={sku:esc(row.sku),barcode:row.barcode?`<svg class="scan-barcode" data-barcode="${esc(row.barcode)}"></svg>`:'<span class="spr-missing-barcode">No barcode</span>',description:esc(row.description),count:'<span class="spr-count-box"></span>'};
     return `<tr data-spr-row="${index}">${columns.filter(([key])=>settings.columns[key]).map(([key])=>`<td data-spr-cell="${key}">${cells[key]}</td>`).join('')}</tr>`;
   }
-  function pageMarkup(indexes, page, total, header, branch) {
+  function pageMarkup(indexes, page, total, header, branch, combined) {
     const selected=columns.filter(([key])=>settings.columns[key]);let previous='';
-    const body=indexes.map(index=>{const current=group(index);const band=settings.bands&&current.key!==previous?`<tr class="spr-department-band" data-spr-band="${index}"><td colspan="${selected.length}">${esc(current.label)}</td></tr>`:'';previous=current.key;return band+rowMarkup(index)}).join('');
+    const body=indexes.map(index=>{const current=group(index,combined);const band=current.label&&current.key!==previous?`<tr class="spr-department-band" data-spr-band="${index}"><td colspan="${selected.length}">${esc(current.label)}</td></tr>`:'';previous=current.key;return band+rowMarkup(index)}).join('');
     return `<article class="count-sheet-page spr-sheet">${header}<table class="spr-table"><colgroup>${selected.map(([key])=>`<col data-spr-col="${key}">`).join('')}</colgroup><thead><tr>${selected.map(([,label])=>`<th scope="col">${label}</th>`).join('')}</tr></thead><tbody>${body}</tbody></table>${settings.footer?`<footer class="spr-sheet-footer"><span>${esc([$('storeField').value.trim(),branch].filter(Boolean).join(' · '))}</span><span>Page ${page} of ${total}</span></footer>`:''}</article>`;
   }
   function sizeBarcodes(root) {
@@ -137,27 +188,45 @@
     applySettings();if(!rows.length)return;
     if($('sprCountSheetMode').hidden)return;
     const selected = categoryFilter.value;
-    const indexes = [];
+    const combined = selected === 'combined';
+    const groups = new Map();
+    if (combined) {
+      for (const key of categories.keys()) {
+        if (selectedCategories.has(key)) groups.set(key, []);
+      }
+    }
+
+    let indexes = [];
     rows.forEach((row, index) => {
-      if (!selected || categoryKey(row) === selected) indexes.push(index);
+      const key = categoryKey(row);
+      if (combined) groups.get(key)?.push(index);
+      else if (!selected || key === selected) indexes.push(index);
     });
+    if (combined) indexes = [...groups.values()].flat();
+    if (!indexes.length) {
+      pages.replaceChildren();
+      print.disabled = pdf.disabled = true;
+      status.textContent = 'Select at least one category to preview and print.';
+      return;
+    }
+
     const scopeRows = indexes.map(index => rows[index]);
-    const category = selected || categoryFilter.options.length === 2
-      ? scopeRows[0].category
-      : 'All categories';
+    let category = 'All categories';
+    if (combined) category = 'Combined categories';
+    else if (selected || categories.size === 1) category = scopeRows[0].category;
     const branch = metadataValue(scopeRows[0], ['branch', 'branchname']) || window.fujiWorkspaceSettings?.branchName || '';
     const header = sheetHeader(scopeRows, branch, category);
-    const probe=document.createElement('div');probe.className='spr-measurement';probe.innerHTML=pageMarkup(indexes,1,1,header,branch);pages.append(probe);sizeBarcodes(probe);
+    const probe=document.createElement('div');probe.className='spr-measurement';probe.innerHTML=pageMarkup(indexes,1,1,header,branch,combined);pages.append(probe);sizeBarcodes(probe);
     const {height,margin}=geometry();
     const available=(height-2*margin)*96/25.4-probe.querySelector('.spr-sheet-heading').getBoundingClientRect().height-12-probe.querySelector('thead').getBoundingClientRect().height-(settings.footer?probe.querySelector('footer').getBoundingClientRect().height+16:0)-8;
     const heights = new Map([...probe.querySelectorAll('[data-spr-row]')].map(row => [Number(row.dataset.sprRow), row.getBoundingClientRect().height]));
-    const bands=new Map([...probe.querySelectorAll('[data-spr-band]')].map(row=>[group(Number(row.dataset.sprBand)).key,row.getBoundingClientRect().height]));
+    const bands=new Map([...probe.querySelectorAll('[data-spr-band]')].map(row=>[group(Number(row.dataset.sprBand),combined).key,row.getBoundingClientRect().height]));
     const chunks=[];let chunk=[],used=0,previous='',tooTall=false;
-    indexes.forEach(index=>{const current=group(index);const height=heights.get(index);let band=settings.bands&&(!chunk.length||previous!==current.key)?bands.get(current.key)||25:0;
-      if(chunk.length&&(chunk.length>=settings.perPage||used+band+height>available)){chunks.push(chunk);chunk=[];used=0;band=settings.bands?bands.get(current.key)||25:0;}
+    indexes.forEach(index=>{const current=group(index,combined);const height=heights.get(index);let band=current.label&&(!chunk.length||previous!==current.key)?bands.get(current.key)||25:0;
+      if(chunk.length&&(chunk.length>=settings.perPage||used+band+height>available)){chunks.push(chunk);chunk=[];used=0;band=current.label?bands.get(current.key)||25:0;}
       if(band+height>available)tooTall=true;chunk.push(index);used+=band+height;previous=current.key;
     });if(chunk.length)chunks.push(chunk);
-    probe.remove();pages.innerHTML=chunks.map((chunk,index)=>pageMarkup(chunk,index+1,chunks.length,header,branch)).join('');sizeBarcodes(pages);
+    probe.remove();pages.innerHTML=chunks.map((chunk,index)=>pageMarkup(chunk,index+1,chunks.length,header,branch,combined)).join('');sizeBarcodes(pages);
     const tooWide=[...pages.querySelectorAll('.scan-barcode')].some(svg=>svg.getBoundingClientRect().width>svg.closest('td').clientWidth-12);
     print.disabled=pdf.disabled=tooTall||tooWide;
     const missing=scopeRows.filter(row=>!row.barcode).length;
@@ -166,7 +235,20 @@
   }
 
   syncControls();syncPresets();applySettings();
-  categoryFilter.addEventListener('change', render);
+  categoryFilter.addEventListener('change', () => {
+    categoryList.hidden = categoryFilter.value !== 'combined';
+    render();
+  });
+  selectAllCategories.addEventListener('click', () => {
+    for (const key of categories.keys()) selectedCategories.add(key);
+    updateCategorySelection();
+    render();
+  });
+  clearCategories.addEventListener('click', () => {
+    selectedCategories.clear();
+    updateCategorySelection();
+    render();
+  });
   ['storeField','dateField','editorName'].forEach(id=>$(id)?.addEventListener('change',()=>{if(rows.length)render()}));
   $('chooseSprCountSheetMode').addEventListener('click',()=>setTimeout(render,0));
 
@@ -176,6 +258,7 @@
     if (!file) return;
     const wasPrintDisabled=print.disabled;
     upload.disabled = categoryFilter.disabled = print.disabled = pdf.disabled = true;
+    categoryList.inert = true;
     $('sprCountSheetMode').setAttribute('aria-busy', 'true');
     status.textContent = `Reading ${file.name}…`;
     try {
@@ -198,6 +281,7 @@
     } finally {
       upload.disabled = false;
       categoryFilter.disabled = !rows.length;
+      categoryList.inert = false;
       if(!rows.length)print.disabled=pdf.disabled=true;
       $('sprCountSheetMode').removeAttribute('aria-busy');
       input.value = '';
