@@ -26,6 +26,11 @@ try{
  await page.locator('#sprCountSheetFile').setInputFiles(path.join(out,'template.csv'));await page.waitForFunction(()=>!document.querySelector('#sprCountSheetMode').hasAttribute('aria-busy'));assert.equal(await page.locator('[data-spr-row]').count(),2);
  await page.locator('#sprCountSheetFile').setInputFiles(path.join(out,'template.xlsx'));await page.waitForFunction(()=>!document.querySelector('#sprCountSheetMode').hasAttribute('aria-busy'));assert.equal(await page.locator('[data-spr-cell="sku"]').first().innerText(),'000001');
  const categoryFilter = page.locator('#sprCategoryFilter');
+ const groupSheets = page.locator('#sprGroupSheets');
+ const categoryList = page.locator('#sprCategorySelectionList');
+ const resetPrinted = categoryList.getByRole('button', {name:'Reset Printed'});
+ const chooseCategory = name => categoryList.getByRole('button', {name, exact:true}).click();
+ assert.deepEqual(await groupSheets.locator('option').allTextContents(), ['One category per sheet','Combine into single continuous sheet']);
  const previewSkus = () => page.locator('[data-spr-cell="sku"]').allTextContents();
  await categoryFilter.selectOption({label:'Household'});
  assert.deepEqual(await previewSkus(), ['000002']);
@@ -45,7 +50,7 @@ try{
   name:'categorized.csv', mimeType:'text/csv', buffer:Buffer.from(categorizedRows.map(row=>row.join(',')).join('\n'))
  });
  await page.waitForFunction(()=>!document.querySelector('#sprCountSheetMode').hasAttribute('aria-busy'));
- assert.deepEqual(await categoryFilter.locator('option').allTextContents(), ['All categories','Grocery','Household','Imported Items','Combine into single continuous sheet','One category per sheet']);
+ assert.deepEqual(await categoryFilter.locator('option').allTextContents(), ['All categories','Selected categories','Grocery','Household','Imported Items']);
  await categoryFilter.selectOption({label:'Grocery'});
  assert.deepEqual(await previewSkus(), ['001','003']);
  assert.match(await page.locator('.spr-header-fields').first().innerText(), /CCD No\.\s+1\s+Category\s+Grocery/i);
@@ -58,18 +63,29 @@ try{
  await page.evaluate(()=>{
   window.print=()=>{window.sprPrintedSkus=[...document.querySelectorAll('[data-spr-cell="sku"]')].map(cell=>cell.textContent)};
  });
- for (const button of ['#printSprCountSheet','#exportSprCountSheet']) {
+ async function verifyPrint(button, expectedSkus) {
   await page.evaluate(()=>{window.sprPrintedSkus=null});
   await page.locator(button).click();
   await page.waitForFunction(()=>window.sprPrintedSkus!==null);
-  assert.deepEqual(await page.evaluate(()=>window.sprPrintedSkus), ['001','003']);
+  assert.deepEqual(await page.evaluate(()=>window.sprPrintedSkus), expectedSkus);
   await page.evaluate(()=>dispatchEvent(new Event('afterprint')));
  }
+ await verifyPrint('#printSprCountSheet', ['001','003']);
+ const printedGrocery = categoryList.getByRole('button', {name:/Grocery.*PRINTED/});
+ assert.equal(await printedGrocery.isEnabled(), false);
+ assert.equal(await categoryList.getByRole('button', {name:'Household', exact:true}).isEnabled(), true);
+ assert.equal(await categoryFilter.locator('option[value="category:grocery"]').evaluate(option=>option.disabled), true);
+ await resetPrinted.click();
+ assert.equal(await categoryList.getByRole('button', {name:'Grocery', exact:true}).isEnabled(), true);
+ await categoryFilter.selectOption({label:'Grocery'});
+ await verifyPrint('#exportSprCountSheet', ['001','003']);
+ assert.equal(await printedGrocery.isEnabled(), false);
+ await resetPrinted.click();
  await categoryFilter.selectOption({label:'Imported Items'});
  assert.deepEqual(await previewSkus(), ['004']);
 
- await categoryFilter.selectOption({label:'Combine into single continuous sheet'});
- const categoryList = page.locator('#sprCategorySelectionList');
+ await groupSheets.selectOption({label:'Combine into single continuous sheet'});
+ await categoryList.getByRole('button', {name:'Clear All'}).click();
  assert.equal(await page.locator('#printSprCountSheet').isEnabled(), false);
  assert.deepEqual(await previewSkus(), []);
  await categoryList.getByRole('button', {name:'Select All Categories'}).click();
@@ -99,14 +115,14 @@ try{
  assert.equal([...combinedPdf.toString('latin1').matchAll(/\/MediaBox\s*\[/g)].length, 2);
  assert.deepEqual(await page.locator('.spr-sheet').first().locator('[data-spr-cell="sku"]').allTextContents(), combinedSkus.slice(0, 3));
  await rowsPerPage.fill('15');
- for (const button of ['#printSprCountSheet','#exportSprCountSheet']) {
-  await page.evaluate(()=>{window.sprPrintedSkus=null});
-  await page.locator(button).click();
-  await page.waitForFunction(()=>window.sprPrintedSkus!==null);
-  assert.deepEqual(await page.evaluate(()=>window.sprPrintedSkus), combinedSkus);
-  await page.evaluate(()=>dispatchEvent(new Event('afterprint')));
- }
- await categoryFilter.selectOption({label:'One category per sheet'});
+ await verifyPrint('#printSprCountSheet', combinedSkus);
+ assert.equal(await categoryList.locator('.is-printed').count(), 2);
+ await categoryList.screenshot({path:path.join(out,'printed-category-tiles.png')});
+ assert.equal(await categoryList.getByRole('button', {name:'Imported Items', exact:true}).isEnabled(), true);
+ await resetPrinted.click();
+ await chooseCategory('Household');
+ await chooseCategory('Grocery');
+ await groupSheets.selectOption({label:'One category per sheet'});
  assert.deepEqual(await printOrder.allTextContents(), ['Household','Grocery']);
  assert.equal(await page.locator('.spr-sheet').count(), 2);
  const separateSheets = page.locator('.spr-sheet');
@@ -117,22 +133,20 @@ try{
  assert.equal(await separateSheets.nth(1).locator('.spr-sheet-footer span').last().innerText(), 'Page 2 of 2');
  const separatePdf = await page.pdf({preferCSSPageSize:true, printBackground:true});
  assert.equal([...separatePdf.toString('latin1').matchAll(/\/MediaBox\s*\[/g)].length, 2);
- for (const button of ['#printSprCountSheet','#exportSprCountSheet']) {
-  await page.evaluate(()=>{window.sprPrintedSkus=null});
-  await page.locator(button).click();
-  await page.waitForFunction(()=>window.sprPrintedSkus!==null);
-  assert.deepEqual(await page.evaluate(()=>window.sprPrintedSkus), combinedSkus);
-  await page.evaluate(()=>dispatchEvent(new Event('afterprint')));
- }
+ await verifyPrint('#exportSprCountSheet', combinedSkus);
+ assert.equal(await categoryList.locator('.is-printed').count(), 2);
+ await resetPrinted.click();
+ await chooseCategory('Household');
+ await chooseCategory('Grocery');
  await page.setViewportSize({width:390,height:844});
  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1), 'Print order fits on a phone');
  await page.setViewportSize({width:1440,height:1000});
- await categoryFilter.selectOption({label:'Combine into single continuous sheet'});
+ await groupSheets.selectOption({label:'Combine into single continuous sheet'});
  assert.equal(await page.locator('.spr-sheet').count(), 1);
  assert.deepEqual(await previewSkus(), combinedSkus);
  await upload(30);
  assert.equal(await categoryFilter.inputValue(), '');
- assert.deepEqual(await categoryFilter.locator('option').allTextContents(), ['All categories','Imported Items']);
+ assert.deepEqual(await categoryFilter.locator('option').allTextContents(), ['All categories','Selected categories','Imported Items']);
  assert.deepEqual(await page.locator('.spr-table thead').first().locator('th').allTextContents(),['SKU','Barcode','Description','Final Count']);
  assert.equal(await page.locator('.spr-table [data-spr-cell="count"]').first().innerText(),'');
  const originalLayout=await page.evaluate(()=>({paper:document.querySelector('#paperSize').value,orientation:document.querySelector('#orientation').value,page:document.documentElement.style.getPropertyValue('--print-page-size')}));
@@ -149,7 +163,7 @@ try{
  await page.locator('#sprSavedPreset').selectOption('0');await page.locator('#sprDeletePreset').click();await page.locator('#confirmAccept').click();assert.equal(await page.locator('#sprSavedPreset option').count(),1);
  await page.locator('#sprResetLayout').click();await upload(5);await page.locator('#sprCountSheetFile').setInputFiles({name:'bad.csv',mimeType:'text/csv',buffer:Buffer.from('WRONG,HEADINGS\nno,sku')});await page.waitForFunction(()=>document.querySelector('#sprCountSheetStatus').textContent.includes('Could not load file'));assert.equal(await page.locator('[data-spr-row]').count(),5);assert.equal(await page.locator('#printSprCountSheet').isEnabled(),true);
  await page.evaluate(()=>{window.print=()=>{window.sprPrintCalls=(window.sprPrintCalls||0)+1}});
- for(const id of ['printSprCountSheet','exportSprCountSheet']){const before=await page.evaluate(()=>window.sprPrintCalls||0);await page.locator(`#${id}`).click();await page.waitForFunction(value=>window.sprPrintCalls===value,before+1);assert.equal(await page.evaluate(()=>document.body.classList.contains('print-spr-count-sheet')),true);await page.evaluate(()=>dispatchEvent(new Event('afterprint')))}
+ for(const id of ['printSprCountSheet','exportSprCountSheet']){const before=await page.evaluate(()=>window.sprPrintCalls||0);await page.locator(`#${id}`).click();await page.waitForFunction(value=>window.sprPrintCalls===value,before+1);assert.equal(await page.evaluate(()=>document.body.classList.contains('print-spr-count-sheet')),true);await page.evaluate(()=>dispatchEvent(new Event('afterprint')));await resetPrinted.click();await categoryList.getByRole('button',{name:'Select All Categories'}).click()}
  const printed=[];for(const theme of ['light','dark']){await page.evaluate(theme=>{document.documentElement.dataset.theme=theme;window.prepareSprCountSheetPrint()},theme);await page.emulateMedia({media:'print'});printed.push(await page.locator('.spr-sheet').first().screenshot());await page.evaluate(()=>dispatchEvent(new Event('afterprint')));await page.emulateMedia({media:'screen'})}assert.ok(printed[0].equals(printed[1]),'Printed SPR sheet is identical in both themes');
  await page.setViewportSize({width:390,height:844});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Phone has no page overflow');await page.screenshot({path:path.join(out,'phone.png'),fullPage:true});await page.setViewportSize({width:1440,height:1000});await page.screenshot({path:path.join(out,'desktop.png'),fullPage:true});
  assert.deepEqual(await page.evaluate(()=>({paper:document.querySelector('#paperSize').value,orientation:document.querySelector('#orientation').value,page:document.documentElement.style.getPropertyValue('--print-page-size')})),originalLayout);assert.equal(await page.evaluate(()=>items[0].sku),'SAVED');
@@ -171,6 +185,6 @@ try{
  assert.ok(standardLabels.some(label=>label.includes('CATEGORY: Household · SUPPLIER: Home Supply')));
  assert.doesNotMatch(await page.locator('#countSheetPages').textContent(), /Unsorted item/);
 
- assert.deepEqual(errors,[]);console.log(JSON.stringify({passed:true,cdnFailureRecovered:true,excelFormats:['xlsx','xls','xlsm'],templates:['xlsx','csv'],categoryPrinting:true,categoryOrder:true,separateCategorySheets:true,pagination,pdfChecks,presets:true,persistence:true,mobile:true,otherModeUnchanged:true,output:out},null,2));
+ assert.deepEqual(errors,[]);console.log(JSON.stringify({passed:true,cdnFailureRecovered:true,excelFormats:['xlsx','xls','xlsm'],templates:['xlsx','csv'],categoryPrinting:true,categoryOrder:true,separateCategorySheets:true,printedCategoryStatus:true,pagination,pdfChecks,presets:true,persistence:true,mobile:true,otherModeUnchanged:true,output:out},null,2));
 }finally{await context.close();await browser.close();await new Promise(resolve=>server.close(resolve))}
 })().catch(error=>{console.error(error);process.exitCode=1});

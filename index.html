@@ -587,14 +587,24 @@
           <button id="printSprCountSheet" class="secondary-button" type="button" disabled>Print FOR SPR</button>
           <button id="exportSprCountSheet" class="secondary-button" type="button" disabled>Export PDF</button>
         </div>
-        <label class="spr-category-filter" for="sprCategoryFilter">
-          Print category
-          <select id="sprCategoryFilter" disabled><option value="">All categories</option></select>
-        </label>
+        <div class="spr-category-controls">
+          <label class="spr-category-filter" for="sprCategoryFilter">
+            Print category
+            <select id="sprCategoryFilter" disabled><option value="">All categories</option></select>
+          </label>
+          <label class="spr-category-filter" for="sprGroupSheets">
+            Group sheets
+            <select id="sprGroupSheets" disabled>
+              <option value="separate">One category per sheet</option>
+              <option value="combined" selected>Combine into single continuous sheet</option>
+            </select>
+          </label>
+        </div>
         <div id="sprCategorySelectionList" class="supplier-selection-list" role="group" aria-label="Select categories to print" hidden>
           <div class="supplier-selection-actions">
             <button id="sprSelectAllCategories" class="supplier-selection-action" type="button">Select All Categories</button>
             <button id="sprClearCategories" class="supplier-selection-action" type="button">Clear All</button>
+            <button id="sprResetPrinted" class="supplier-selection-action reset-printed" type="button">Reset Printed</button>
           </div>
         </div>
         <section id="sprCategoryOrder" class="spr-category-order" aria-labelledby="sprCategoryOrderHeading" hidden>
