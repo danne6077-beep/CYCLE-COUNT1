@@ -62,3 +62,151 @@
 @media(max-width:760px){.cigars-day-meta{grid-template-columns:repeat(3,minmax(0,1fr))}.cigars-monitor-heading{align-items:flex-start;flex-direction:column}}
 @media(max-width:520px){.cigars-monitor-card{padding:14px}.cigars-day-meta{grid-template-columns:repeat(2,minmax(0,1fr))}.cigars-import-bar{align-items:flex-start;flex-direction:column}.cigars-table-wrap{max-height:60vh}.cigars-save-row{align-items:flex-start;flex-direction:column}.cigars-save-row .primary-button{width:100%}.cigars-summary-heading{align-items:flex-start;flex-direction:column}.cigars-summary-actions{width:100%}.cigars-summary-actions button{flex:1}.cigars-summary-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:460px){.cigars-card{padding:15px}}
+
+/* Cigarette Monitor daily entry and trends */
+#cigarsPanel{
+  --cigar-chart-main:var(--ui-accent);
+  --cigar-chart-secondary:#6a4ec4;
+  --cigar-chart-positive:#2b65bf;
+  --cigar-chart-other:#9a4082;
+  --cigar-warning:#9b4d10;
+  --cigar-warning-bg:#fff1e3;
+  --cigar-logged-bg:#d9eee4;
+  --cigar-logged-text:#175e49;
+}
+@media(prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) #cigarsPanel{
+    --cigar-chart-main:#78cbb0;
+    --cigar-chart-secondary:#b8a4ff;
+    --cigar-chart-positive:#91baff;
+    --cigar-chart-other:#efa6dd;
+    --cigar-warning:#ffba84;
+    --cigar-warning-bg:#36271f;
+    --cigar-logged-bg:#1b3b32;
+    --cigar-logged-text:#a0dec9;
+  }
+}
+:root[data-theme="dark"] #cigarsPanel{
+  --cigar-chart-main:#78cbb0;
+  --cigar-chart-secondary:#b8a4ff;
+  --cigar-chart-positive:#91baff;
+  --cigar-chart-other:#efa6dd;
+  --cigar-warning:#ffba84;
+  --cigar-warning-bg:#36271f;
+  --cigar-logged-bg:#1b3b32;
+  --cigar-logged-text:#a0dec9;
+}
+#cigarsPanel .cigars-day-meta{grid-template-columns:repeat(6,minmax(0,1fr))}
+#cigarsPanel .cigars-list-tools{flex-wrap:wrap;align-items:end;gap:12px}
+#cigarsPanel .cigars-list-tools .cigar-entry-toggle{display:inline-flex;align-items:center;align-self:center;gap:8px;width:auto}
+#cigarsPanel .cigar-entry-toggle input{width:17px;height:17px;margin:0;accent-color:var(--ui-accent)}
+#cigarsPanel .cigar-daily-totals{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;
+  margin:12px 0;padding:12px;border-radius:var(--ui-radius);background:var(--ui-surface-2)
+}
+#cigarsPanel .cigar-daily-totals span{display:block;color:var(--ui-muted);font-size:12px}
+#cigarsPanel .cigar-daily-totals strong{font-size:16px;font-variant-numeric:tabular-nums}
+#cigarsPanel .cigars-table-wrap{scroll-padding-top:40px}
+#cigarsPanel .cigars-daily-table{border-collapse:separate;border-spacing:0}
+#cigarsPanel .cigars-daily-table th{z-index:2;box-shadow:0 1px var(--ui-border)}
+#cigarsPanel .cigar-figure{min-width:64px;text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
+#cigarsPanel .cigar-figure-alert{color:var(--cigar-warning);background:var(--cigar-warning-bg)}
+#cigarsPanel strong.cigar-figure-alert{border-radius:var(--ui-radius-sm);padding-inline:4px}
+#cigarsPanel .cigars-save-row .is-error{color:var(--cigar-warning)}
+#cigarsPanel .cigar-trends{color:var(--ui-text);font-variant-numeric:tabular-nums}
+#cigarsPanel .cigar-trend-card{
+  min-width:0;padding:clamp(12px,2vw,20px);border:1px solid var(--ui-border);
+  border-radius:var(--ui-radius-lg);background:var(--ui-surface)
+}
+#cigarsPanel .cigar-trend-card :is(h2,h3){margin:0;color:var(--ui-text);line-height:1.25}
+#cigarsPanel .cigar-trend-card h2{font-size:clamp(20px,2vw,25px)}
+#cigarsPanel .cigar-trend-card h3{font-size:15px}
+#cigarsPanel .cigar-trend-card p{margin:4px 0 0;color:var(--ui-muted);font-size:13px}
+#cigarsPanel .cigar-trend-heading-row{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px}
+#cigarsPanel .cigar-data-actions{display:flex;flex-wrap:wrap;gap:8px}
+#cigarsPanel .cigar-data-actions button,
+#cigarsPanel .cigar-history-action{display:inline-flex;align-items:center;justify-content:center;gap:6px}
+#cigarsPanel :is(.cigar-data-actions,.cigar-history-action) .ui-icon{width:15px;height:15px;flex:none}
+#cigarsPanel .cigar-range-bar{
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px 16px;
+  margin-top:16px;padding:6px;background:var(--ui-surface-2);border-radius:var(--ui-radius)
+}
+#cigarsPanel .cigar-range-options{display:flex;flex-wrap:wrap;gap:4px}
+#cigarsPanel .cigar-range-options button{
+  min-height:38px;padding:6px 10px;border:1px solid transparent;border-radius:var(--ui-radius-sm);
+  color:var(--ui-text);background:transparent;font-size:13px;font-weight:600
+}
+#cigarsPanel .cigar-range-options button:is(:hover,[aria-pressed="true"]){
+  color:var(--cigar-chart-main);background:var(--ui-surface);border-color:var(--ui-border)
+}
+#cigarsPanel .cigar-range-bar p{margin:0 6px}
+#cigarsPanel .cigar-date-range,#cigarsPanel .cigar-sku-chooser{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px
+}
+#cigarsPanel .cigar-date-range{max-width:400px}
+#cigarsPanel :is(.cigar-date-range,.cigar-sku-chooser) label{color:var(--ui-muted);font-size:12px}
+#cigarsPanel :is(.cigar-date-range,.cigar-sku-chooser) :is(input,select){min-width:0;width:100%}
+#cigarsPanel .cigar-data-status:empty{display:none}
+#cigarsPanel .cigar-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:14px}
+#cigarsPanel .cigar-kpi h3{font-size:12px;color:var(--ui-muted)}
+#cigarsPanel .cigar-kpi strong{display:block;margin-top:6px;font-size:clamp(18px,2vw,26px);line-height:1.2}
+#cigarsPanel .cigar-kpi:last-child{grid-column:1/-1}
+#cigarsPanel .cigar-kpi details{margin-top:8px}
+#cigarsPanel .cigar-kpi summary{color:var(--cigar-chart-main);cursor:pointer;font-size:13px}
+#cigarsPanel .cigar-kpi ul{margin:8px 0 0;padding-left:20px}
+#cigarsPanel .cigar-charts-grid{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:14px 0
+}
+#cigarsPanel .cigar-chart-frame{position:relative;width:100%;height:260px;margin-top:12px}
+#cigarsPanel .cigar-chart-frame canvas{max-width:100%;max-height:100%}
+#cigarsPanel .cigar-chart-top{height:300px}
+#cigarsPanel .cigar-empty{padding:18px 8px;text-align:center;color:var(--ui-muted)}
+#cigarsPanel #cigarTrendsEmpty{margin-top:14px;padding:24px}
+#cigarsPanel .cigar-calendar-legend{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0;color:var(--ui-muted);font-size:12px}
+#cigarsPanel .cigar-calendar-legend span::before{
+  display:inline-block;width:10px;height:10px;margin-right:4px;border:1px solid var(--ui-border);
+  border-radius:3px;content:""
+}
+#cigarsPanel .cigar-calendar-legend [data-state="logged"]::before{background:var(--cigar-logged-bg)}
+#cigarsPanel .cigar-calendar-legend [data-state="missing"]::before{background:var(--cigar-warning-bg);border:1px dashed var(--cigar-warning)}
+#cigarsPanel .cigar-calendar-legend [data-state="today"]::before{border:2px solid var(--cigar-chart-secondary)}
+#cigarsPanel .cigar-calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;text-align:center}
+#cigarsPanel .cigar-calendar-week{margin-bottom:6px;color:var(--ui-muted);font-size:11px;font-weight:600}
+#cigarsPanel .cigar-calendar-day{
+  display:grid;place-items:center;min-height:34px;padding:2px;border:1px solid var(--ui-border);
+  border-radius:var(--ui-radius-sm);background:var(--ui-surface);color:var(--ui-muted);font:inherit;font-size:12px
+}
+#cigarsPanel .cigar-calendar-day[data-state="logged"]{background:var(--cigar-logged-bg);color:var(--cigar-logged-text)}
+#cigarsPanel .cigar-calendar-day[data-state="missing"]{border:1px dashed var(--cigar-warning);background:var(--cigar-warning-bg);color:var(--cigar-warning)}
+#cigarsPanel .cigar-calendar-day[aria-current="date"]{border:2px solid var(--cigar-chart-secondary);color:var(--ui-text)}
+#cigarsPanel button.cigar-calendar-day:hover{outline:1px solid currentColor;outline-offset:-3px}
+#cigarsPanel .cigar-history h3{margin-bottom:10px}
+#cigarsPanel .cigar-history-table td{min-width:0;white-space:nowrap}
+#cigarsPanel .cigar-history-table th{white-space:nowrap}
+#cigarsPanel .cigar-history-actions{text-align:right}
+#cigarsPanel .cigar-history-actions button+button{margin-left:6px}
+#cigarsPanel .cigar-variance-chip{
+  display:inline-block;padding:3px 7px;border-radius:var(--ui-radius-sm);background:var(--ui-surface-2)
+}
+#cigarsPanel .cigar-data-dialog{
+  width:min(480px,calc(100% - 32px));padding:20px;border:1px solid var(--ui-border);
+  border-radius:var(--ui-radius-lg);background:var(--ui-surface);color:var(--ui-text)
+}
+#cigarsPanel .cigar-data-dialog::backdrop{background:rgb(12 21 18 / 60%)}
+#cigarsPanel .cigar-data-dialog h2{margin:0;font-size:20px}
+#cigarsPanel .cigar-data-dialog .cigar-data-actions{justify-content:flex-end}
+@media(max-width:960px){
+  #cigarsPanel .cigars-day-meta{grid-template-columns:repeat(3,minmax(0,1fr))}
+  #cigarsPanel .cigar-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:720px){
+  #cigarsPanel .cigar-charts-grid{grid-template-columns:minmax(0,1fr)}
+}
+@media(max-width:520px){
+  #cigarsPanel .cigars-day-meta,#cigarsPanel .cigar-daily-totals{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #cigarsPanel .cigar-range-options button{font-size:12px;padding-inline:7px}
+  #cigarsPanel .cigar-chart-frame{height:232px}
+  #cigarsPanel .cigar-chart-top{height:300px}
+  #cigarsPanel .cigars-save-row .cigar-data-actions{width:100%}
+  #cigarsPanel .cigars-save-row .cigar-data-actions button{width:auto;flex:1}
+}

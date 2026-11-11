@@ -1,13 +1,13 @@
-const CACHE = 'fuji-shell-v10-count-dates';
+const CACHE = 'fuji-shell-v11-cigarette-trends';
 const SHELL = [
   '/', '/index.html', '/404.html', '/manifest.webmanifest', '/logo.jpg', '/tokens.css',
   '/styles.css', '/app-shell.css', '/ui-polish.css', '/ui-polish.js', '/ui-vendor/lucide-icons.js', '/spr-vendor/JsBarcode.all.min.js', '/count-entry.css', '/spr-count-sheet.css?v=9', '/count-sheet.css', '/count-sheet-reference.css',
   '/print.css', '/print-tags.css', '/shelftag.css', '/home-dashboard.css', '/auth.css',
-  '/settings-hub.css', '/cigars.css', '/announcements.css', '/masterlist.css', '/site-extras.css', '/about-us.css', '/redesign.css',
+  '/settings-hub.css', '/cigars.css?v=11', '/announcements.css', '/masterlist.css', '/site-extras.css', '/about-us.css', '/redesign.css',
   '/safe-text-utils.js', '/count-session-utils.js', '/count-entry-utils.js', '/count-sheet-import-utils.js',
   '/count-sheet-filter-utils.js', '/cigar-monitor-utils.js', '/cigar-expiry-utils.js',
   '/app.js', '/count-entry.js', '/firebase-config.js', '/firebase-auth.js', '/app-shell.js', '/site-extras.js',
-  '/print-controller.js', '/spr-count-sheet.js?v=10', '/spr-vendor/xlsx.full.min.js', '/product-lookup.js', '/shelftag.js', '/cigar-monitor.js',
+  '/print-controller.js', '/spr-count-sheet.js?v=10', '/spr-vendor/xlsx.full.min.js', '/product-lookup.js', '/shelftag.js', '/cigar-monitor.js?v=11', '/cigar-monitor-data.js?v=11', '/cigar-trends.js?v=11', '/cigar-vendor/chart.umd.min.js',
   '/cigar-expiry.js', '/masterlist.js', '/announcements.js', '/count-sheet-reference.js?v=10', '/layout-persistence.js?v=10'
 ];
 const LIBS = [

@@ -1,246 +1,267 @@
-(()=>{
-  const storageKey='fuji-cigarette-monitor-v1';
-  const emptyState={products:[],records:[]};
-  const $=id=>document.getElementById(id);
-  const form=$('cigarDailyForm');
-  const fileInput=$('cigarSellingFile');
-  const rows=$('cigarDailyRows');
-  const status=$('cigarDailyStatus');
-  const importStatus=$('cigarImportStatus');
-  const fieldIds={transaction:'cigarTransaction',cs1:'cigarCs1',cs2:'cigarCs2',bag:'cigarBag',fmcg:'cigarFmcg'};
-  const monitorTab=$('cigarMonitorTab');
-  const expiryTab=$('cigarExpiryTab');
-  const monitorWorkspace=$('cigarMonitorWorkspace');
-  const expiryWorkspace=$('cigarExpiryWorkspace');
-  const summaryView=$('cigarDailySummary');
-  const fieldColumns=[
-    {key:'beginning',label:'BEG'},
-    {key:'withdrawal',label:'W'},
-    {key:'sales',label:'SALES'},
-    {key:'jdaSales',label:'JDA_S'},
-    {key:'ending',label:'ENDING'}
+(() => {
+  const storageKey = 'fuji-cigarette-monitor-v1';
+  const $ = id => document.getElementById(id);
+  const form = $('cigarDailyForm');
+  const fileInput = $('cigarSellingFile');
+  const rows = $('cigarDailyRows');
+  const status = $('cigarDailyStatus');
+  const importStatus = $('cigarImportStatus');
+  const dateInput = $('cigarLogDate');
+  const summaryView = $('cigarDailySummary');
+  const fieldIds = {transaction:'cigarTransaction', cs1:'cigarCs1', cs2:'cigarCs2', bag:'cigarBag', fmcg:'cigarFmcg'};
+  const data = CigarMonitorData;
+  const {localDate, validDate, addDays, ending, variance, totals, hasEntry, parseQuantity, formatNumber, formatSigned} = data;
+  const inputKeys = Object.keys(data.inputFields);
+  const tabs = [
+    [$('cigarMonitorTab'), $('cigarMonitorWorkspace')],
+    [$('cigarExpiryTab'), $('cigarExpiryWorkspace')],
+    [$('cigarTrendsTab'), $('cigarTrendsWorkspace')]
   ];
-  let state={...emptyState};
-  let draft={};
-  let loadedDate='';
-  let dirty=false;
+  let state = {products:[], records:[]};
+  let knownStorage;
+  let initialDate = localDate();
+  let drafts = {};
+  let loadedDate = '';
+  let edits;
+  let activeProducts = [];
+  let savedItems = new Map();
+  let previousItems = new Map();
+  let editsStored = true;
+  let savePending = false;
+  let pendingBackup;
+  let trends;
 
-  function localDate(){
-    const date=new Date();
-    return`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
-  }
-
-  function setStatus(message,isError=false){
-    status.textContent=message;
+  function setStatus(message, isError = false){
+    status.textContent = message;
     status.classList.toggle('is-error',isError);
   }
 
   function showEntryForm(){
-    form.hidden=false;
-    summaryView.hidden=true;
-  }
-
-  function nextDate(dateValue){
-    const date=new Date(`${dateValue}T00:00:00`);
-    date.setDate(date.getDate()+1);
-    return`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+    form.hidden = false;
+    summaryView.hidden = true;
   }
 
   function getSavedRecord(date){
-    return state.records.find(record=>record.date===date)||null;
+    return state.records.find(record => record.date === date);
   }
 
-  function latestPreviousRecord(date){
-    return state.records.filter(record=>record.date<date).sort((left,right)=>right.date.localeCompare(left.date))[0]||null;
+  function persistState(snapshot = state, nextDrafts = drafts){
+    try{
+      if(localStorage.getItem(storageKey) !== knownStorage) throw new Error('The log changed in another tab. Refresh to load those entries.');
+      const draftDate = Object.hasOwn(nextDrafts,loadedDate) ? loadedDate : undefined;
+      const serialized = JSON.stringify({...snapshot, drafts:nextDrafts, draftDate});
+      localStorage.setItem(storageKey,serialized);
+      knownStorage = serialized;
+    }catch(error){
+      throw new Error('Could not save cigarette monitoring data in this browser: '+error.message);
+    }
   }
 
-  function valueText(value){
-    return value===null||value===undefined?'':String(value);
+  function draftHasEdits(){
+    return Object.keys(edits.fields).length > 0 || Object.keys(edits.items).length > 0;
   }
 
-  function getDraftForDate(date){
-    const saved=getSavedRecord(date);
-    const previous=latestPreviousRecord(date);
-    const savedItems=new Map((saved?.items||[]).map(item=>[item.sku,item]));
-    const previousItems=new Map((previous?.items||[]).map(item=>[item.sku,item]));
-    return Object.fromEntries(state.products.map(product=>{
-      const current=savedItems.get(product.sku);
-      const last=previousItems.get(product.sku);
-      const values={};
-      fieldColumns.forEach(({key})=>{
-        values[key]=valueText(current?.[key]??(key==='beginning'?last?.ending??'':''));
-      });
-      return[product.sku,values];
-    }));
-  }
-
-  function readRecordFields(record){
-    Object.entries(fieldIds).forEach(([field,id])=>{$(id).value=record?.[field]||''});
+  function saveDraft(){
+    const nextDrafts = {...drafts};
+    if(draftHasEdits()) nextDrafts[loadedDate] = edits;
+    else delete nextDrafts[loadedDate];
+    drafts = nextDrafts;
+    try{
+      persistState();
+      editsStored = true;
+      setStatus(draftHasEdits() ? 'Draft saved on this device.' : 'No unsaved changes.');
+    }catch(error){
+      editsStored = false;
+      setStatus(error.message+' The draft is still open in this tab.',true);
+    }
   }
 
   function loadDate(date){
-    const record=getSavedRecord(date);
-    draft=getDraftForDate(date);
-    readRecordFields(record);
-    loadedDate=date;
-    dirty=false;
+    const saved = getSavedRecord(date);
+    const previous = state.records.findLast(record => record.date < date);
+    const stored = data.own(drafts,date);
+    const productMap = new Map(state.products.map(product => [product.sku,product]));
+    for(const sku of [...(saved?.items ?? []).map(item => item.sku), ...Object.keys(stored?.items ?? {})]){
+      if(!productMap.has(sku)) productMap.set(sku,{sku});
+    }
+    activeProducts = [...productMap.values()];
+    savedItems = new Map((saved?.items ?? []).map(item => [item.sku,item]));
+    previousItems = new Map((previous?.items ?? []).map(item => [item.sku,item]));
+    edits = {fields:{...stored?.fields}, items:Object.assign(Object.create(null),structuredClone(stored?.items ?? {}))};
+    loadedDate = date;
+    dateInput.value = date;
+    for(const [field,id] of Object.entries(fieldIds)){
+      $(id).value = edits.fields[field] ?? saved?.[field] ?? '';
+    }
     showEntryForm();
     renderProducts();
-    $('cigarSaveDay').textContent=record?'Update daily entry':'Save daily entry';
-    setStatus(record?'Loaded saved entry for this date.':state.products.length?'New day ready. Beginning counts carry forward from the latest earlier saved day.':'Import a SELLING workbook to start.');
+    updateTotals();
+    $('cigarSaveDay').disabled = !activeProducts.length;
+    $('cigarSaveDay').textContent = saved ? 'Update daily entry' : 'Save daily entry';
+    if(!editsStored && stored) setStatus('The draft could not be saved. Keep this tab open and back up your data.',true);
+    else setStatus(stored ? 'Unsaved draft restored.' : saved ? 'Loaded saved entry for this date.' : activeProducts.length ?
+      'Beginning counts carry forward from the previous saved day.' : 'Import a SELLING workbook to start.');
   }
 
-  function summaryValue(value){
-    return value===null||value===undefined?'—':String(value);
+  function figures(sku){
+    const saved = savedItems.get(sku);
+    const fields = data.own(edits.items,sku) ?? {};
+    const values = {};
+    for(const key of inputKeys){
+      const original = saved ? saved[key] : key === 'beginning' ? previousItems.get(sku)?.ending : null;
+      values[key] = fields[key] ?? (original == null ? '' : String(original));
+    }
+    return values;
   }
 
-  function renderSummary(record){
-    $('cigarSummaryHeading').textContent=new Intl.DateTimeFormat(undefined,{dateStyle:'full'}).format(new Date(`${record.date}T00:00:00`));
-    const metadata=[['TRANS#',record.transaction],['CS1',record.cs1],['CS2',record.cs2],['BAG',record.bag],['FMCG',record.fmcg]]
-      .filter(([,value])=>value)
-      .map(([label,value])=>`${label}: ${value}`);
-    $('cigarSummaryMetadata').textContent=metadata.length?metadata.join(' · '):'No transaction details were entered.';
-    const countEntered=record.items.filter(item=>fieldColumns.some(({key})=>item[key]!==null&&item[key]!==undefined)).length;
-    const totals=Object.fromEntries(fieldColumns.map(({key,label})=>{
-      const numbers=record.items.map(item=>item[key]).filter(value=>typeof value==='number'&&Number.isFinite(value));
-      return[label,numbers.length?numbers.reduce((sum,value)=>sum+value,0):'—'];
-    }));
-    const stats=[
-      ['Products entered',`${countEntered} / ${record.items.length}`],
-      ['Total sales',totals.SALES],
-      ['JDA sales',totals.JDA_S],
-      ['Ending stock',totals.ENDING]
-    ];
-    const statsContainer=$('cigarSummaryStats');
-    statsContainer.replaceChildren();
-    stats.forEach(([label,value])=>{
-      const card=document.createElement('div');
-      const caption=document.createElement('span');
-      caption.textContent=label;
-      const number=document.createElement('strong');
-      number.textContent=String(value);
-      card.append(caption,number);
-      statsContainer.append(card);
-    });
-    const productBySku=new Map(state.products.map(product=>[product.sku,product]));
-    const summaryRows=$('cigarSummaryRows');
-    summaryRows.replaceChildren();
-    record.items.forEach(item=>{
-      const row=summaryRows.insertRow();
-      const product=productBySku.get(item.sku)||{};
-      [item.sku,product.description,...fieldColumns.map(({key})=>summaryValue(item[key]))].forEach(value=>{
-        const cell=row.insertCell();
-        cell.textContent=value||'—';
-      });
-    });
-    $('cigarSummaryNote').textContent=`Saved locally in this browser for ${record.items.length} products. Use “Enter new day” to start the next date with beginning counts carried forward from these ending counts.`;
-    form.hidden=true;
-    summaryView.hidden=false;
+  function rowData(sku, validate = false){
+    const values = figures(sku);
+    const fields = data.own(edits.items,sku) ?? {};
+    const item = {sku};
+    for(const [key,value] of Object.entries(values)){
+      const quantity = parseQuantity(value);
+      if(validate && value !== '' && Object.hasOwn(fields,key) && !Number.isSafeInteger(quantity)){
+        throw new Error(data.inputFields[key]+' must be a whole number for SKU '+sku+'.');
+      }
+      item[key] = quantity;
+    }
+    item.entered = ['withdrawal','sales','jdaSales'].some(key => item[key] !== null) ||
+      (item.beginning !== null && (Object.hasOwn(fields,'beginning') || hasEntry(savedItems.get(sku) ?? {})));
+    const saved = savedItems.get(sku);
+    const changedStock = ['beginning','withdrawal','sales'].some(key => Object.hasOwn(fields,key));
+    item.ending = saved && !changedStock ? saved.ending ?? null : ending(item);
+    if(saved && !Object.keys(fields).length && hasEntry(saved)) item.entered = true;
+    return item;
+  }
+
+  function addCell(row, value, className = ''){
+    const cell = row.insertCell();
+    cell.className = className;
+    cell.textContent = value ?? '—';
+    return cell;
+  }
+
+  function computedCell(cell, value, alert, signed = false){
+    cell.textContent = signed ? formatSigned(value) : formatNumber(value);
+    cell.classList.toggle('cigar-figure-alert',alert);
+  }
+
+  function updateComputedRow(row, item){
+    const difference = variance(item);
+    computedCell(row.cells[7],difference,difference !== null && difference !== 0,true);
+    computedCell(row.cells[8],item.ending,item.ending < 0);
+  }
+
+  function updateTotals(){
+    const figures = totals(activeProducts.map(product => rowData(product.sku)));
+    $('cigarTotalSales').textContent = formatNumber(figures.sales);
+    $('cigarTotalJda').textContent = formatNumber(figures.jdaSales);
+    computedCell($('cigarTotalVariance'),figures.variance,Boolean(figures.variance),true);
+    $('cigarEnteredCount').textContent = formatNumber(figures.entered);
   }
 
   function renderProducts(){
-    const term=$('cigarItemSearch').value.trim().toLocaleLowerCase();
-    const products=state.products.filter(product=>`${product.sku} ${product.description} ${product.upc}`.toLocaleLowerCase().includes(term));
-    $('cigarProductCount').textContent=state.products.length?`${products.length} of ${state.products.length} products`: 'No products loaded';
+    const term = $('cigarItemSearch').value.trim().toLocaleLowerCase();
+    const enteredOnly = $('cigarEnteredOnly').checked;
+    const products = activeProducts.filter(product =>
+      (!enteredOnly || rowData(product.sku).entered) &&
+      [product.sku,product.description,product.upc].join(' ').toLocaleLowerCase().includes(term));
+    $('cigarProductCount').textContent = activeProducts.length ?
+      formatNumber(products.length)+' of '+formatNumber(activeProducts.length)+' products' : 'No products loaded';
     rows.replaceChildren();
-    if(!state.products.length){
-      const row=rows.insertRow();
-      const cell=row.insertCell();
-      cell.colSpan=8;
-      cell.textContent='Import a SELLING sheet to load cigarette products.';
-      return;
-    }
     if(!products.length){
-      const row=rows.insertRow();
-      const cell=row.insertCell();
-      cell.colSpan=8;
-      cell.textContent='No products match this search.';
+      addCell(rows.insertRow(), !activeProducts.length ? 'Import a SELLING sheet to load cigarette products.' :
+        enteredOnly ? 'No matching SKUs have entries. Turn off the filter to enter more figures.' :
+        'No products match this search.').colSpan = 9;
       return;
     }
-    products.forEach(product=>{
-      const row=rows.insertRow();
-      [product.sku,product.description,product.upc].forEach(value=>{
-        const cell=row.insertCell();
-        cell.textContent=value||'—';
-      });
-      fieldColumns.forEach(({key,label})=>{
-        const cell=row.insertCell();
-        const input=document.createElement('input');
-        input.type='number';
-        input.step='1';
-        input.inputMode='numeric';
-        input.autocomplete='off';
-        input.setAttribute('aria-label',`${label} for ${product.sku} ${product.description}`);
-        input.dataset.sku=product.sku;
-        input.dataset.field=key;
-        input.value=draft[product.sku]?.[key]||'';
-        input.addEventListener('input',()=>{
-          draft[product.sku][key]=input.value;
-          dirty=true;
-          setStatus('Unsaved changes.');
-        });
-        cell.append(input);
-      });
-    });
-  }
-
-  function persistState(snapshot=state){
-    try{
-      localStorage.setItem(storageKey,JSON.stringify(snapshot));
-    }catch(error){
-      throw new Error(`Could not save cigarette monitoring data in this browser: ${error.message}`);
+    for(const product of products){
+      const row = rows.insertRow();
+      const values = figures(product.sku);
+      [product.sku,product.description,product.upc].forEach(value => addCell(row,value || '—'));
+      for(const [key,label] of Object.entries(data.inputFields)){
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.step = 'any';
+        input.inputMode = 'numeric';
+        input.autocomplete = 'off';
+        input.setAttribute('aria-label',label+' for '+product.sku+' '+(product.description ?? ''));
+        input.dataset.sku = product.sku;
+        input.dataset.field = key;
+        input.value = values[key];
+        addCell(row,'').append(input);
+      }
+      addCell(row,'','cigar-figure');
+      addCell(row,'','cigar-figure');
+      updateComputedRow(row,rowData(product.sku));
     }
   }
 
-  function readNumber(value,sku,field){
-    if(value.trim()==='')return null;
-    const number=Number(value);
-    if(!Number.isInteger(number))throw new Error(`${field} must be a whole number for SKU ${sku}.`);
-    return number;
+  function renderSummary(record){
+    $('cigarSummaryHeading').textContent = data.dateLabel(record.date,{dateStyle:'full'});
+    const metadata = Object.entries(data.metadata).filter(([key]) => record[key] !== '' && record[key] != null)
+      .map(([key,label]) => label+': '+record[key]);
+    $('cigarSummaryMetadata').textContent = metadata.join(' · ') || 'No transaction details were entered.';
+    const figures = totals(record.items);
+    const stats = [
+      ['SKUs with entries',formatNumber(figures.entered)], ['Total SALES',formatNumber(figures.sales)],
+      ['Total JDA_S',formatNumber(figures.jdaSales)], ['Total variance',formatSigned(figures.variance)]
+    ];
+    $('cigarSummaryStats').replaceChildren(...stats.map(([label,value]) => {
+      const card = document.createElement('div');
+      const caption = document.createElement('span');
+      const number = document.createElement('strong');
+      caption.textContent = label;
+      number.textContent = value;
+      card.append(caption,number);
+      return card;
+    }));
+    const productMap = new Map(state.products.map(product => [product.sku,product]));
+    const summaryRows = $('cigarSummaryRows');
+    summaryRows.replaceChildren();
+    for(const item of record.items){
+      const row = summaryRows.insertRow();
+      addCell(row,item.sku);
+      addCell(row,productMap.get(item.sku)?.description || '—');
+      for(const key of inputKeys) addCell(row,formatNumber(item[key]));
+      const difference = variance(item);
+      computedCell(addCell(row,'','cigar-figure'),difference,Boolean(difference),true);
+      computedCell(addCell(row,'','cigar-figure'),item.ending,item.ending < 0);
+    }
+    $('cigarSummaryNote').textContent = 'Saved on this device for '+formatNumber(record.items.length)+' products.';
+    form.hidden = true;
+    summaryView.hidden = false;
   }
 
-  function saveDay(event){
+  function confirmAction(message,title){
+    return window.fujiConfirm?.(message,title) ?? Promise.resolve(window.confirm(message));
+  }
+
+  async function saveDay(event){
     event.preventDefault();
-    const date=$('cigarLogDate').value;
-    if(!date){
-      setStatus('Choose a date before saving.',true);
-      return;
-    }
-    if(!state.products.length)throw new Error('Import a SELLING workbook before saving daily entries.');
-    const items=state.products.map(product=>{
-      const values=draft[product.sku]||{};
-      return{
-        sku:product.sku,
-        beginning:readNumber(values.beginning||'',product.sku,'BEG'),
-        withdrawal:readNumber(values.withdrawal||'',product.sku,'W'),
-        sales:readNumber(values.sales||'',product.sku,'SALES'),
-        jdaSales:readNumber(values.jdaSales||'',product.sku,'JDA_S'),
-        ending:readNumber(values.ending||'',product.sku,'ENDING')
-      };
-    });
-    const record={
-      date,
-      transaction:$('cigarTransaction').value.trim(),
-      cs1:$('cigarCs1').value.trim(),
-      cs2:$('cigarCs2').value.trim(),
-      bag:$('cigarBag').value.trim(),
-      fmcg:$('cigarFmcg').value.trim(),
-      items
-    };
-    const nextState={
-      products:state.products,
-      records:[...state.records.filter(existing=>existing.date!==date),record]
-        .sort((left,right)=>left.date.localeCompare(right.date))
-    };
+    if(savePending) return;
+    savePending = true;
     try{
-      persistState(nextState);
-      state=nextState;
-      loadedDate=date;
-      dirty=false;
-      setStatus(`Saved ${date} for ${items.length} products in this browser.`);
+      if(!validDate(dateInput.value)) throw new Error('Choose a date before saving.');
+      if(!activeProducts.length) throw new Error('Import a SELLING workbook before saving daily entries.');
+      const record = {date:loadedDate, items:activeProducts.map(product => rowData(product.sku,true))};
+      for(const [field,id] of Object.entries(fieldIds)) record[field] = $(id).value.trim();
+      if(getSavedRecord(record.date) && !await confirmAction('Replace the saved daily entry for '+record.date+' with these figures?','Overwrite daily entry')) return;
+      const nextState = {...state, records:[...state.records.filter(existing => existing.date !== record.date),record]
+        .sort((left,right) => left.date.localeCompare(right.date))};
+      const nextDrafts = {...drafts};
+      delete nextDrafts[record.date];
+      persistState(nextState,nextDrafts);
+      state = nextState;
+      drafts = nextDrafts;
+      editsStored = true;
+      loadDate(record.date);
       renderSummary(record);
+      $('cigarEditDay').focus();
     }catch(error){
       setStatus(error.message,true);
+    }finally{
+      savePending = false;
     }
   }
 
@@ -290,80 +311,231 @@
     }
   }
 
-  function exportCsv(){
-    if(!state.records.length){
-      setStatus('There are no saved daily entries to export.',true);
+  function download(contents,type,filename){
+    const url = URL.createObjectURL(new Blob([contents],{type}));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url),1000);
+  }
+
+  function showCsvDialog(range){
+    $('cigarCsvFrom').value = range?.from ?? '';
+    $('cigarCsvTo').value = range?.to ?? '';
+    $('cigarCsvStatus').textContent = state.records.length ? 'Leave either date blank to export without that limit.' : 'There are no saved daily entries to export.';
+    $('cigarCsvDownload').disabled = !state.records.length;
+    $('cigarCsvDialog').showModal();
+  }
+
+  function exportCsv(event){
+    event.preventDefault();
+    const from = $('cigarCsvFrom').value, to = $('cigarCsvTo').value;
+    if(from && to && from > to){
+      $('cigarCsvStatus').textContent = 'Choose an end date on or after the start date.';
       return;
     }
-    const headings=['Date','TRANS#','CS1','CS2','BAG','FMCG','SKU','DESCRIPTION','UPC','TOTAL','EXPIRY','BEG','W','SALES','JDA_S','ENDING'];
-    const lines=[headings.map(CigarMonitorUtils.escapeCsv).join(',')];
-    state.records.forEach(record=>{
-      record.items.forEach(item=>{
-        const product=state.products.find(entry=>entry.sku===item.sku)||{};
+    const matching = state.records.filter(record => (!from || record.date >= from) && (!to || record.date <= to));
+    if(!matching.length){
+      $('cigarCsvStatus').textContent = 'There are no saved entries in this range.';
+      return;
+    }
+    const headings = ['Date','TRANS#','CS1','CS2','BAG','FMCG','SKU','DESCRIPTION','UPC','TOTAL','EXPIRY','BEG','W','SALES','JDA_S','ENDING'];
+    const lines = [headings.map(CigarMonitorUtils.escapeCsv).join(',')];
+    const products = new Map(state.products.map(product => [product.sku,product]));
+    for(const record of matching){
+      for(const item of record.items){
+        const product = products.get(item.sku) ?? {};
         lines.push([
           record.date,record.transaction,record.cs1,record.cs2,record.bag,record.fmcg,
           item.sku,product.description,product.upc,product.total,product.expiry,
           item.beginning,item.withdrawal,item.sales,item.jdaSales,item.ending
         ].map(CigarMonitorUtils.escapeCsv).join(','));
-      });
-    });
-    const blob=new Blob([`\uFEFF${lines.join('\r\n')}`],{type:'text/csv;charset=utf-8'});
-    const url=URL.createObjectURL(blob);
-    const link=document.createElement('a');
-    link.href=url;
-    link.download=`cigarette-monitor-${localDate()}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
+      }
+    }
+    download('\uFEFF'+lines.join('\r\n'),'text/csv;charset=utf-8','cigarette-monitor-'+localDate()+'.csv');
+    $('cigarCsvDialog').close();
   }
 
-  $('cigarLogDate').value=localDate();
+  function backUp(){
+    const backup = {format:'fuji-cigarette-monitor', version:1, exportedAt:new Date().toISOString(), ...state, drafts};
+    download(JSON.stringify(backup,null,2),'application/json','cigarette-monitor-'+localDate()+'.json');
+  }
+
+  async function previewBackup(event){
+    const input = event.target;
+    const file = input.files?.[0];
+    if(!file) return;
+    pendingBackup = undefined;
+    $('cigarRestoreConfirm').disabled = true;
+    $('cigarRestorePreview').textContent = 'Reading backup…';
+    $('cigarRestoreDialog').showModal();
+    try{
+      const backup = data.validateBackup(JSON.parse(await file.text()));
+      if(!$('cigarRestoreDialog').open) return;
+      pendingBackup = backup;
+      const dates = backup.records.map(record => record.date).sort();
+      const count = (length,singular) => formatNumber(length)+' '+singular+(length === 1 ? '' : 's');
+      $('cigarRestorePreview').textContent = [
+        count(backup.products.length,'product'), count(dates.length,'saved day'),
+        count(Object.keys(backup.drafts).length,'draft'), dates.length ? dates[0]+' to '+dates.at(-1) : ''
+      ].filter(Boolean).join(' · ');
+      $('cigarRestoreConfirm').disabled = false;
+    }catch(error){
+      $('cigarRestorePreview').textContent = error instanceof SyntaxError ? 'This file is not valid JSON.' : error.message;
+    }finally{
+      input.value = '';
+    }
+  }
+
+  function restoreBackup(event){
+    event.preventDefault();
+    if(!pendingBackup) return;
+    const nextState = {products:pendingBackup.products, records:[...pendingBackup.records].sort((a,b) => a.date.localeCompare(b.date))};
+    const nextDrafts = pendingBackup.drafts;
+    try{
+      persistState(nextState,nextDrafts);
+      state = nextState;
+      drafts = nextDrafts;
+      editsStored = true;
+      loadDate(loadedDate);
+      $('cigarRestoreDialog').close();
+      $('cigarDataStatus').textContent = 'Cigarette Monitor backup restored.';
+      trends.render();
+    }catch(error){
+      $('cigarRestorePreview').textContent = error.message;
+    }
+  }
+
+  function openDay(date, mode){
+    loadDate(date);
+    selectTab(0);
+    if(mode === 'view' && getSavedRecord(date)){
+      renderSummary(getSavedRecord(date));
+      $('cigarEditDay').focus();
+    }else dateInput.focus();
+  }
+
+  async function deleteDay(date){
+    if(!await confirmAction('Delete the saved entry for '+date+'? Any unsaved draft for this date will be kept.','Delete daily entry')) return;
+    const nextState = {...state, records:state.records.filter(record => record.date !== date)};
+    try{
+      persistState(nextState);
+      state = nextState;
+      if(loadedDate === date) loadDate(date);
+      $('cigarDataStatus').textContent = 'Deleted saved entry for '+date+'.';
+      trends.render();
+      $('cigarHistoryHeading').focus();
+    }catch(error){
+      $('cigarDataStatus').textContent = error.message;
+    }
+  }
+
+  async function startOver(){
+    if(!await confirmAction('Discard any unsaved edits for '+loadedDate+'? Saved entries stay in your log.','Start over')) return;
+    const nextDrafts = {...drafts};
+    delete nextDrafts[loadedDate];
+    try{
+      persistState(state,nextDrafts);
+      drafts = nextDrafts;
+      editsStored = true;
+      openDay(loadedDate,'edit');
+      setStatus('Daily entry reset.');
+    }catch(error){
+      setStatus(error.message,true);
+    }
+  }
+
+  function selectTab(index, focus = false){
+    tabs.forEach(([tab,panel],i) => {
+      tab.setAttribute('aria-selected',String(i === index));
+      tab.tabIndex = i === index ? 0 : -1;
+      panel.hidden = i !== index;
+    });
+    if(index === 2) trends.render();
+    if(focus) tabs[index][0].focus();
+  }
+
   try{
-    const saved=localStorage.getItem(storageKey);
-    if(saved){
-      const parsed=JSON.parse(saved);
-      if(!Array.isArray(parsed.products)||!Array.isArray(parsed.records))throw new Error('Saved cigarette monitoring data has an invalid format.');
-      state=parsed;
+    knownStorage = localStorage.getItem(storageKey);
+    if(knownStorage){
+      const parsed = JSON.parse(knownStorage);
+      if(!Array.isArray(parsed.products) || !Array.isArray(parsed.records)) throw new Error('Saved cigarette monitoring data has an invalid format.');
+      state = {products:parsed.products, records:[...parsed.records].sort((left,right) => left.date.localeCompare(right.date))};
+      if(parsed.drafts && typeof parsed.drafts === 'object' && !Array.isArray(parsed.drafts)) drafts = parsed.drafts;
+      if(validDate(parsed.draftDate) && Object.hasOwn(drafts,parsed.draftDate)) initialDate = parsed.draftDate;
     }
   }catch(error){
-    importStatus.textContent=`Could not read saved cigarette monitoring data: ${error.message}`;
+    importStatus.textContent = 'Could not read saved cigarette monitoring data: '+error.message;
   }
-  loadDate($('cigarLogDate').value);
-  $('cigarLogDate').addEventListener('change',()=>{
-    if(dirty&&!window.confirm('Discard unsaved changes for this date?')){
-      $('cigarLogDate').value=loadedDate;
-      return;
-    }
-    loadDate($('cigarLogDate').value);
+  loadDate(initialDate);
+  dateInput.addEventListener('change',() => {
+    if(validDate(dateInput.value)) loadDate(dateInput.value);
+    else dateInput.value = loadedDate;
   });
   $('cigarItemSearch').addEventListener('input',renderProducts);
-  form.addEventListener('input',event=>{
-    if(event.target.id!=='cigarItemSearch'){
-      dirty=true;
-      setStatus('Unsaved changes.');
+  $('cigarEnteredOnly').addEventListener('change',renderProducts);
+  form.addEventListener('input',event => {
+    const input = event.target;
+    if(input.dataset.field){
+      const {sku,field} = input.dataset;
+      (edits.items[sku] ??= {})[field] = input.value;
+      updateComputedRow(input.closest('tr'),rowData(sku));
+      updateTotals();
+    }else{
+      const key = Object.keys(fieldIds).find(field => fieldIds[field] === input.id);
+      if(!key) return;
+      edits.fields[key] = input.value;
     }
+    saveDraft();
   });
-  form.addEventListener('submit',event=>{
-    try{saveDay(event)}catch(error){event.preventDefault();setStatus(error.message,true)}
+  rows.addEventListener('focusout',event => {
+    const row = event.target.closest('tr');
+    if(!$('cigarEnteredOnly').checked || !event.target.dataset.sku || row.contains(event.relatedTarget) || rowData(event.target.dataset.sku).entered) return;
+    row.hidden = true;
+    $('cigarProductCount').textContent = formatNumber(rows.querySelectorAll('tr:not([hidden])').length)+' of '+formatNumber(activeProducts.length)+' products';
   });
+  rows.addEventListener('keydown',event => {
+    if(!['Enter','Tab'].includes(event.key) || !event.target.dataset.field || event.ctrlKey || event.altKey || event.metaKey) return;
+    const column = event.target.closest('td').cellIndex;
+    const visibleRows = [...rows.querySelectorAll('tr:not([hidden])')];
+    const rowIndex = visibleRows.indexOf(event.target.closest('tr'));
+    const direction = event.shiftKey ? -1 : 1;
+    const next = visibleRows[rowIndex+direction]?.cells[column].firstElementChild;
+    const wrap = event.key === 'Tab' && visibleRows[direction === 1 ? 0 : visibleRows.length-1]?.cells[column+direction]?.querySelector('input');
+    const target = next || wrap;
+    if(target || event.key === 'Enter') event.preventDefault();
+    if(target){target.focus();target.select();}
+  });
+  form.addEventListener('submit',saveDay);
   fileInput.addEventListener('change',importSellingSheet);
-  $('cigarExportCsv').addEventListener('click',exportCsv);
-  $('cigarEditDay').addEventListener('click',showEntryForm);
-  $('cigarNewDay').addEventListener('click',()=>{
-    const date=nextDate(loadedDate);
-    $('cigarLogDate').value=date;
-    loadDate(date);
-    $('cigarLogDate').focus();
+  $('cigarExportCsv').addEventListener('click',() => showCsvDialog());
+  $('cigarCsvForm').addEventListener('submit',exportCsv);
+  $('cigarCsvCancel').addEventListener('click',() => $('cigarCsvDialog').close());
+  $('cigarBackup').addEventListener('click',backUp);
+  $('cigarRestore').addEventListener('click',() => $('cigarRestoreFile').click());
+  $('cigarRestoreFile').addEventListener('change',previewBackup);
+  $('cigarRestoreForm').addEventListener('submit',restoreBackup);
+  $('cigarRestoreCancel').addEventListener('click',() => $('cigarRestoreDialog').close());
+  $('cigarEditDay').addEventListener('click',() => {showEntryForm();dateInput.focus();});
+  $('cigarNewDay').addEventListener('click',() => openDay(addDays(loadedDate,1),'edit'));
+  $('cigarStartOver').addEventListener('click',startOver);
+  $('resetBtn').addEventListener('click',event => {
+    if(!event.isTrusted || $('cigarsPanel').hidden) return;
+    event.stopImmediatePropagation();
+    startOver();
+  },true);
+
+  trends = CigarTrends({
+    getState:() => state, openDay, deleteDay, exportCsv:showCsvDialog
   });
-  monitorTab.addEventListener('click',()=>{
-    monitorTab.setAttribute('aria-selected','true');
-    expiryTab.setAttribute('aria-selected','false');
-    monitorWorkspace.hidden=false;
-    expiryWorkspace.hidden=true;
-  });
-  expiryTab.addEventListener('click',()=>{
-    monitorTab.setAttribute('aria-selected','false');
-    expiryTab.setAttribute('aria-selected','true');
-    monitorWorkspace.hidden=true;
-    expiryWorkspace.hidden=false;
+  tabs.forEach(([tab],index) => {
+    tab.addEventListener('click',() => selectTab(index));
+    tab.addEventListener('keydown',event => {
+      const next = {ArrowLeft:(index+tabs.length-1)%tabs.length, ArrowRight:(index+1)%tabs.length, Home:0, End:tabs.length-1}[event.key];
+      if(next === undefined) return;
+      event.preventDefault();
+      selectTab(next,true);
+    });
   });
 })();

@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="count-sheet-reference.css">
   <link rel="stylesheet" href="shelftag.css">
   <link rel="stylesheet" href="home-dashboard.css">
-  <link rel="stylesheet" href="cigars.css">
+  <link rel="stylesheet" href="cigars.css?v=11">
   <link rel="stylesheet" href="announcements.css">
   <link rel="stylesheet" href="masterlist.css">
   <link rel="stylesheet" href="auth.css">
@@ -424,11 +424,12 @@
       </header>
       <div class="cigars-tabs" role="tablist" aria-label="Cigarette tools">
         <button class="cigars-tab" id="cigarMonitorTab" type="button" role="tab" aria-selected="true" aria-controls="cigarMonitorWorkspace">Daily Monitoring</button>
-        <button class="cigars-tab" id="cigarExpiryTab" type="button" role="tab" aria-selected="false" aria-controls="cigarExpiryWorkspace">Expiry Lookup</button>
+        <button class="cigars-tab" id="cigarExpiryTab" type="button" role="tab" aria-selected="false" aria-controls="cigarExpiryWorkspace" tabindex="-1">Expiry Lookup</button>
+        <button class="cigars-tab" id="cigarTrendsTab" type="button" role="tab" aria-selected="false" aria-controls="cigarTrendsWorkspace" tabindex="-1">Trends</button>
       </div>
       <section id="cigarMonitorWorkspace" class="cigars-tab-panel" role="tabpanel" aria-labelledby="cigarMonitorTab">
       <section class="cigars-monitor-card" aria-labelledby="cigarMonitorHeading">
-        <div class="cigars-monitor-heading"><div><p class="section-kicker">DAILY SELLING SHEET</p><h2 id="cigarMonitorHeading">Daily stock log</h2><p>Choose a date to enter the same figures as the workbook: BEG, W, SALES, JDA_S, and ENDING.</p></div><button id="cigarExportCsv" class="secondary-button" type="button">Download log CSV</button></div>
+        <div class="cigars-monitor-heading"><div><p class="section-kicker">DAILY SELLING SHEET</p><h2 id="cigarMonitorHeading">Daily stock log</h2><p>Enter BEG, W, SALES, and JDA_S for each SKU. ENDING and variance calculate as you type.</p></div><button id="cigarExportCsv" class="secondary-button" type="button" data-cigar-icon="Download">Download log CSV</button></div>
         <div class="cigars-import-bar"><label class="secondary-button" for="cigarSellingFile">Import SELLING workbook</label><input id="cigarSellingFile" type="file" accept=".xlsx,.xls,.xlsm" hidden><span id="cigarImportStatus" role="status" aria-live="polite">No selling sheet imported. Choose your workbook to load its products and existing daily entries.</span></div>
         <p class="cigars-storage-note">The workbook is read on this device only. Monitoring data is saved in this browser and is not uploaded to the website.</p>
         <form id="cigarDailyForm">
@@ -440,14 +441,15 @@
             <label for="cigarBag">BAG<input id="cigarBag" type="text" autocomplete="off"></label>
             <label for="cigarFmcg">FMCG<input id="cigarFmcg" type="text" autocomplete="off"></label>
           </div>
-          <div class="cigars-list-tools"><label for="cigarItemSearch">Find product<input id="cigarItemSearch" type="search" placeholder="Search SKU or description"></label><span id="cigarProductCount"></span></div>
-          <div class="cigars-table-wrap"><table class="cigars-daily-table"><thead><tr><th>SKU</th><th>Description</th><th>UPC</th><th>BEG</th><th>W</th><th>SALES</th><th>JDA_S</th><th>ENDING</th></tr></thead><tbody id="cigarDailyRows"><tr><td colspan="8">Import a SELLING sheet to load cigarette products.</td></tr></tbody></table></div>
-          <div class="cigars-save-row"><span id="cigarDailyStatus" role="status" aria-live="polite"></span><button id="cigarSaveDay" class="primary-button" type="submit">Save daily entry</button></div>
+          <div class="cigars-list-tools"><label for="cigarItemSearch">Find product<input id="cigarItemSearch" type="search" placeholder="Search SKU or description"></label><label class="cigar-entry-toggle"><input id="cigarEnteredOnly" type="checkbox">Only SKUs with entries</label><span id="cigarProductCount"></span></div>
+          <div class="cigar-daily-totals" aria-label="Daily totals"><div><span>Total SALES</span><strong id="cigarTotalSales"></strong></div><div><span>Total JDA_S</span><strong id="cigarTotalJda"></strong></div><div><span>Variance</span><strong id="cigarTotalVariance"></strong></div><div><span>SKUs with entries</span><strong id="cigarEnteredCount"></strong></div></div>
+          <div class="cigars-table-wrap" role="region" aria-label="Daily SKU figures" tabindex="0"><table class="cigars-daily-table"><thead><tr><th scope="col">SKU</th><th scope="col">Description</th><th scope="col">UPC</th><th scope="col">BEG</th><th scope="col">W</th><th scope="col">SALES</th><th scope="col">JDA_S</th><th scope="col">Variance</th><th scope="col">ENDING</th></tr></thead><tbody id="cigarDailyRows"><tr><td colspan="9">Import a SELLING sheet to load cigarette products.</td></tr></tbody></table></div>
+          <div class="cigars-save-row"><span id="cigarDailyStatus" role="status" aria-live="polite"></span><div class="cigar-data-actions"><button id="cigarStartOver" class="secondary-button" type="button" data-cigar-icon="RotateCcw">Start over</button><button id="cigarSaveDay" class="primary-button" type="submit">Save daily entry</button></div></div>
         </form>
         <section id="cigarDailySummary" class="cigars-summary" hidden aria-labelledby="cigarSummaryHeading">
           <div class="cigars-summary-heading"><div><p class="section-kicker">SAVED DAILY SUMMARY</p><h2 id="cigarSummaryHeading"></h2><p id="cigarSummaryMetadata"></p></div><div class="cigars-summary-actions"><button id="cigarEditDay" class="secondary-button" type="button">Edit this day</button><button id="cigarNewDay" class="primary-button" type="button">Enter new day</button></div></div>
           <div id="cigarSummaryStats" class="cigars-summary-stats"></div>
-          <div class="cigars-table-wrap"><table class="cigars-daily-table"><thead><tr><th>SKU</th><th>Description</th><th>BEG</th><th>W</th><th>SALES</th><th>JDA_S</th><th>ENDING</th></tr></thead><tbody id="cigarSummaryRows"></tbody></table></div>
+          <div class="cigars-table-wrap"><table class="cigars-daily-table"><thead><tr><th>SKU</th><th>Description</th><th>BEG</th><th>W</th><th>SALES</th><th>JDA_S</th><th>Variance</th><th>ENDING</th></tr></thead><tbody id="cigarSummaryRows"></tbody></table></div>
           <p id="cigarSummaryNote" class="cigars-storage-note"></p>
         </section>
       </section>
@@ -467,6 +469,111 @@
         </section>
       </div>
       </section>
+      <section id="cigarTrendsWorkspace" class="cigars-tab-panel cigar-trends" role="tabpanel" aria-labelledby="cigarTrendsTab" tabindex="0" hidden>
+        <section class="cigar-trend-card cigar-trends-heading">
+          <div class="cigar-trend-heading-row">
+            <div><h2>Selling trends</h2><p>Review the figures saved in Daily Monitoring.</p></div>
+            <div class="cigar-data-actions">
+              <button type="button" id="cigarBackup" class="secondary-button" data-cigar-icon="Download">Back up data</button>
+              <button type="button" id="cigarRestore" class="secondary-button" data-cigar-icon="Upload">Restore backup</button>
+              <input id="cigarRestoreFile" type="file" accept=".json,application/json" hidden>
+              <button type="button" id="cigarTrendExport" class="secondary-button" data-cigar-icon="Download">Download log CSV</button>
+            </div>
+          </div>
+          <div class="cigar-range-bar">
+            <div id="cigarTrendRanges" class="cigar-range-options" role="group" aria-label="Date range">
+              <button type="button" data-range="7" aria-pressed="false">7 days</button>
+              <button type="button" data-range="30" aria-pressed="false">30 days</button>
+              <button type="button" data-range="month" aria-pressed="true">This month</button>
+              <button type="button" data-range="custom" aria-pressed="false">Custom range</button>
+            </div>
+            <p id="cigarRangeSummary" role="status"></p>
+          </div>
+          <div id="cigarTrendCustomRange" class="cigar-date-range" hidden>
+            <label>From<input id="cigarTrendFrom" type="date"></label>
+            <label>To<input id="cigarTrendTo" type="date"></label>
+          </div>
+          <p id="cigarDataStatus" class="cigar-data-status" role="status"></p>
+        </section>
+        <section id="cigarTrendsEmpty" class="cigar-trend-card cigar-empty" hidden>
+          <h3>No saved entries yet</h3><p>Save a day in Daily Monitoring to see sales, stock, and variance here.</p>
+        </section>
+        <div id="cigarTrendContent" hidden>
+          <section id="cigarTrendKpis" class="cigar-kpis" aria-label="Key figures"></section>
+          <div class="cigar-charts-grid">
+            <section class="cigar-trend-card cigar-chart">
+              <h3>Total SALES per day</h3><p>All SKUs, with a 7-day average of logged sales.</p>
+              <div class="cigar-chart-frame"><canvas id="cigarSalesChart" role="img" aria-label="Line chart of daily sales and 7-day moving average"></canvas></div>
+              <p class="cigar-empty" id="cigarSalesChartEmpty" hidden></p>
+            </section>
+            <section class="cigar-trend-card cigar-chart">
+              <h3>SALES vs JDA_S variance</h3><p>Difference across all SKUs by day.</p>
+              <div class="cigar-chart-frame"><canvas id="cigarVarianceChart" role="img" aria-label="Bar chart of daily sales minus JDA sales"></canvas></div>
+              <p class="cigar-empty" id="cigarVarianceChartEmpty" hidden></p>
+            </section>
+            <section class="cigar-trend-card cigar-chart">
+              <h3>Ending stock by SKU</h3>
+              <div class="cigar-sku-chooser">
+                <label>Find SKU<input type="search" id="cigarTrendSkuSearch" placeholder="SKU or description"></label>
+                <label>Product<select id="cigarTrendSku"></select></label>
+              </div>
+              <div class="cigar-chart-frame"><canvas id="cigarEndingChart" role="img" aria-label="Line chart of ending stock for the selected SKU"></canvas></div>
+              <p class="cigar-empty" id="cigarEndingChartEmpty" hidden></p>
+            </section>
+            <section class="cigar-trend-card cigar-chart">
+              <h3>Top 10 SKUs by sales</h3><p>Pieces sold in the selected range.</p>
+              <div class="cigar-chart-frame cigar-chart-top"><canvas id="cigarTopChart" role="img" aria-label="Horizontal bar chart of the top SKUs by sales"></canvas></div>
+              <p class="cigar-empty" id="cigarTopChartEmpty" hidden></p>
+            </section>
+            <section class="cigar-trend-card cigar-chart">
+              <h3>Daily counts</h3><p>Numeric values entered for TRANS#, CS1, CS2, BAG, and FMCG.</p>
+              <div class="cigar-chart-frame"><canvas id="cigarCountsChart" role="img" aria-label="Line chart of transaction and header counts by day"></canvas></div>
+              <p class="cigar-empty" id="cigarCountsChartEmpty" hidden></p>
+            </section>
+            <section class="cigar-trend-card cigar-calendar">
+              <h3>Days logged</h3><p id="cigarLoggedMonth"></p>
+              <div class="cigar-calendar-legend"><span data-state="logged">Logged</span><span data-state="missing">Missing</span><span data-state="today">Today</span></div>
+              <div class="cigar-calendar-grid cigar-calendar-week" aria-hidden="true"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>
+              <div class="cigar-calendar-grid" id="cigarLoggedDays"></div>
+            </section>
+          </div>
+          <section class="cigar-trend-card cigar-history" aria-labelledby="cigarHistoryHeading">
+            <h3 id="cigarHistoryHeading" tabindex="-1">Saved entries</h3>
+            <div id="cigarHistoryTable" class="cigars-table-wrap" role="region" aria-label="Saved daily entries" tabindex="0">
+              <table class="cigars-daily-table cigar-history-table">
+                <thead><tr><th scope="col">Date</th><th scope="col">TRANS#</th><th scope="col">Total SALES</th><th scope="col">Total JDA_S</th><th scope="col">Variance</th><th scope="col">Actions</th></tr></thead>
+                <tbody id="cigarHistoryRows"></tbody>
+              </table>
+            </div>
+            <p class="cigar-empty" id="cigarHistoryEmpty" hidden>No entries are saved in this date range.</p>
+          </section>
+        </div>
+      </section>
+      <dialog id="cigarCsvDialog" class="cigar-data-dialog" aria-labelledby="cigarCsvHeading">
+        <form id="cigarCsvForm">
+          <h2 id="cigarCsvHeading">Download log CSV</h2>
+          <div class="cigar-date-range">
+            <label>From<input id="cigarCsvFrom" type="date" autofocus></label>
+            <label>To<input id="cigarCsvTo" type="date"></label>
+          </div>
+          <p id="cigarCsvStatus" role="status"></p>
+          <div class="cigar-data-actions">
+            <button id="cigarCsvCancel" class="secondary-button" type="button">Cancel</button>
+            <button id="cigarCsvDownload" class="primary-button" type="submit">Download CSV</button>
+          </div>
+        </form>
+      </dialog>
+      <dialog id="cigarRestoreDialog" class="cigar-data-dialog" aria-labelledby="cigarRestoreHeading">
+        <form id="cigarRestoreForm">
+          <h2 id="cigarRestoreHeading">Restore backup</h2>
+          <p id="cigarRestorePreview" role="status"></p>
+          <p>Restoring replaces the Cigarette Monitor products, saved days, and drafts in this browser.</p>
+          <div class="cigar-data-actions">
+            <button id="cigarRestoreCancel" class="secondary-button" type="button" autofocus>Cancel</button>
+            <button id="cigarRestoreConfirm" class="primary-button" type="submit" disabled>Restore data</button>
+          </div>
+        </form>
+      </dialog>
     </section>
     <section id="introRow" class="intro-row">
       <div>
@@ -936,7 +1043,9 @@
   <script src="product-lookup.js"></script>
   <script src="cigar-expiry-utils.js"></script>
   <script src="cigar-monitor-utils.js"></script>
-  <script src="cigar-monitor.js"></script>
+  <script src="cigar-monitor-data.js?v=11"></script>
+  <script src="cigar-trends.js?v=11"></script>
+  <script src="cigar-monitor.js?v=11"></script>
   <script src="cigar-expiry.js"></script>
   <script src="masterlist.js"></script>
   <script src="shelftag.js"></script>
