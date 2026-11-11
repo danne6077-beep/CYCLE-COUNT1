@@ -580,13 +580,17 @@
         <div id="countSheetPages"></div>
       </div>
       <div id="sprCountSheetMode" hidden aria-labelledby="sprCountSheetHeading">
-        <header class="spr-heading"><div><p class="section-kicker">PORTRAIT COUNT SHEET</p><h2 id="sprCountSheetHeading">FOR SPR</h2><p>Upload your SKU, BARCODE, and DESCRIPTION columns. Review the sheet before printing.</p></div><span class="status-pill">Letter · Portrait</span></header>
+        <header class="spr-heading"><div><p class="section-kicker">PORTRAIT COUNT SHEET</p><h2 id="sprCountSheetHeading">FOR SPR</h2><p>Upload your SKU, BARCODE, and DESCRIPTION columns. Add CATEGORY to print one category at a time.</p></div><span class="status-pill">Letter · Portrait</span></header>
         <div class="manual-import-controls" aria-label="SPR spreadsheet upload and printing">
           <input id="sprCountSheetFile" type="file" accept=".xlsx,.xls,.xlsm,.csv" hidden>
           <button id="uploadSprCountSheet" class="primary-button" type="button">Upload Excel / CSV</button>
           <button id="printSprCountSheet" class="secondary-button" type="button" disabled>Print FOR SPR</button>
           <button id="exportSprCountSheet" class="secondary-button" type="button" disabled>Export PDF</button>
         </div>
+        <label class="spr-category-filter" for="sprCategoryFilter">
+          Print category
+          <select id="sprCategoryFilter" disabled><option value="">All categories</option></select>
+        </label>
         <p id="sprCountSheetStatus" role="status" aria-live="polite">Choose a file to preview your SPR sheet.</p>
         <div id="sprCountSheetPages" class="spr-pages"></div>
       </div>

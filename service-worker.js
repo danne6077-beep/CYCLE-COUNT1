@@ -1,4 +1,4 @@
-const CACHE = 'fuji-shell-v4-redesign-ui';
+const CACHE = 'fuji-shell-v5-spr-category';
 const SHELL = [
   '/', '/index.html', '/404.html', '/manifest.webmanifest', '/logo.jpg', '/tokens.css',
   '/styles.css', '/app-shell.css', '/ui-polish.css', '/ui-polish.js', '/ui-vendor/lucide-icons.js', '/spr-vendor/JsBarcode.all.min.js', '/count-entry.css', '/spr-count-sheet.css', '/count-sheet.css', '/count-sheet-reference.css',

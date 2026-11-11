@@ -2,6 +2,8 @@
 .spr-heading h2{margin:0 0 8px}.spr-heading p{margin:0 0 12px}
 #sprCountSheetStatus{font-size:13px;overflow-wrap:anywhere;color:var(--ui-text-muted,#536158)}
 .spr-upload-help{font-size:12px;line-height:1.6;color:var(--ui-muted,#536158);max-width:90ch}
+.spr-category-filter{display:grid;gap:5px;width:min(100%,320px);font-size:13px;font-weight:600}
+.spr-category-filter select{width:100%;min-width:0}
 .spr-layout-workspace{display:grid;grid-template-columns:240px minmax(0,1fr);align-items:start;gap:16px;min-width:0}
 .spr-layout-settings{border:1px solid var(--ui-border,#d4ddd7);border-radius:8px;background:var(--ui-surface,#fff);min-width:0}
 .spr-layout-settings summary{padding:12px;cursor:pointer;font-weight:600;font-size:13px}

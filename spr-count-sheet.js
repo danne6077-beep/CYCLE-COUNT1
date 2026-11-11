@@ -5,6 +5,7 @@
   const pdf = $('exportSprCountSheet');
   const status = $('sprCountSheetStatus');
   const pages = $('sprCountSheetPages');
+  const categoryFilter = $('sprCategoryFilter');
   let excelReady;
   function ensureExcel() {
     if(typeof window.XLSX?.read==='function')return Promise.resolve();
@@ -16,23 +17,27 @@
     }).catch(error=>{excelReady=null;throw error});
     return excelReady;
   }
-  const templateRows=[['SKU','BARCODE','DESCRIPTION'],['000001','036000291452','Example product - replace this row'],['000002','012345678905','Another example - replace this row']];
+  const templateRows = [
+    ['SKU', 'BARCODE', 'DESCRIPTION', 'CATEGORY'],
+    ['000001', '036000291452', 'Example product - replace this row', 'Groceries'],
+    ['000002', '012345678905', 'Another example - replace this row', 'Household']
+  ];
   const templateExcel=document.createElement('button');templateExcel.id='downloadSprExcelTemplate';templateExcel.type='button';templateExcel.className='secondary-button';templateExcel.textContent='Download Excel template';
   const templateCsv=document.createElement('button');templateCsv.id='downloadSprCsvTemplate';templateCsv.type='button';templateCsv.className='secondary-button';templateCsv.textContent='Download CSV template';
   upload.after(templateExcel,templateCsv);
-  const instructions=document.createElement('p');instructions.className='spr-upload-help';instructions.textContent='Start with a template, replace the example rows, and keep the first row: SKU, BARCODE, DESCRIPTION. Format SKU and BARCODE as Text to retain leading zeros. No locator or CCD column is required. Supported: .xlsx, .xls, .xlsm, .csv.';status.before(instructions);
+  const instructions=document.createElement('p');instructions.className='spr-upload-help';instructions.textContent='Replace the example rows and keep the SKU, BARCODE, DESCRIPTION, and CATEGORY headers. Fill in CATEGORY to print by category. Keep SKU and BARCODE as Text to retain leading zeros. No locator or CCD is required. Supported: .xlsx, .xls, .xlsm, .csv.';status.before(instructions);
   templateCsv.addEventListener('click',()=>{
     const url=URL.createObjectURL(new Blob(['\uFEFF'+templateRows.map(row=>row.map(value=>'"'+String(value).replace(/"/g,'""')+'"').join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'}));
     const link=document.createElement('a');link.href=url;link.download='FOR-SPR-upload-template.csv';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
   });
   templateExcel.addEventListener('click',async()=>{
     templateExcel.disabled=true;
-    try{await ensureExcel();const workbook=XLSX.utils.book_new(),sheet=XLSX.utils.aoa_to_sheet(templateRows);sheet['!cols']=[{wch:18},{wch:24},{wch:60}];for(const address of ['A2','A3','B2','B3'])sheet[address].z='@';XLSX.utils.book_append_sheet(workbook,sheet,'FOR SPR');XLSX.writeFile(workbook,'FOR-SPR-upload-template.xlsx');}
+    try{await ensureExcel();const workbook=XLSX.utils.book_new(),sheet=XLSX.utils.aoa_to_sheet(templateRows);sheet['!cols']=[{wch:18},{wch:24},{wch:60},{wch:24}];for(const address of ['A2','A3','B2','B3'])sheet[address].z='@';XLSX.utils.book_append_sheet(workbook,sheet,'FOR SPR');XLSX.writeFile(workbook,'FOR-SPR-upload-template.xlsx');}
     catch(error){status.textContent=error.message}finally{templateExcel.disabled=false}
   });
   let rows = [];
   let fileName = '';
-  let printMetadata = [];
+  const categoryKey = row => row.category.toLowerCase();
   const settingsKey = 'fuji-spr-layout-settings-v1';
   const presetsKey = 'fuji-spr-layout-presets-v1';
   const defaults = {perPage:15,orientation:'portrait',paper:'a4',columns:{sku:true,barcode:true,description:true,count:true},density:'normal',font:'medium',barcode:'medium',margins:'normal',fields:true,bands:true,footer:true};
@@ -98,23 +103,30 @@
     document.querySelector('#sprCountSheetMode .status-pill').textContent=`${settings.paper.toUpperCase()} · ${settings.orientation==='portrait'?'Portrait':'Landscape'}`;
   }
   function metadataValue(row,names) {const key=Object.keys(row||{}).find(key=>names.includes(key.toLowerCase().replace(/[^a-z0-9]/g,'')));return key?String(row[key]??'').trim():'';}
-  function sheetHeader() {
-    const first=printMetadata[0]||{},store=$('storeField').value.trim()||'—';
-    const branch=metadataValue(first,['branch','branchname'])||window.fujiWorkspaceSettings?.branchName||'—';
-    const unique=key=>[...new Set(printMetadata.map(row=>String(row[key]||'').trim()).filter(Boolean))].join(', ')||'—';
-    const fields=[['Store',store],['Branch',branch],['CCD No.',unique('ccdNo')],['Category',unique('category')],['Date',$('dateField').value||new Date().toLocaleDateString()],['Prepared by',$('editorName')?.value||'—']];
+  function syncCategoryFilter() {
+    const labels = new Map();
+    for (const row of rows) {
+      const key = categoryKey(row);
+      if (!labels.has(key)) labels.set(key, row.category);
+    }
+    const options = [...labels].sort((a, b) => a[1].localeCompare(b[1]));
+    categoryFilter.replaceChildren(new Option('All categories', ''), ...options.map(([key, label]) => new Option(label, key)));
+  }
+  function sheetHeader(scopeRows, branch, category) {
+    const store = $('storeField').value.trim() || '—';
+    const ccdNumbers = [...new Set(scopeRows.map(row => row.ccdNo).filter(Boolean))].join(', ') || '—';
+    const fields=[['Store',store],['Branch',branch||'—'],['CCD No.',ccdNumbers],['Category',category],['Date',$('dateField').value||new Date().toLocaleDateString()],['Prepared by',$('editorName')?.value||'—']];
     return `<header class="spr-sheet-heading"><h3>Cycle Count Sheet</h3>${settings.fields?`<div class="spr-header-fields">${fields.map(([label,value])=>`<div><b>${esc(label)}</b><span>${esc(value)}</span></div>`).join('')}</div>`:''}</header>`;
   }
-  function group(index) {const row=printMetadata[index]||{};return {key:JSON.stringify([row.department||'',row.ccdNo||'']),label:`Department: ${row.department||'—'} · CCD No.: ${row.ccdNo||'—'}`};}
+  function group(index) {const row=rows[index];return {key:JSON.stringify([row.department||'',row.ccdNo||'']),label:`Department: ${row.department||'—'} · CCD No.: ${row.ccdNo||'—'}`};}
   function rowMarkup(index) {
     const row=rows[index];const cells={sku:esc(row.sku),barcode:row.barcode?`<svg class="scan-barcode" data-barcode="${esc(row.barcode)}"></svg>`:'<span class="spr-missing-barcode">No barcode</span>',description:esc(row.description),count:'<span class="spr-count-box"></span>'};
     return `<tr data-spr-row="${index}">${columns.filter(([key])=>settings.columns[key]).map(([key])=>`<td data-spr-cell="${key}">${cells[key]}</td>`).join('')}</tr>`;
   }
-  function pageMarkup(indexes,page,total) {
+  function pageMarkup(indexes, page, total, header, branch) {
     const selected=columns.filter(([key])=>settings.columns[key]);let previous='';
     const body=indexes.map(index=>{const current=group(index);const band=settings.bands&&current.key!==previous?`<tr class="spr-department-band" data-spr-band="${index}"><td colspan="${selected.length}">${esc(current.label)}</td></tr>`:'';previous=current.key;return band+rowMarkup(index)}).join('');
-    const first=printMetadata[0]||{},branch=metadataValue(first,['branch','branchname'])||window.fujiWorkspaceSettings?.branchName||'';
-    return `<article class="count-sheet-page spr-sheet">${sheetHeader()}<table class="spr-table"><colgroup>${selected.map(([key])=>`<col data-spr-col="${key}">`).join('')}</colgroup><thead><tr>${selected.map(([,label])=>`<th scope="col">${label}</th>`).join('')}</tr></thead><tbody>${body}</tbody></table>${settings.footer?`<footer class="spr-sheet-footer"><span>${esc([$('storeField').value.trim(),branch].filter(Boolean).join(' · '))}</span><span>Page ${page} of ${total}</span></footer>`:''}</article>`;
+    return `<article class="count-sheet-page spr-sheet">${header}<table class="spr-table"><colgroup>${selected.map(([key])=>`<col data-spr-col="${key}">`).join('')}</colgroup><thead><tr>${selected.map(([,label])=>`<th scope="col">${label}</th>`).join('')}</tr></thead><tbody>${body}</tbody></table>${settings.footer?`<footer class="spr-sheet-footer"><span>${esc([$('storeField').value.trim(),branch].filter(Boolean).join(' · '))}</span><span>Page ${page} of ${total}</span></footer>`:''}</article>`;
   }
   function sizeBarcodes(root) {
     drawCountSheetBarcodes(root);
@@ -124,25 +136,37 @@
   function render() {
     applySettings();if(!rows.length)return;
     if($('sprCountSheetMode').hidden)return;
-    const probe=document.createElement('div');probe.className='spr-measurement';probe.innerHTML=pageMarkup(rows.map((_,index)=>index),1,1);pages.append(probe);sizeBarcodes(probe);
+    const selected = categoryFilter.value;
+    const indexes = [];
+    rows.forEach((row, index) => {
+      if (!selected || categoryKey(row) === selected) indexes.push(index);
+    });
+    const scopeRows = indexes.map(index => rows[index]);
+    const category = selected || categoryFilter.options.length === 2
+      ? scopeRows[0].category
+      : 'All categories';
+    const branch = metadataValue(scopeRows[0], ['branch', 'branchname']) || window.fujiWorkspaceSettings?.branchName || '';
+    const header = sheetHeader(scopeRows, branch, category);
+    const probe=document.createElement('div');probe.className='spr-measurement';probe.innerHTML=pageMarkup(indexes,1,1,header,branch);pages.append(probe);sizeBarcodes(probe);
     const {height,margin}=geometry();
     const available=(height-2*margin)*96/25.4-probe.querySelector('.spr-sheet-heading').getBoundingClientRect().height-12-probe.querySelector('thead').getBoundingClientRect().height-(settings.footer?probe.querySelector('footer').getBoundingClientRect().height+16:0)-8;
-    const heights=[...probe.querySelectorAll('[data-spr-row]')].map(row=>row.getBoundingClientRect().height);
+    const heights = new Map([...probe.querySelectorAll('[data-spr-row]')].map(row => [Number(row.dataset.sprRow), row.getBoundingClientRect().height]));
     const bands=new Map([...probe.querySelectorAll('[data-spr-band]')].map(row=>[group(Number(row.dataset.sprBand)).key,row.getBoundingClientRect().height]));
     const chunks=[];let chunk=[],used=0,previous='',tooTall=false;
-    rows.forEach((row,index)=>{const current=group(index);let band=settings.bands&&(!chunk.length||previous!==current.key)?bands.get(current.key)||25:0;
-      if(chunk.length&&(chunk.length>=settings.perPage||used+band+heights[index]>available)){chunks.push(chunk);chunk=[];used=0;band=settings.bands?bands.get(current.key)||25:0;}
-      if(band+heights[index]>available)tooTall=true;chunk.push(index);used+=band+heights[index];previous=current.key;
+    indexes.forEach(index=>{const current=group(index);const height=heights.get(index);let band=settings.bands&&(!chunk.length||previous!==current.key)?bands.get(current.key)||25:0;
+      if(chunk.length&&(chunk.length>=settings.perPage||used+band+height>available)){chunks.push(chunk);chunk=[];used=0;band=settings.bands?bands.get(current.key)||25:0;}
+      if(band+height>available)tooTall=true;chunk.push(index);used+=band+height;previous=current.key;
     });if(chunk.length)chunks.push(chunk);
-    probe.remove();pages.innerHTML=chunks.map((indexes,index)=>pageMarkup(indexes,index+1,chunks.length)).join('');sizeBarcodes(pages);
+    probe.remove();pages.innerHTML=chunks.map((chunk,index)=>pageMarkup(chunk,index+1,chunks.length,header,branch)).join('');sizeBarcodes(pages);
     const tooWide=[...pages.querySelectorAll('.scan-barcode')].some(svg=>svg.getBoundingClientRect().width>svg.closest('td').clientWidth-12);
     print.disabled=pdf.disabled=tooTall||tooWide;
-    const missing=rows.filter(row=>!row.barcode).length;
-    status.textContent=`${fileName} · ${rows.length.toLocaleString()} rows · ${chunks.length} ${settings.orientation} page(s)${missing?` · ${missing} row(s) without a barcode`:''}. ${tooTall?'A row is too tall for this paper. Use a smaller font or larger paper.':tooWide?'A barcode is too wide to print at a readable size. Choose larger paper, landscape, or hide another column.':'Ready to print.'}`;
-    if(chunks.some(chunk=>chunk.length<settings.perPage)&&rows.length>settings.perPage)message('SKUs per page is a maximum. Additional pages keep rows and barcodes within the printable area.');
+    const missing=scopeRows.filter(row=>!row.barcode).length;
+    status.textContent=`${fileName}${selected ? ` · ${category}` : ''} · ${scopeRows.length.toLocaleString()} rows · ${chunks.length} ${settings.orientation} page(s)${missing?` · ${missing} row(s) without a barcode`:''}. ${tooTall?'A row is too tall for this paper. Use a smaller font or larger paper.':tooWide?'A barcode is too wide to print at a readable size. Choose larger paper, landscape, or hide another column.':'Ready to print.'}`;
+    if(chunks.some(chunk=>chunk.length<settings.perPage)&&scopeRows.length>settings.perPage)message('SKUs per page is a maximum. Additional pages keep rows and barcodes within the printable area.');
   }
 
   syncControls();syncPresets();applySettings();
+  categoryFilter.addEventListener('change', render);
   ['storeField','dateField','editorName'].forEach(id=>$(id)?.addEventListener('change',()=>{if(rows.length)render()}));
   $('chooseSprCountSheetMode').addEventListener('click',()=>setTimeout(render,0));
 
@@ -151,7 +175,7 @@
     const file = input.files?.[0];
     if (!file) return;
     const wasPrintDisabled=print.disabled;
-    upload.disabled = print.disabled = pdf.disabled = true;
+    upload.disabled = categoryFilter.disabled = print.disabled = pdf.disabled = true;
     $('sprCountSheetMode').setAttribute('aria-busy', 'true');
     status.textContent = `Reading ${file.name}…`;
     try {
@@ -161,12 +185,11 @@
       if(extension!=='csv')await ensureExcel();
       const imported = await readImportedCountSheet(file);
       if (imported.length > 50000) throw new Error('Split files larger than 50,000 rows into smaller files.');
-      const nextRows = imported.map((row, index) => {
+      imported.forEach((row, index) => {
         if (!row.sku || !row.description) throw new Error(`Row ${index + 2}: SKU and DESCRIPTION are required. Check your column headings and values.`);
-        return {sku: row.sku, barcode: row.barcode, description: row.description};
       });
-      rows = nextRows;
-      printMetadata = imported;
+      rows = imported;
+      syncCategoryFilter();
       fileName = file.name;
       render();
     } catch (error) {
@@ -174,6 +197,7 @@
       status.textContent = `Could not load file: ${error.message}${rows.length ? ` Previous file still shown: ${fileName}.` : ''}`;
     } finally {
       upload.disabled = false;
+      categoryFilter.disabled = !rows.length;
       if(!rows.length)print.disabled=pdf.disabled=true;
       $('sprCountSheetMode').removeAttribute('aria-busy');
       input.value = '';
@@ -181,7 +205,7 @@
   });
 
   window.prepareSprCountSheetPrint = () => {
-    if (!rows.length) return false;
+    if (!rows.length || upload.disabled) return false;
     render();
     if(print.disabled)return false;
     const {width,height,margin}=geometry();
